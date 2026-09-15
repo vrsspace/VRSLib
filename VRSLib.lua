@@ -26,7 +26,7 @@ local RunService       = cloneref(game:GetService("RunService"))
 local LocalPlayer      = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
 local VRSLib = {
-    Version = "1.1.9",
+    Version = "1.2.0",
     Theme = {
         Background      = Color3.fromRGB(13, 14, 19),
         Sidebar         = Color3.fromRGB(16, 17, 24),
@@ -930,7 +930,13 @@ function VRSLib:CreateWindow(config)
     FooterDivider.BorderSizePixel = 0
     FooterDivider.Parent = FooterBar
 
-    local initialGame = config.GameName or "Detecting..."
+    local syncGame = nil
+    pcall(function()
+        if game.Name and game.Name ~= "" and game.Name ~= "Game" then
+            syncGame = game.Name
+        end
+    end)
+    local initialGame = config.GameName or syncGame or "Detecting Experience..."
     local FooterLabel = Instance.new("TextLabel")
     FooterLabel.Name = "FooterLabel"
     FooterLabel.Size = UDim2.new(1, -60, 1, 0)
@@ -954,17 +960,26 @@ function VRSLib:CreateWindow(config)
         TweenService:Create(FooterLabel, TweenInfo.new(0.15), { TextColor3 = Color3.fromRGB(170, 175, 195) }):Play()
     end)
 
-    -- Auto-Detect Game Name from game.PlaceId via MarketplaceService
+    -- Auto-Detect Live Game Title from game.PlaceId via MarketplaceService
     task.spawn(function()
         local gameTitle = config.GameName
         if not gameTitle or gameTitle == "" then
             pcall(function()
                 local MarketplaceService = cloneref(game:GetService("MarketplaceService"))
-                local info = MarketplaceService:GetProductInfo(game.PlaceId)
+                local info = MarketplaceService:GetProductInfo(game.PlaceId, Enum.InfoType.Asset)
                 if info and info.Name and info.Name ~= "" then
                     gameTitle = info.Name
                 end
             end)
+            if not gameTitle or gameTitle == "" then
+                pcall(function()
+                    local MarketplaceService = cloneref(game:GetService("MarketplaceService"))
+                    local info = MarketplaceService:GetProductInfo(game.PlaceId)
+                    if info and info.Name and info.Name ~= "" then
+                        gameTitle = info.Name
+                    end
+                end)
+            end
             if not gameTitle or gameTitle == "" then
                 pcall(function()
                     if game.Name and game.Name ~= "" and game.Name ~= "Game" then
@@ -973,7 +988,7 @@ function VRSLib:CreateWindow(config)
                 end)
             end
         end
-        local finalGame = gameTitle or "Roblox"
+        local finalGame = gameTitle or "Roblox Experience"
         self.DetectedGame = finalGame
         FooterLabel.Text = "Copyright © VRS Artelier | " .. finalGame
     end)
