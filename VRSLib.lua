@@ -26,7 +26,7 @@ local RunService       = cloneref(game:GetService("RunService"))
 local LocalPlayer      = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
 local VRSLib = {
-    Version = "1.1.8",
+    Version = "1.1.9",
     Theme = {
         Background      = Color3.fromRGB(13, 14, 19),
         Sidebar         = Color3.fromRGB(16, 17, 24),
@@ -111,12 +111,12 @@ end
 -- ==============================================================================
 -- OFFICIAL VRS ARTELIER BRAND LOGO (PERMANENT TEMPLATE)
 -- ==============================================================================
-local BRAND_LOGO_URL = "https://r2.fivemanage.com/vZukXicMKTGIXYcjmBRsm/Logo/2.png"
+local BRAND_LOGO_URL = "https://raw.githubusercontent.com/vrsspace/VRSLib/v1.1.9/assets/logo.png"
 local cachedLogoAsset = nil
 
 local function GetBrandLogo()
     if cachedLogoAsset then return cachedLogoAsset end
-    local fileName = "vrs_artelier_logo.png"
+    local fileName = "vrs_artelier_logo_v2.png"
 
     if writefile and isfile and (getcustomasset or getsynasset) then
         local customAsset = getcustomasset or getsynasset
@@ -149,9 +149,9 @@ local function ApplyBrandLogo(imageLabel)
         imageLabel.ImageRectSize = Vector2.new(686, 535)
         imageLabel.ImageColor3 = VRSLib.Theme.Accent
     else
-        -- 2.png cropped tightly to content (removes the massive 251, 304 black padding so logo is huge)
-        imageLabel.ImageRectOffset = Vector2.new(251, 304)
-        imageLabel.ImageRectSize = Vector2.new(763, 583)
+        -- Clean 100% transparent cropped logo without box artifacts
+        imageLabel.ImageRectOffset = Vector2.new(0, 0)
+        imageLabel.ImageRectSize = Vector2.new(0, 0)
         imageLabel.ImageColor3 = Color3.fromRGB(255, 255, 255)
     end
 end
@@ -316,7 +316,7 @@ function VRSLib:CreateWindow(config)
     local self = setmetatable({}, Window)
 
     self.Title          = config.Title or "VRS Artelier"
-    self.SubTitle       = config.SubTitle or "v1.1.8 Pro"
+    self.SubTitle       = config.SubTitle or "v1.1.9 Pro"
     self.DefaultSize    = config.Size or UDim2.fromOffset(1020, 620)
     self.MaximizedSize  = UDim2.fromOffset(1240, 740)
     self.Keybind        = config.Keybind or Enum.KeyCode.RightControl
@@ -1064,10 +1064,10 @@ function VRSLib:CreateWindow(config)
         end
     end)
 
-    -- Floating Mobile / PC Draggable Wings Widget (Clean Standalone Logo, No Circle Background or Border)
+    -- Floating Mobile / PC Draggable Wings Widget (Pure Clean Transparent Logo, Zero Box)
     local FloatingToggle = Instance.new("ImageButton")
     FloatingToggle.Name = "VRS_FloatingWings"
-    FloatingToggle.Size = UDim2.fromOffset(56, 42)
+    FloatingToggle.Size = UDim2.fromOffset(54, 40)
     FloatingToggle.Position = UDim2.new(0, 25, 0.45, 0)
     FloatingToggle.BackgroundTransparency = 1
     FloatingToggle.BorderSizePixel = 0
@@ -1076,25 +1076,11 @@ function VRSLib:CreateWindow(config)
     ApplyBrandLogo(FloatingToggle)
     FloatingToggle.Parent = ScreenGui
 
-    -- Subtle Neon Ambient Glow behind floating wings
-    local FloatGlow = Instance.new("ImageLabel")
-    FloatGlow.Name = "Glow"
-    FloatGlow.Size = UDim2.new(1, 24, 1, 24)
-    FloatGlow.Position = UDim2.new(0, -12, 0, -12)
-    FloatGlow.BackgroundTransparency = 1
-    FloatGlow.Image = "rbxassetid://5028857084"
-    FloatGlow.ImageColor3 = VRSLib.Theme.Accent
-    FloatGlow.ImageTransparency = 0.82
-    FloatGlow.ZIndex = 0
-    FloatGlow.Parent = FloatingToggle
-
     FloatingToggle.MouseEnter:Connect(function()
-        TweenService:Create(FloatingToggle, TweenInfo.new(0.2), { Size = UDim2.fromOffset(62, 47) }):Play()
-        TweenService:Create(FloatGlow, TweenInfo.new(0.2), { ImageTransparency = 0.55 }):Play()
+        TweenService:Create(FloatingToggle, TweenInfo.new(0.2), { Size = UDim2.fromOffset(60, 44) }):Play()
     end)
     FloatingToggle.MouseLeave:Connect(function()
-        TweenService:Create(FloatingToggle, TweenInfo.new(0.2), { Size = UDim2.fromOffset(56, 42) }):Play()
-        TweenService:Create(FloatGlow, TweenInfo.new(0.2), { ImageTransparency = 0.82 }):Play()
+        TweenService:Create(FloatingToggle, TweenInfo.new(0.2), { Size = UDim2.fromOffset(54, 40) }):Play()
     end)
 
     MakeDraggable(FloatingToggle, FloatingToggle)
