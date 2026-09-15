@@ -26,7 +26,7 @@ local RunService       = cloneref(game:GetService("RunService"))
 local LocalPlayer      = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
 local VRSLib = {
-    Version = "1.0.3",
+    Version = "1.0.4",
     Theme = {
         Background      = Color3.fromRGB(13, 14, 19),
         Sidebar         = Color3.fromRGB(16, 17, 24),
@@ -55,7 +55,7 @@ local VRSLib = {
     },
     -- Injected Lucide Icon Engine
     Icons = (function()
-        local GITHUB_REPO = "https://raw.githubusercontent.com/vrsspace/VRSLib/v1.0.3/"
+        local GITHUB_REPO = "https://raw.githubusercontent.com/vrsspace/VRSLib/v1.0.4/"
         local function TryImport(file)
             if isfile and isfile(file) then
                 local ok, res = pcall(function() return loadstring(readfile(file))() end)
@@ -315,7 +315,7 @@ function VRSLib:CreateWindow(config)
     local self = setmetatable({}, Window)
 
     self.Title          = config.Title or "VRS Artelier"
-    self.SubTitle       = config.SubTitle or "v1.0.3 Pro"
+    self.SubTitle       = config.SubTitle or "v1.0.4 Pro"
     self.DefaultSize    = config.Size or UDim2.fromOffset(1020, 620)
     self.MaximizedSize  = UDim2.fromOffset(1240, 740)
     self.Keybind        = config.Keybind or Enum.KeyCode.RightControl
@@ -436,7 +436,7 @@ function VRSLib:CreateWindow(config)
     SubTitleLabel.AutomaticSize = Enum.AutomaticSize.X
     SubTitleLabel.Position = UDim2.new(1, 6, 0, 0)
     SubTitleLabel.BackgroundTransparency = 1
-    SubTitleLabel.Text = config.SubTitle or (config.Title ~= "VRS Artelier" and config.Title) or "v1.0.3 Pro"
+    SubTitleLabel.Text = config.SubTitle or (config.Title ~= "VRS Artelier" and config.Title) or "v1.0.4 Pro"
     SubTitleLabel.Font = Enum.Font.Gotham
     SubTitleLabel.TextSize = 11
     SubTitleLabel.TextColor3 = VRSLib.Theme.TextMuted
@@ -658,7 +658,7 @@ function VRSLib:CreateWindow(config)
     SettingsBtn.MouseButton1Click:Connect(function()
         VRSLib:Notify({
             Title = "VRS Artelier",
-            Description = "Framework: VRS Artelier v1.0.3 Pro\nToggle Key: RightControl",
+            Description = "Framework: VRS Artelier v1.0.4 Pro\nToggle Key: RightControl",
             Duration = 3,
             Icon = VRSLib.Icons.Wings
         })
@@ -728,10 +728,10 @@ function VRSLib:CreateWindow(config)
     self.BreadcrumbTab      = BreadcrumbTab
     self.BreadcrumbBadge    = BreadcrumbBadge
 
-    -- View Switchers on right: [ ⊞  ☰  𝄜 ]
+    -- View Switchers on right: [ ⊞ Grid, ☰ List ] (Compact button removed completely)
     local ViewSwitchers = Instance.new("Frame")
-    ViewSwitchers.Size = UDim2.new(0, 88, 0, 24)
-    ViewSwitchers.Position = UDim2.new(1, -104, 0.5, -12)
+    ViewSwitchers.Size = UDim2.new(0, 58, 0, 24)
+    ViewSwitchers.Position = UDim2.new(1, -74, 0.5, -12)
     ViewSwitchers.BackgroundColor3 = VRSLib.Theme.Card
     ViewSwitchers.BorderSizePixel = 0
     ViewSwitchers.Parent = ContentHeader
@@ -755,7 +755,6 @@ function VRSLib:CreateWindow(config)
     local viewIcons = {
         { Id = "Grid", Icon = VRSLib.Icons.Get("grid") },
         { Id = "List", Icon = VRSLib.Icons.Get("list") },
-        { Id = "Compact", Icon = VRSLib.Icons.Get("compact") },
     }
 
     self.ViewButtons = {}
@@ -1598,15 +1597,7 @@ function Window:SetViewMode(mode)
         local availableW = scrollW - 32
         self.GridLayout.FillDirectionMaxCells = 1
         self.GridLayout.CellPadding = UDim2.fromOffset(8, 6)
-        self.GridLayout.CellSize = UDim2.fromOffset(availableW, 52)
-    elseif mode == "Compact" then
-        local scrollW = (self.CardsScroll and self.CardsScroll.AbsoluteSize.X > 50) and self.CardsScroll.AbsoluteSize.X or (self.MainFrame.AbsoluteSize.X - 186)
-        local availableW = scrollW - 32
-        local cols = math.clamp(math.floor((availableW + 8) / 140), 3, 6)
-        local cellW = math.floor((availableW - (cols - 1) * 8) / cols)
-        self.GridLayout.FillDirectionMaxCells = cols
-        self.GridLayout.CellPadding = UDim2.fromOffset(8, 8)
-        self.GridLayout.CellSize = UDim2.fromOffset(cellW, 46)
+        self.GridLayout.CellSize = UDim2.fromOffset(availableW, 64)
     end
 end
 
