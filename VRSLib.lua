@@ -26,7 +26,7 @@ local RunService       = cloneref(game:GetService("RunService"))
 local LocalPlayer      = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
 local VRSLib = {
-    Version = "1.1.2",
+    Version = "1.1.3",
     Theme = {
         Background      = Color3.fromRGB(13, 14, 19),
         Sidebar         = Color3.fromRGB(16, 17, 24),
@@ -315,7 +315,7 @@ function VRSLib:CreateWindow(config)
     local self = setmetatable({}, Window)
 
     self.Title          = config.Title or "VRS Artelier"
-    self.SubTitle       = config.SubTitle or "v1.1.2 Pro"
+    self.SubTitle       = config.SubTitle or "v1.1.3 Pro"
     self.DefaultSize    = config.Size or UDim2.fromOffset(1020, 620)
     self.MaximizedSize  = UDim2.fromOffset(1240, 740)
     self.Keybind        = config.Keybind or Enum.KeyCode.RightControl
@@ -437,7 +437,7 @@ function VRSLib:CreateWindow(config)
     SubTitleLabel.AutomaticSize = Enum.AutomaticSize.X
     SubTitleLabel.Position = UDim2.new(1, 6, 0, 0)
     SubTitleLabel.BackgroundTransparency = 1
-    SubTitleLabel.Text = config.SubTitle or (config.Title ~= "VRS Artelier" and config.Title) or "v1.1.2 Pro"
+    SubTitleLabel.Text = config.SubTitle or (config.Title ~= "VRS Artelier" and config.Title) or "v1.1.3 Pro"
     SubTitleLabel.Font = Enum.Font.Gotham
     SubTitleLabel.TextSize = 11
     SubTitleLabel.TextColor3 = VRSLib.Theme.TextMuted
@@ -2182,25 +2182,18 @@ function Window:CreateSidebarTab(config)
         SubCorner.CornerRadius = UDim.new(0, 6)
         SubCorner.Parent = SubBtn
 
-        -- Sub-tab Tree branch pip (Subtle vertical guide line)
+        -- Sub-tab Tree branch pip (Single sleek vertical guide line that changes color to Neon Pink when active)
         local TreePip = Instance.new("Frame")
-        TreePip.Size = UDim2.new(0, 2, 0, 16)
+        TreePip.Name = "TreePip"
+        TreePip.Size = UDim2.new(0, 2.5, 0, 16)
         TreePip.Position = UDim2.new(0, 6, 0.5, -8)
         TreePip.BackgroundColor3 = VRSLib.Theme.Outline
         TreePip.BorderSizePixel = 0
         TreePip.Parent = SubBtn
 
-        local SubIndicator = Instance.new("Frame")
-        SubIndicator.Size = UDim2.new(0, 3, 0, 18)
-        SubIndicator.Position = UDim2.new(0, 2, 0.5, -9)
-        SubIndicator.BackgroundColor3 = VRSLib.Theme.Accent
-        SubIndicator.BorderSizePixel = 0
-        SubIndicator.Visible = false
-        SubIndicator.Parent = SubBtn
-
-        local SubIndCorner = Instance.new("UICorner")
-        SubIndCorner.CornerRadius = UDim.new(1, 0)
-        SubIndCorner.Parent = SubIndicator
+        local TreeCorner = Instance.new("UICorner")
+        TreeCorner.CornerRadius = UDim.new(1, 0)
+        TreeCorner.Parent = TreePip
 
         local SubIcon = Instance.new("ImageLabel")
         SubIcon.Size = UDim2.fromOffset(14, 14)
@@ -2254,7 +2247,8 @@ function Window:CreateSidebarTab(config)
             Label        = SubLabel,
             Badge        = SubBadge,
             BadgeText    = SubBadgeText,
-            Indicator    = SubIndicator,
+            Indicator    = TreePip,
+            TreePip      = TreePip,
             Cards        = {},
             IsSubTab     = true,
         }
@@ -2281,12 +2275,14 @@ function Window:CreateSidebarTab(config)
             if self.Window.ActiveTab ~= SubTabObj then
                 TweenService:Create(SubBtn, TweenInfo.new(0.15), { BackgroundTransparency = 0.6, BackgroundColor3 = VRSLib.Theme.CardHover }):Play()
                 TweenService:Create(SubLabel, TweenInfo.new(0.15), { TextColor3 = VRSLib.Theme.TextPrimary }):Play()
+                TweenService:Create(TreePip, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromRGB(70, 75, 95) }):Play()
             end
         end)
         SubBtn.MouseLeave:Connect(function()
             if self.Window.ActiveTab ~= SubTabObj then
                 TweenService:Create(SubBtn, TweenInfo.new(0.15), { BackgroundTransparency = 1 }):Play()
                 TweenService:Create(SubLabel, TweenInfo.new(0.15), { TextColor3 = VRSLib.Theme.TextMuted }):Play()
+                TweenService:Create(TreePip, TweenInfo.new(0.15), { BackgroundColor3 = VRSLib.Theme.Outline }):Play()
             end
         end)
 
@@ -2460,14 +2456,22 @@ function Window:SelectTab(tabObj)
             TweenService:Create(t.Button, TweenInfo.new(0.2), { BackgroundTransparency = 0, BackgroundColor3 = VRSLib.Theme.Card }):Play()
             TweenService:Create(t.Label, TweenInfo.new(0.2), { TextColor3 = VRSLib.Theme.TextPrimary }):Play()
             TweenService:Create(t.Icon, TweenInfo.new(0.2), { ImageColor3 = VRSLib.Theme.Accent }):Play()
-            t.Indicator.Visible = true
+            if t.IsSubTab then
+                TweenService:Create(t.Indicator, TweenInfo.new(0.2), { BackgroundColor3 = VRSLib.Theme.Accent }):Play()
+            else
+                t.Indicator.Visible = true
+            end
         else
             local isParentOfCurrent = (tabObj.IsSubTab and t == tabObj.ParentTab)
             if not isParentOfCurrent then
                 TweenService:Create(t.Button, TweenInfo.new(0.2), { BackgroundTransparency = 1 }):Play()
                 TweenService:Create(t.Label, TweenInfo.new(0.2), { TextColor3 = VRSLib.Theme.TextMuted }):Play()
                 TweenService:Create(t.Icon, TweenInfo.new(0.2), { ImageColor3 = VRSLib.Theme.TextMuted }):Play()
-                t.Indicator.Visible = false
+                if t.IsSubTab then
+                    TweenService:Create(t.Indicator, TweenInfo.new(0.2), { BackgroundColor3 = VRSLib.Theme.Outline }):Play()
+                else
+                    t.Indicator.Visible = false
+                end
             end
         end
     end
