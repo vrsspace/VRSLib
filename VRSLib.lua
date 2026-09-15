@@ -26,7 +26,7 @@ local RunService       = cloneref(game:GetService("RunService"))
 local LocalPlayer      = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
 local VRSLib = {
-    Version = "1.1.5",
+    Version = "1.1.6",
     Theme = {
         Background      = Color3.fromRGB(13, 14, 19),
         Sidebar         = Color3.fromRGB(16, 17, 24),
@@ -315,7 +315,7 @@ function VRSLib:CreateWindow(config)
     local self = setmetatable({}, Window)
 
     self.Title          = config.Title or "VRS Artelier"
-    self.SubTitle       = config.SubTitle or "v1.1.5 Pro"
+    self.SubTitle       = config.SubTitle or "v1.1.6 Pro"
     self.DefaultSize    = config.Size or UDim2.fromOffset(1020, 620)
     self.MaximizedSize  = UDim2.fromOffset(1240, 740)
     self.Keybind        = config.Keybind or Enum.KeyCode.RightControl
@@ -339,6 +339,7 @@ function VRSLib:CreateWindow(config)
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "VRS_Artelier_Engine"
     ScreenGui.ResetOnSpawn = false
+    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     ScreenGui.Parent = GetSafeContainer()
     self.Gui = ScreenGui
 
@@ -928,19 +929,29 @@ function VRSLib:CreateWindow(config)
     FooterDivider.BorderSizePixel = 0
     FooterDivider.Parent = FooterBar
 
+    local initialGame = config.GameName or "Detecting..."
     local FooterLabel = Instance.new("TextLabel")
+    FooterLabel.Name = "FooterLabel"
     FooterLabel.Size = UDim2.new(1, -60, 1, 0)
     FooterLabel.AnchorPoint = Vector2.new(0.5, 0.5)
     FooterLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
     FooterLabel.BackgroundTransparency = 1
-    FooterLabel.Text = "VRS Artelier | " .. (config.GameName or "Detecting...")
-    FooterLabel.Font = Enum.Font.Code
-    FooterLabel.TextSize = 11
-    FooterLabel.TextColor3 = Color3.fromRGB(130, 135, 150)
+    FooterLabel.Text = "Copyright © VRS Artelier | " .. initialGame
+    FooterLabel.Font = Enum.Font.GothamMedium
+    FooterLabel.TextSize = 10.5
+    FooterLabel.TextColor3 = Color3.fromRGB(170, 175, 195)
     FooterLabel.TextXAlignment = Enum.TextXAlignment.Center
     FooterLabel.TextTruncate = Enum.TextTruncate.AtEnd
+    FooterLabel.ZIndex = 30
     FooterLabel.Parent = FooterBar
     ProtectLocalization(FooterLabel)
+
+    FooterLabel.MouseEnter:Connect(function()
+        TweenService:Create(FooterLabel, TweenInfo.new(0.15), { TextColor3 = VRSLib.Theme.Accent }):Play()
+    end)
+    FooterLabel.MouseLeave:Connect(function()
+        TweenService:Create(FooterLabel, TweenInfo.new(0.15), { TextColor3 = Color3.fromRGB(170, 175, 195) }):Play()
+    end)
 
     -- Auto-Detect Game Name from game.PlaceId via MarketplaceService
     task.spawn(function()
@@ -963,7 +974,7 @@ function VRSLib:CreateWindow(config)
         end
         local finalGame = gameTitle or "Roblox"
         self.DetectedGame = finalGame
-        FooterLabel.Text = "VRS Artelier | " .. finalGame
+        FooterLabel.Text = "Copyright © VRS Artelier | " .. finalGame
     end)
 
     -- Window Resize Draggers (Attached to FooterBar right corner)
