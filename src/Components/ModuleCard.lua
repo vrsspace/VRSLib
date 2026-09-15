@@ -26,7 +26,7 @@ function ModuleCard.Create(window, tab, config)
 
     local card = Instance.new("Frame")
     card.Name = "Mod_" .. title:gsub("%s+", "")
-    card.Size = UDim2.new(0, 160, 0, 78)
+    card.Size = UDim2.new(0, 195, 0, 76)
     card.BackgroundColor3 = VRSLib.Theme.Card
     card.BorderSizePixel = 0
     card.ClipsDescendants = true

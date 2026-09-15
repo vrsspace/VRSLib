@@ -807,11 +807,17 @@ function VRSLib:CreateWindow(config)
     GridPadding.Parent = CardsScroll
 
     local GridLayout = Instance.new("UIGridLayout")
-    GridLayout.CellPadding = UDim2.fromOffset(8, 8)
-    GridLayout.CellSize = UDim2.fromOffset(148, 78) -- Dynamically recalculated by ReflowGrid()
+    GridLayout.CellPadding = UDim2.fromOffset(10, 10)
+    GridLayout.CellSize = UDim2.fromOffset(195, 76) -- Recalculated dynamically by ReflowGrid()
+    GridLayout.FillDirectionMaxCells = 4
     GridLayout.SortOrder = Enum.SortOrder.LayoutOrder
     GridLayout.Parent = CardsScroll
     self.GridLayout = GridLayout
+
+    -- Automatically recalculate grid columns when container size changes
+    CardsScroll:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+        self:ReflowGrid()
+    end)
 
     -- Empty Search State Label (Fixed: only visible when search text is active and no cards match)
     local EmptyState = Instance.new("TextLabel")
@@ -969,24 +975,26 @@ end
 -- ==============================================================================
 function Window:ReflowGrid()
     if self.CurrentView ~= "Grid" then return end
-    local contentW = self.CardsScroll.AbsoluteSize.X - 32
-    if contentW <= 100 then
-        contentW = self.MainFrame.AbsoluteSize.X - 186 - 32
+    local scrollW = self.CardsScroll.AbsoluteWindowSize.X
+    if scrollW <= 100 then
+        scrollW = self.MainFrame.AbsoluteSize.X - 175 - 10
     end
+    local availableW = scrollW - 32 -- 16px left + 16px right padding
+    if availableW <= 100 then availableW = 780 end
 
-    local cols = 4
-    if contentW >= 1050 then
-        cols = 6 -- 6 columns like 404hub!
-    elseif contentW >= 820 then
-        cols = 5
-    elseif contentW >= 600 then
-        cols = 4
-    else
-        cols = 3
-    end
+    local gap = 10
+    self.GridLayout.CellPadding = UDim2.fromOffset(gap, gap)
 
-    local cellW = math.floor((contentW - (cols - 1) * 8) / cols)
-    self.GridLayout.CellSize = UDim2.fromOffset(cellW, 78)
+    -- In 404hub: Target card width is 185px - 215px.
+    -- Default window width (1020px) produces exactly 4 spacious columns!
+    local targetCardW = 190
+    local cols = math.clamp(math.floor((availableW + gap) / (targetCardW + gap)), 3, 6)
+
+    local cellW = math.floor((availableW - (cols - 1) * gap) / cols)
+    local cellH = 76
+
+    self.GridLayout.FillDirectionMaxCells = cols
+    self.GridLayout.CellSize = UDim2.fromOffset(cellW, cellH)
 end
 
 -- ==============================================================================
@@ -1577,9 +1585,21 @@ function Window:SetViewMode(mode)
     if mode == "Grid" then
         self:ReflowGrid()
     elseif mode == "List" then
-        self.GridLayout.CellSize = UDim2.new(1, 0, 0, 52)
+        local scrollW = self.CardsScroll.AbsoluteWindowSize.X
+        if scrollW <= 100 then scrollW = self.MainFrame.AbsoluteSize.X - 185 end
+        local availableW = scrollW - 32
+        self.GridLayout.FillDirectionMaxCells = 1
+        self.GridLayout.CellPadding = UDim2.fromOffset(8, 6)
+        self.GridLayout.CellSize = UDim2.fromOffset(availableW, 52)
     elseif mode == "Compact" then
-        self.GridLayout.CellSize = UDim2.fromOffset(130, 48)
+        local scrollW = self.CardsScroll.AbsoluteWindowSize.X
+        if scrollW <= 100 then scrollW = self.MainFrame.AbsoluteSize.X - 185 end
+        local availableW = scrollW - 32
+        local cols = math.clamp(math.floor((availableW + 8) / 140), 3, 6)
+        local cellW = math.floor((availableW - (cols - 1) * 8) / cols)
+        self.GridLayout.FillDirectionMaxCells = cols
+        self.GridLayout.CellPadding = UDim2.fromOffset(8, 8)
+        self.GridLayout.CellSize = UDim2.fromOffset(cellW, 46)
     end
 end
 
