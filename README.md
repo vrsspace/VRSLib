@@ -57,7 +57,7 @@ local SaveManager = loadstring(game:HttpGet(repo .. "addons/SaveManager.lua"))()
 
 local Window = VRSLib:CreateWindow({
     Title    = "VRS Artelier",
-    SubTitle = "v1.1.4 Pro",
+    SubTitle = "v1.1.5 Pro",
     Size     = UDim2.fromOffset(1020, 620),
     Accent   = Color3.fromRGB(255, 64, 140),
 })
@@ -66,5 +66,5 @@ local Window = VRSLib:CreateWindow({
 ### Menjalankan Showcase Lengkap (47 Modules)
 Tinggal eksekusi 1 baris ini di executor Anda:
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/vrsspace/VRSLib/v1.1.4/Example.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/vrsspace/VRSLib/v1.1.5/Example.lua"))()
 ```

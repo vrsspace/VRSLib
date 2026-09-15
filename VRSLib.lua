@@ -26,7 +26,7 @@ local RunService       = cloneref(game:GetService("RunService"))
 local LocalPlayer      = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
 local VRSLib = {
-    Version = "1.1.4",
+    Version = "1.1.5",
     Theme = {
         Background      = Color3.fromRGB(13, 14, 19),
         Sidebar         = Color3.fromRGB(16, 17, 24),
@@ -315,7 +315,7 @@ function VRSLib:CreateWindow(config)
     local self = setmetatable({}, Window)
 
     self.Title          = config.Title or "VRS Artelier"
-    self.SubTitle       = config.SubTitle or "v1.1.4 Pro"
+    self.SubTitle       = config.SubTitle or "v1.1.5 Pro"
     self.DefaultSize    = config.Size or UDim2.fromOffset(1020, 620)
     self.MaximizedSize  = UDim2.fromOffset(1240, 740)
     self.Keybind        = config.Keybind or Enum.KeyCode.RightControl
@@ -405,14 +405,30 @@ function VRSLib:CreateWindow(config)
     TopbarDivider.BorderSizePixel = 0
     TopbarDivider.Parent = Topbar
 
-    -- Brand Box with Prominent Big Wings Logo (Header Kiri Atas, Clean Icon Only)
+    -- Brand Box with Prominent Big Wings Logo (Centered in 220px Sidebar Header Column)
+    local BrandBox = Instance.new("Frame")
+    BrandBox.Name = "BrandBox"
+    BrandBox.Size = UDim2.new(0, 220, 1, 0)
+    BrandBox.Position = UDim2.new(0, 0, 0, 0)
+    BrandBox.BackgroundTransparency = 1
+    BrandBox.Parent = Topbar
+
     local WingsLogo = Instance.new("ImageLabel")
     WingsLogo.Name = "WingsLogo"
-    WingsLogo.Size = UDim2.fromOffset(32, 32)
-    WingsLogo.Position = UDim2.new(0, 16, 0.5, -16)
+    WingsLogo.Size = UDim2.fromOffset(50, 39)
+    WingsLogo.AnchorPoint = Vector2.new(0.5, 0.5)
+    WingsLogo.Position = UDim2.new(0.5, 0, 0.5, 0)
     WingsLogo.BackgroundTransparency = 1
+    WingsLogo.ScaleType = Enum.ScaleType.Fit
     ApplyBrandLogo(WingsLogo)
-    WingsLogo.Parent = Topbar
+    WingsLogo.Parent = BrandBox
+
+    BrandBox.MouseEnter:Connect(function()
+        TweenService:Create(WingsLogo, TweenInfo.new(0.2), { Size = UDim2.fromOffset(54, 42) }):Play()
+    end)
+    BrandBox.MouseLeave:Connect(function()
+        TweenService:Create(WingsLogo, TweenInfo.new(0.2), { Size = UDim2.fromOffset(50, 39) }):Play()
+    end)
 
     -- Live Search Input Box: [ 🔍 Search modules... ] (Pusat / Centered)
     local SearchFrame = Instance.new("Frame")
@@ -506,10 +522,10 @@ function VRSLib:CreateWindow(config)
     MakeDraggable(Topbar, Main)
 
     -- ==============================================================================
-    -- BODY (SIDEBAR + MAIN CONTENT)
+    -- BODY (SIDEBAR + MAIN CONTENT) — Positioned between Topbar (48px) & FooterBar (22px)
     -- ==============================================================================
     local Body = Instance.new("Frame")
-    Body.Size = UDim2.new(1, 0, 1, -48)
+    Body.Size = UDim2.new(1, 0, 1, -70)
     Body.Position = UDim2.new(0, 0, 0, 48)
     Body.BackgroundTransparency = 1
     Body.Parent = Main
@@ -535,7 +551,7 @@ function VRSLib:CreateWindow(config)
     SidebarDivider.Parent = Sidebar
 
     local SidebarScroll = Instance.new("ScrollingFrame")
-    SidebarScroll.Size = UDim2.new(1, 0, 1, -74)
+    SidebarScroll.Size = UDim2.new(1, 0, 1, -50)
     SidebarScroll.Position = UDim2.new(0, 0, 0, 4)
     SidebarScroll.BackgroundTransparency = 1
     SidebarScroll.BorderSizePixel = 0
@@ -561,8 +577,8 @@ function VRSLib:CreateWindow(config)
     -- Profile Bar (Bottom Left)
     local ProfileBar = Instance.new("Frame")
     ProfileBar.Name = "ProfileBar"
-    ProfileBar.Size = UDim2.new(1, 0, 0, 48)
-    ProfileBar.Position = UDim2.new(0, 0, 1, -72)
+    ProfileBar.Size = UDim2.new(1, 0, 0, 50)
+    ProfileBar.Position = UDim2.new(0, 0, 1, -50)
     ProfileBar.BackgroundColor3 = VRSLib.Theme.Sidebar
     ProfileBar.BorderSizePixel = 0
     ProfileBar.Parent = Sidebar
@@ -636,55 +652,7 @@ function VRSLib:CreateWindow(config)
         })
     end)
 
-    -- Dedicated Copyright & Auto-Detected Game Info Bar (Bottom of Sidebar)
-    local CopyrightBar = Instance.new("Frame")
-    CopyrightBar.Name = "CopyrightBar"
-    CopyrightBar.Size = UDim2.new(1, 0, 0, 24)
-    CopyrightBar.Position = UDim2.new(0, 0, 1, -24)
-    CopyrightBar.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
-    CopyrightBar.BorderSizePixel = 0
-    CopyrightBar.Parent = Sidebar
 
-    local CopyDivider = Instance.new("Frame")
-    CopyDivider.Size = UDim2.new(1, 0, 0, 1)
-    CopyDivider.BackgroundColor3 = VRSLib.Theme.Outline
-    CopyDivider.BorderSizePixel = 0
-    CopyDivider.Parent = CopyrightBar
-
-    local CopyLabel = Instance.new("TextLabel")
-    CopyLabel.Size = UDim2.new(1, -16, 1, 0)
-    CopyLabel.Position = UDim2.new(0, 8, 0, 0)
-    CopyLabel.BackgroundTransparency = 1
-    CopyLabel.Text = "Copyright VRS Artelier - Detecting..."
-    CopyLabel.Font = Enum.Font.GothamMedium
-    CopyLabel.TextSize = 9.5
-    CopyLabel.TextColor3 = VRSLib.Theme.TextMuted
-    CopyLabel.TextXAlignment = Enum.TextXAlignment.Center
-    CopyLabel.TextTruncate = Enum.TextTruncate.AtEnd
-    CopyLabel.Parent = CopyrightBar
-    ProtectLocalization(CopyLabel)
-
-    -- Auto-Detect Game Name from game.PlaceId via MarketplaceService
-    task.spawn(function()
-        local detectedName = nil
-        pcall(function()
-            local MarketplaceService = cloneref(game:GetService("MarketplaceService"))
-            local info = MarketplaceService:GetProductInfo(game.PlaceId)
-            if info and info.Name and info.Name ~= "" then
-                detectedName = info.Name
-            end
-        end)
-        if not detectedName or detectedName == "" then
-            pcall(function()
-                if game.Name and game.Name ~= "" and game.Name ~= "Game" then
-                    detectedName = game.Name
-                end
-            end)
-        end
-        local finalGame = detectedName or "Roblox Experience"
-        self.DetectedGame = finalGame
-        CopyLabel.Text = "Copyright VRS Artelier - " .. finalGame
-    end)
 
     -- ==============================================================================
     -- MAIN CONTENT AREA
@@ -940,16 +908,75 @@ function VRSLib:CreateWindow(config)
     -- ==============================================================================
     -- FREE WINDOW DRAG-RESIZING SYSTEM (CORNER & BORDER DRAGGERS)
     -- ==============================================================================
+    -- ==============================================================================
+    -- FULL-WIDTH WINDOW FOOTER BAR (VRS Artelier | <Game Name>)
+    -- ==============================================================================
+    local FooterBar = Instance.new("Frame")
+    FooterBar.Name = "FooterBar"
+    FooterBar.Size = UDim2.new(1, 0, 0, 22)
+    FooterBar.Position = UDim2.new(0, 0, 1, -22)
+    FooterBar.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+    FooterBar.BorderSizePixel = 0
+    FooterBar.ZIndex = 25
+    FooterBar.Parent = Main
+    self.FooterBar = FooterBar
+
+    local FooterDivider = Instance.new("Frame")
+    FooterDivider.Size = UDim2.new(1, 0, 0, 1)
+    FooterDivider.Position = UDim2.new(0, 0, 0, 0)
+    FooterDivider.BackgroundColor3 = VRSLib.Theme.Outline
+    FooterDivider.BorderSizePixel = 0
+    FooterDivider.Parent = FooterBar
+
+    local FooterLabel = Instance.new("TextLabel")
+    FooterLabel.Size = UDim2.new(1, -60, 1, 0)
+    FooterLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+    FooterLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
+    FooterLabel.BackgroundTransparency = 1
+    FooterLabel.Text = "VRS Artelier | " .. (config.GameName or "Detecting...")
+    FooterLabel.Font = Enum.Font.Code
+    FooterLabel.TextSize = 11
+    FooterLabel.TextColor3 = Color3.fromRGB(130, 135, 150)
+    FooterLabel.TextXAlignment = Enum.TextXAlignment.Center
+    FooterLabel.TextTruncate = Enum.TextTruncate.AtEnd
+    FooterLabel.Parent = FooterBar
+    ProtectLocalization(FooterLabel)
+
+    -- Auto-Detect Game Name from game.PlaceId via MarketplaceService
+    task.spawn(function()
+        local gameTitle = config.GameName
+        if not gameTitle or gameTitle == "" then
+            pcall(function()
+                local MarketplaceService = cloneref(game:GetService("MarketplaceService"))
+                local info = MarketplaceService:GetProductInfo(game.PlaceId)
+                if info and info.Name and info.Name ~= "" then
+                    gameTitle = info.Name
+                end
+            end)
+            if not gameTitle or gameTitle == "" then
+                pcall(function()
+                    if game.Name and game.Name ~= "" and game.Name ~= "Game" then
+                        gameTitle = game.Name
+                    end
+                end)
+            end
+        end
+        local finalGame = gameTitle or "Roblox"
+        self.DetectedGame = finalGame
+        FooterLabel.Text = "VRS Artelier | " .. finalGame
+    end)
+
+    -- Window Resize Draggers (Attached to FooterBar right corner)
     local ResizeGrip = Instance.new("ImageButton")
     ResizeGrip.Name = "ResizeGrip"
-    ResizeGrip.Size = UDim2.fromOffset(22, 22)
-    ResizeGrip.Position = UDim2.new(1, -22, 1, -22)
+    ResizeGrip.Size = UDim2.fromOffset(14, 14)
+    ResizeGrip.Position = UDim2.new(1, -18, 0.5, -7)
     ResizeGrip.BackgroundTransparency = 1
     ResizeGrip.Image = VRSLib.Icons.Get("resize")
-    ResizeGrip.ImageColor3 = VRSLib.Theme.Accent
+    ResizeGrip.ImageColor3 = Color3.fromRGB(120, 125, 145)
     ResizeGrip.Rotation = 225
     ResizeGrip.ZIndex = 30
-    ResizeGrip.Parent = Main
+    ResizeGrip.Parent = FooterBar
 
     local RightBorder = Instance.new("TextButton")
     RightBorder.Name = "ResizeRight"
