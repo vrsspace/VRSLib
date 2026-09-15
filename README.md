@@ -2,6 +2,8 @@
 
 Proprietary, modular Roblox Luau UI Library engineered for **VRS Artelier**, featuring the 404hub desktop card-grid interface, dynamic 3–6 column reflow, free corner drag-resizing, and a clean Obsidian-style modular architecture.
 
+📖 **[Baca Dokumentasi Lengkap & Panduan Developer Disini (DOCUMENTATION.md)](./DOCUMENTATION.md)**
+
 ---
 
 ## 📂 Struktur Repositori (Obsidian Standard)
