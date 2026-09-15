@@ -63,8 +63,8 @@ local Window = VRSLib:CreateWindow({
 })
 ```
 
-### Menjalankan File Showcase Lengkap (47 Modules)
-Jalankan file [Example.lua](file:///d:/Data%20Project's/Roblox%20Project/SC/[%20UI%20LIB%20DATA%20]/Example.lua) langsung di executor:
+### Menjalankan Showcase Lengkap (47 Modules)
+Tinggal eksekusi 1 baris ini di executor Anda:
 ```lua
-loadstring(readfile("d:\\Data Project's\\Roblox Project\\SC\\[ UI LIB DATA ]\\Example.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/vrsspace/VRSLib/main/Example.lua"))()
 ```

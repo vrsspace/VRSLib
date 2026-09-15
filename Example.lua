@@ -14,33 +14,9 @@
 -- Anti-multi execution
 if _G.VRS_SCRIPT_UNLOAD then pcall(_G.VRS_SCRIPT_UNLOAD) end
 
--- 1. Load UI Engine langsung dari GitHub Repository (Anti-Cache) atau Lokal
-local VRSLib
-local function FetchLibrary()
-    -- Cek lokal workspace executor (untuk testing cepat tanpa upload GitHub)
-    if isfile and isfile("VRSLib.lua") then
-        local ok, lib = pcall(function() return loadstring(readfile("VRSLib.lua"))() end)
-        if ok and lib then return lib end
-    end
-
-    -- Tarik dari Raw GitHub dengan Anti-Cache (?v=timestamp agar tidak kena cache Roblox)
-    local RAW_URL = "https://raw.githubusercontent.com/vrsspace/VRSLib/main/VRSLib.lua?v=" .. tick()
-    local ok, lib = pcall(function()
-        return loadstring(game:HttpGet(RAW_URL))()
-    end)
-    if ok and lib then return lib end
-
-    -- Fallback disk lokal
-    local localDisk = "d:\\Data Project's\\Roblox Project\\SC\\[ UI LIB DATA ]\\VRSLib.lua"
-    local s, res = pcall(function()
-        if readfile then return loadstring(readfile(localDisk))() end
-    end)
-    if s and res then return res end
-
-    error("[VRS Loader] Gagal memuat library dari GitHub maupun lokal!")
-end
-
-VRSLib = FetchLibrary()
+-- 1. Load UI Engine langsung dari Raw GitHub (Anti-Cache)
+local repo = "https://raw.githubusercontent.com/vrsspace/VRSLib/main/"
+local VRSLib = loadstring(game:HttpGet(repo .. "VRSLib.lua?v=" .. tick()))()
 
 -- 2. Buat Window VRS Artelier (Aksen Neon Magenta Pink & Wings Logo)
 local Window = VRSLib:CreateWindow({
