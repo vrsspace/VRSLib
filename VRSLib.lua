@@ -26,7 +26,7 @@ local RunService       = cloneref(game:GetService("RunService"))
 local LocalPlayer      = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
 local VRSLib = {
-    Version = "1.1.6",
+    Version = "1.1.7",
     Theme = {
         Background      = Color3.fromRGB(13, 14, 19),
         Sidebar         = Color3.fromRGB(16, 17, 24),
@@ -149,8 +149,9 @@ local function ApplyBrandLogo(imageLabel)
         imageLabel.ImageRectSize = Vector2.new(686, 535)
         imageLabel.ImageColor3 = VRSLib.Theme.Accent
     else
-        imageLabel.ImageRectOffset = Vector2.new(0, 0)
-        imageLabel.ImageRectSize = Vector2.new(0, 0)
+        -- 2.png cropped tightly to content (removes the massive 251, 304 black padding so logo is huge)
+        imageLabel.ImageRectOffset = Vector2.new(251, 304)
+        imageLabel.ImageRectSize = Vector2.new(763, 583)
         imageLabel.ImageColor3 = Color3.fromRGB(255, 255, 255)
     end
 end
@@ -315,7 +316,7 @@ function VRSLib:CreateWindow(config)
     local self = setmetatable({}, Window)
 
     self.Title          = config.Title or "VRS Artelier"
-    self.SubTitle       = config.SubTitle or "v1.1.6 Pro"
+    self.SubTitle       = config.SubTitle or "v1.1.7 Pro"
     self.DefaultSize    = config.Size or UDim2.fromOffset(1020, 620)
     self.MaximizedSize  = UDim2.fromOffset(1240, 740)
     self.Keybind        = config.Keybind or Enum.KeyCode.RightControl
@@ -383,7 +384,7 @@ function VRSLib:CreateWindow(config)
     -- ==============================================================================
     local Topbar = Instance.new("Frame")
     Topbar.Name = "Topbar"
-    Topbar.Size = UDim2.new(1, 0, 0, 48)
+    Topbar.Size = UDim2.new(1, 0, 0, 52)
     Topbar.BackgroundColor3 = VRSLib.Theme.Header
     Topbar.BorderSizePixel = 0
     Topbar.Parent = Main
@@ -406,7 +407,7 @@ function VRSLib:CreateWindow(config)
     TopbarDivider.BorderSizePixel = 0
     TopbarDivider.Parent = Topbar
 
-    -- Brand Box with Prominent Big Wings Logo (Centered in 220px Sidebar Header Column)
+    -- Brand Box with Prominent Big Wings Logo (Centered in 220px Sidebar Header Column, Massive & Crisp)
     local BrandBox = Instance.new("Frame")
     BrandBox.Name = "BrandBox"
     BrandBox.Size = UDim2.new(0, 220, 1, 0)
@@ -416,19 +417,19 @@ function VRSLib:CreateWindow(config)
 
     local WingsLogo = Instance.new("ImageLabel")
     WingsLogo.Name = "WingsLogo"
-    WingsLogo.Size = UDim2.fromOffset(50, 39)
+    WingsLogo.Size = UDim2.fromOffset(72, 54)
     WingsLogo.AnchorPoint = Vector2.new(0.5, 0.5)
     WingsLogo.Position = UDim2.new(0.5, 0, 0.5, 0)
     WingsLogo.BackgroundTransparency = 1
-    WingsLogo.ScaleType = Enum.ScaleType.Fit
+    WingsLogo.ScaleType = Enum.ScaleType.Stretch
     ApplyBrandLogo(WingsLogo)
     WingsLogo.Parent = BrandBox
 
     BrandBox.MouseEnter:Connect(function()
-        TweenService:Create(WingsLogo, TweenInfo.new(0.2), { Size = UDim2.fromOffset(54, 42) }):Play()
+        TweenService:Create(WingsLogo, TweenInfo.new(0.2), { Size = UDim2.fromOffset(78, 58) }):Play()
     end)
     BrandBox.MouseLeave:Connect(function()
-        TweenService:Create(WingsLogo, TweenInfo.new(0.2), { Size = UDim2.fromOffset(50, 39) }):Play()
+        TweenService:Create(WingsLogo, TweenInfo.new(0.2), { Size = UDim2.fromOffset(72, 54) }):Play()
     end)
 
     -- Live Search Input Box: [ 🔍 Search modules... ] (Pusat / Centered)
@@ -523,11 +524,11 @@ function VRSLib:CreateWindow(config)
     MakeDraggable(Topbar, Main)
 
     -- ==============================================================================
-    -- BODY (SIDEBAR + MAIN CONTENT) — Positioned between Topbar (48px) & FooterBar (22px)
+    -- BODY (SIDEBAR + MAIN CONTENT) — Positioned between Topbar (52px) & FooterBar (22px)
     -- ==============================================================================
     local Body = Instance.new("Frame")
-    Body.Size = UDim2.new(1, 0, 1, -70)
-    Body.Position = UDim2.new(0, 0, 0, 48)
+    Body.Size = UDim2.new(1, 0, 1, -74)
+    Body.Position = UDim2.new(0, 0, 0, 52)
     Body.BackgroundTransparency = 1
     Body.Parent = Main
 
