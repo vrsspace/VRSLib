@@ -26,7 +26,7 @@ local RunService       = cloneref(game:GetService("RunService"))
 local LocalPlayer      = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
 local VRSLib = {
-    Version = "1.0.6",
+    Version = "1.0.7",
     Theme = {
         Background      = Color3.fromRGB(13, 14, 19),
         Sidebar         = Color3.fromRGB(16, 17, 24),
@@ -55,7 +55,7 @@ local VRSLib = {
     },
     -- Injected Lucide Icon Engine
     Icons = (function()
-        local GITHUB_REPO = "https://raw.githubusercontent.com/vrsspace/VRSLib/v1.0.6/"
+        local GITHUB_REPO = "https://raw.githubusercontent.com/vrsspace/VRSLib/v1.0.7/"
         local function TryImport(file)
             if isfile and isfile(file) then
                 local ok, res = pcall(function() return loadstring(readfile(file))() end)
@@ -315,7 +315,7 @@ function VRSLib:CreateWindow(config)
     local self = setmetatable({}, Window)
 
     self.Title          = config.Title or "VRS Artelier"
-    self.SubTitle       = config.SubTitle or "v1.0.6 Pro"
+    self.SubTitle       = config.SubTitle or "v1.0.7 Pro"
     self.DefaultSize    = config.Size or UDim2.fromOffset(1020, 620)
     self.MaximizedSize  = UDim2.fromOffset(1240, 740)
     self.Keybind        = config.Keybind or Enum.KeyCode.RightControl
@@ -437,7 +437,7 @@ function VRSLib:CreateWindow(config)
     SubTitleLabel.AutomaticSize = Enum.AutomaticSize.X
     SubTitleLabel.Position = UDim2.new(1, 6, 0, 0)
     SubTitleLabel.BackgroundTransparency = 1
-    SubTitleLabel.Text = config.SubTitle or (config.Title ~= "VRS Artelier" and config.Title) or "v1.0.6 Pro"
+    SubTitleLabel.Text = config.SubTitle or (config.Title ~= "VRS Artelier" and config.Title) or "v1.0.7 Pro"
     SubTitleLabel.Font = Enum.Font.Gotham
     SubTitleLabel.TextSize = 11
     SubTitleLabel.TextColor3 = VRSLib.Theme.TextMuted
@@ -551,7 +551,7 @@ function VRSLib:CreateWindow(config)
     -- ==============================================================================
     local Sidebar = Instance.new("Frame")
     Sidebar.Name = "Sidebar"
-    Sidebar.Size = UDim2.new(0, 185, 1, 0)
+    Sidebar.Size = UDim2.new(0, 220, 1, 0)
     Sidebar.ClipsDescendants = true
     self.Sidebar = Sidebar
     self.SidebarCollapsed = false
@@ -627,7 +627,7 @@ function VRSLib:CreateWindow(config)
     AvImgCorner.Parent = AvatarImg
 
     local UserNameLbl = Instance.new("TextLabel")
-    UserNameLbl.Size = UDim2.new(1, -78, 0, 16)
+    UserNameLbl.Size = UDim2.new(1, -85, 0, 16)
     UserNameLbl.Position = UDim2.new(0, 46, 0.5, -8)
     UserNameLbl.BackgroundTransparency = 1
     UserNameLbl.Text = LocalPlayer.Name
@@ -662,7 +662,7 @@ function VRSLib:CreateWindow(config)
     SettingsBtn.MouseButton1Click:Connect(function()
         VRSLib:Notify({
             Title = "VRS Artelier",
-            Description = "Framework: VRS Artelier v1.0.6 Pro\nToggle Key: RightControl",
+            Description = "Framework: VRS Artelier v1.0.7 Pro\nToggle Key: RightControl",
             Duration = 3,
             Icon = VRSLib.Icons.Wings
         })
@@ -673,8 +673,8 @@ function VRSLib:CreateWindow(config)
     -- ==============================================================================
     local ContentArea = Instance.new("Frame")
     ContentArea.Name = "ContentArea"
-    ContentArea.Size = UDim2.new(1, -186, 1, 0)
-    ContentArea.Position = UDim2.new(0, 186, 0, 0)
+    ContentArea.Size = UDim2.new(1, -221, 1, 0)
+    ContentArea.Position = UDim2.new(0, 221, 0, 0)
     ContentArea.BackgroundTransparency = 1
     ContentArea.Parent = Body
     self.ContentArea = ContentArea
@@ -1020,9 +1020,9 @@ function Window:ToggleSidebar(collapsed)
     end
     self.SidebarCollapsed = collapsed
 
-    local targetSidebarW = collapsed and 0 or 185
-    local targetContentX = collapsed and 0 or 186
-    local targetContentW = collapsed and 0 or -186
+    local targetSidebarW = collapsed and 0 or 220
+    local targetContentX = collapsed and 0 or 221
+    local targetContentW = collapsed and 0 or -221
 
     TweenService:Create(self.Sidebar, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
         Size = UDim2.new(0, targetSidebarW, 1, 0)
@@ -1047,9 +1047,9 @@ end
 
 function Window:ReflowGrid()
     if self.CurrentView ~= "Grid" then return end
-    local scrollW = (self.CardsScroll and self.CardsScroll.AbsoluteSize.X > 50) and self.CardsScroll.AbsoluteSize.X or (self.MainFrame.AbsoluteSize.X - 186)
+    local scrollW = (self.CardsScroll and self.CardsScroll.AbsoluteSize.X > 50) and self.CardsScroll.AbsoluteSize.X or (self.MainFrame.AbsoluteSize.X - 221)
     if scrollW <= 100 then
-        scrollW = self.MainFrame.AbsoluteSize.X - 186
+        scrollW = self.MainFrame.AbsoluteSize.X - 221
     end
     -- Deduct 32px (16px left + 16px right scroll padding)
     local availableW = scrollW - 32
@@ -1096,23 +1096,34 @@ function Window:AddCategory(categoryName, layoutOrder)
         Tabs      = {},
     }
 
+    -- Top spacing divider between categories (except first category)
+    local order = layoutOrder or (#self.Categories * 10 + 20)
+    if #self.Categories > 0 then
+        local Spacer = Instance.new("Frame")
+        Spacer.Name = "CategorySpacer_" .. upperName
+        Spacer.Size = UDim2.new(1, 0, 0, 10)
+        Spacer.BackgroundTransparency = 1
+        Spacer.LayoutOrder = order - 1
+        Spacer.Parent = self.SidebarScroll
+    end
+
     local HeaderBtn = Instance.new("TextButton")
     HeaderBtn.Name = "CategoryHeader_" .. upperName
-    HeaderBtn.Size = UDim2.new(1, 0, 0, 24)
+    HeaderBtn.Size = UDim2.new(1, 0, 0, 26)
     HeaderBtn.BackgroundTransparency = 1
     HeaderBtn.Text = ""
     HeaderBtn.AutoButtonColor = false
-    HeaderBtn.LayoutOrder = layoutOrder or (#self.Categories * 10 + 20)
+    HeaderBtn.LayoutOrder = order
     HeaderBtn.Parent = self.SidebarScroll
     CategoryObj.Header = HeaderBtn
 
     local HeaderText = Instance.new("TextLabel")
-    HeaderText.Size = UDim2.new(1, -24, 1, 0)
-    HeaderText.Position = UDim2.new(0, 4, 0, 0)
+    HeaderText.Size = UDim2.new(1, -30, 1, 0)
+    HeaderText.Position = UDim2.new(0, 6, 0, 0)
     HeaderText.BackgroundTransparency = 1
     HeaderText.Text = upperName
     HeaderText.Font = Enum.Font.GothamBold
-    HeaderText.TextSize = 9.5
+    HeaderText.TextSize = 10
     HeaderText.TextColor3 = VRSLib.Theme.TextMuted
     HeaderText.TextXAlignment = Enum.TextXAlignment.Left
     HeaderText.Parent = HeaderBtn
@@ -1121,8 +1132,8 @@ function Window:AddCategory(categoryName, layoutOrder)
 
     local Chevron = Instance.new("ImageLabel")
     Chevron.Name = "Chevron"
-    Chevron.Size = UDim2.fromOffset(10, 10)
-    Chevron.Position = UDim2.new(1, -14, 0.5, -5)
+    Chevron.Size = UDim2.fromOffset(12, 12)
+    Chevron.Position = UDim2.new(1, -16, 0.5, -6)
     Chevron.BackgroundTransparency = 1
     Chevron.Image = VRSLib.Icons.Get("chevron-down")
     Chevron.ImageColor3 = VRSLib.Theme.TextMuted
@@ -1317,7 +1328,7 @@ function Window:CreateSidebarTab(config)
             TabObj.IsExpanded = not TabObj.IsExpanded
             TabObj.SubContainer.Visible = TabObj.IsExpanded
             if TabObj.IsExpanded then
-                TabObj.SubContainer.Size = UDim2.new(1, 0, 0, #TabObj.SubTabs * 31 + 6)
+                TabObj.SubContainer.Size = UDim2.new(1, 0, 0, #TabObj.SubTabs * 34 + 6)
             end
             TweenService:Create(TabObj.Chevron, TweenInfo.new(0.2), {
                 Rotation = TabObj.IsExpanded and 90 or 0,
@@ -1351,7 +1362,7 @@ function Window:CreateSidebarTab(config)
             local Chevron = Instance.new("ImageLabel")
             Chevron.Name = "Chevron"
             Chevron.Size = UDim2.fromOffset(12, 12)
-            Chevron.Position = UDim2.new(1, -20, 0.5, -6)
+            Chevron.Position = UDim2.new(1, -16, 0.5, -6)
             Chevron.BackgroundTransparency = 1
             Chevron.Image = VRSLib.Icons.Get("chevron-right")
             Chevron.ImageColor3 = VRSLib.Theme.TextMuted
@@ -1359,9 +1370,9 @@ function Window:CreateSidebarTab(config)
             Chevron.Parent = self.Button
             self.Chevron = Chevron
 
-            -- Reposition Badge slightly left to avoid overlapping Chevron
-            self.Badge.Position = UDim2.new(1, -36, 0.5, -7.5)
-            self.Label.Size = UDim2.new(1, -78, 1, 0)
+            -- Generous spacing: Badge at -46px, Chevron at -16px (16px clean gap, NO overlap!)
+            self.Badge.Position = UDim2.new(1, -46, 0.5, -7.5)
+            self.Label.Size = UDim2.new(1, -85, 1, 0)
         end
 
         -- Create SubTabs Container if not exists
@@ -1397,7 +1408,7 @@ function Window:CreateSidebarTab(config)
         local subOrder = #self.SubTabs + 1
         local SubBtn = Instance.new("TextButton")
         SubBtn.Name = "SubTab_" .. subName
-        SubBtn.Size = UDim2.new(1, 0, 0, 28)
+        SubBtn.Size = UDim2.new(1, 0, 0, 30)
         SubBtn.BackgroundTransparency = 1
         SubBtn.BackgroundColor3 = VRSLib.Theme.Card
         SubBtn.BorderSizePixel = 0
@@ -1407,48 +1418,52 @@ function Window:CreateSidebarTab(config)
         SubBtn.Parent = self.SubContainer
 
         local SubCorner = Instance.new("UICorner")
-        SubCorner.CornerRadius = UDim.new(0, 5)
+        SubCorner.CornerRadius = UDim.new(0, 6)
         SubCorner.Parent = SubBtn
 
-        -- Sub-tab Tree branch pip
+        -- Sub-tab Tree branch pip (Subtle vertical guide line)
         local TreePip = Instance.new("Frame")
-        TreePip.Size = UDim2.new(0, 2, 0, 14)
-        TreePip.Position = UDim2.new(0, 4, 0.5, -7)
+        TreePip.Size = UDim2.new(0, 2, 0, 16)
+        TreePip.Position = UDim2.new(0, 6, 0.5, -8)
         TreePip.BackgroundColor3 = VRSLib.Theme.Outline
         TreePip.BorderSizePixel = 0
         TreePip.Parent = SubBtn
 
         local SubIndicator = Instance.new("Frame")
-        SubIndicator.Size = UDim2.new(0, 2, 0, 14)
-        SubIndicator.Position = UDim2.new(0, 4, 0.5, -7)
+        SubIndicator.Size = UDim2.new(0, 3, 0, 18)
+        SubIndicator.Position = UDim2.new(0, 2, 0.5, -9)
         SubIndicator.BackgroundColor3 = VRSLib.Theme.Accent
         SubIndicator.BorderSizePixel = 0
         SubIndicator.Visible = false
         SubIndicator.Parent = SubBtn
 
+        local SubIndCorner = Instance.new("UICorner")
+        SubIndCorner.CornerRadius = UDim.new(1, 0)
+        SubIndCorner.Parent = SubIndicator
+
         local SubIcon = Instance.new("ImageLabel")
-        SubIcon.Size = UDim2.fromOffset(13, 13)
-        SubIcon.Position = UDim2.new(0, 14, 0.5, -6.5)
+        SubIcon.Size = UDim2.fromOffset(14, 14)
+        SubIcon.Position = UDim2.new(0, 18, 0.5, -7)
         SubIcon.BackgroundTransparency = 1
         SubIcon.Image = subIcon
         SubIcon.ImageColor3 = VRSLib.Theme.TextMuted
         SubIcon.Parent = SubBtn
 
         local SubLabel = Instance.new("TextLabel")
-        SubLabel.Size = UDim2.new(1, -54, 1, 0)
-        SubLabel.Position = UDim2.new(0, 32, 0, 0)
+        SubLabel.Size = UDim2.new(1, -68, 1, 0)
+        SubLabel.Position = UDim2.new(0, 38, 0, 0)
         SubLabel.BackgroundTransparency = 1
         SubLabel.Text = subName
         SubLabel.Font = Enum.Font.GothamMedium
-        SubLabel.TextSize = 11
+        SubLabel.TextSize = 11.5
         SubLabel.TextColor3 = VRSLib.Theme.TextMuted
         SubLabel.TextXAlignment = Enum.TextXAlignment.Left
         SubLabel.Parent = SubBtn
         ProtectLocalization(SubLabel)
 
         local SubBadge = Instance.new("Frame")
-        SubBadge.Size = UDim2.new(0, 20, 0, 14)
-        SubBadge.Position = UDim2.new(1, -22, 0.5, -7)
+        SubBadge.Size = UDim2.new(0, 22, 0, 15)
+        SubBadge.Position = UDim2.new(1, -26, 0.5, -7.5)
         SubBadge.BackgroundColor3 = VRSLib.Theme.BadgeBackground
         SubBadge.BorderSizePixel = 0
         SubBadge.Parent = SubBtn
@@ -1508,7 +1523,7 @@ function Window:CreateSidebarTab(config)
         table.insert(self.Window.Tabs, SubTabObj)
 
         -- Keep container height exactly matching number of children
-        self.SubContainer.Size = UDim2.new(1, 0, 0, #self.SubTabs * 31 + 6)
+        self.SubContainer.Size = UDim2.new(1, 0, 0, #self.SubTabs * 34 + 6)
 
         return SubTabObj
     end
