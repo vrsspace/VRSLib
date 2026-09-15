@@ -26,7 +26,7 @@ local RunService       = cloneref(game:GetService("RunService"))
 local LocalPlayer      = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
 local VRSLib = {
-    Version = "1.1.3",
+    Version = "1.1.4",
     Theme = {
         Background      = Color3.fromRGB(13, 14, 19),
         Sidebar         = Color3.fromRGB(16, 17, 24),
@@ -315,7 +315,7 @@ function VRSLib:CreateWindow(config)
     local self = setmetatable({}, Window)
 
     self.Title          = config.Title or "VRS Artelier"
-    self.SubTitle       = config.SubTitle or "v1.1.3 Pro"
+    self.SubTitle       = config.SubTitle or "v1.1.4 Pro"
     self.DefaultSize    = config.Size or UDim2.fromOffset(1020, 620)
     self.MaximizedSize  = UDim2.fromOffset(1240, 740)
     self.Keybind        = config.Keybind or Enum.KeyCode.RightControl
@@ -405,47 +405,14 @@ function VRSLib:CreateWindow(config)
     TopbarDivider.BorderSizePixel = 0
     TopbarDivider.Parent = Topbar
 
-    -- Brand Box with WINGS LOGO (Header Kiri Atas)
-    local BrandBox = Instance.new("Frame")
-    BrandBox.Size = UDim2.new(0, 220, 1, 0)
-    BrandBox.Position = UDim2.new(0, 14, 0, 0)
-    BrandBox.BackgroundTransparency = 1
-    BrandBox.Parent = Topbar
-
+    -- Brand Box with Prominent Big Wings Logo (Header Kiri Atas, Clean Icon Only)
     local WingsLogo = Instance.new("ImageLabel")
     WingsLogo.Name = "WingsLogo"
-    WingsLogo.Size = UDim2.fromOffset(24, 24)
-    WingsLogo.Position = UDim2.new(0, 0, 0.5, -12)
+    WingsLogo.Size = UDim2.fromOffset(32, 32)
+    WingsLogo.Position = UDim2.new(0, 16, 0.5, -16)
     WingsLogo.BackgroundTransparency = 1
     ApplyBrandLogo(WingsLogo)
-    WingsLogo.Parent = BrandBox
-
-    local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Size = UDim2.new(0, 0, 1, 0)
-    TitleLabel.AutomaticSize = Enum.AutomaticSize.X
-    TitleLabel.Position = UDim2.new(0, 32, 0, 0)
-    TitleLabel.BackgroundTransparency = 1
-    TitleLabel.Text = "VRS Artelier"
-    TitleLabel.Font = Enum.Font.GothamBold
-    TitleLabel.TextSize = 13.5
-    TitleLabel.TextColor3 = VRSLib.Theme.TextPrimary
-    TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    TitleLabel.Parent = BrandBox
-
-    local SubTitleLabel = Instance.new("TextLabel")
-    SubTitleLabel.Size = UDim2.new(0, 0, 1, 0)
-    SubTitleLabel.AutomaticSize = Enum.AutomaticSize.X
-    SubTitleLabel.Position = UDim2.new(1, 6, 0, 0)
-    SubTitleLabel.BackgroundTransparency = 1
-    SubTitleLabel.Text = config.SubTitle or (config.Title ~= "VRS Artelier" and config.Title) or "v1.1.3 Pro"
-    SubTitleLabel.Font = Enum.Font.Gotham
-    SubTitleLabel.TextSize = 11
-    SubTitleLabel.TextColor3 = VRSLib.Theme.TextMuted
-    SubTitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    SubTitleLabel.Parent = TitleLabel
-
-    ProtectLocalization(TitleLabel)
-    ProtectLocalization(SubTitleLabel)
+    WingsLogo.Parent = Topbar
 
     -- Live Search Input Box: [ 🔍 Search modules... ] (Pusat / Centered)
     local SearchFrame = Instance.new("Frame")
@@ -568,7 +535,7 @@ function VRSLib:CreateWindow(config)
     SidebarDivider.Parent = Sidebar
 
     local SidebarScroll = Instance.new("ScrollingFrame")
-    SidebarScroll.Size = UDim2.new(1, 0, 1, -50)
+    SidebarScroll.Size = UDim2.new(1, 0, 1, -74)
     SidebarScroll.Position = UDim2.new(0, 0, 0, 4)
     SidebarScroll.BackgroundTransparency = 1
     SidebarScroll.BorderSizePixel = 0
@@ -594,8 +561,8 @@ function VRSLib:CreateWindow(config)
     -- Profile Bar (Bottom Left)
     local ProfileBar = Instance.new("Frame")
     ProfileBar.Name = "ProfileBar"
-    ProfileBar.Size = UDim2.new(1, 0, 0, 50)
-    ProfileBar.Position = UDim2.new(0, 0, 1, -50)
+    ProfileBar.Size = UDim2.new(1, 0, 0, 48)
+    ProfileBar.Position = UDim2.new(0, 0, 1, -72)
     ProfileBar.BackgroundColor3 = VRSLib.Theme.Sidebar
     ProfileBar.BorderSizePixel = 0
     ProfileBar.Parent = Sidebar
@@ -663,10 +630,60 @@ function VRSLib:CreateWindow(config)
     SettingsBtn.MouseButton1Click:Connect(function()
         VRSLib:Notify({
             Title = "VRS Artelier",
-            Description = "Framework: VRS Artelier v1.1.1 Pro\nToggle Key: RightControl",
+            Description = "Framework: VRS Artelier v1.1.4 Pro\nGame: " .. (self.DetectedGame or "Detecting...") .. "\nToggle Key: RightControl",
             Duration = 3,
             Icon = VRSLib.Icons.Wings
         })
+    end)
+
+    -- Dedicated Copyright & Auto-Detected Game Info Bar (Bottom of Sidebar)
+    local CopyrightBar = Instance.new("Frame")
+    CopyrightBar.Name = "CopyrightBar"
+    CopyrightBar.Size = UDim2.new(1, 0, 0, 24)
+    CopyrightBar.Position = UDim2.new(0, 0, 1, -24)
+    CopyrightBar.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+    CopyrightBar.BorderSizePixel = 0
+    CopyrightBar.Parent = Sidebar
+
+    local CopyDivider = Instance.new("Frame")
+    CopyDivider.Size = UDim2.new(1, 0, 0, 1)
+    CopyDivider.BackgroundColor3 = VRSLib.Theme.Outline
+    CopyDivider.BorderSizePixel = 0
+    CopyDivider.Parent = CopyrightBar
+
+    local CopyLabel = Instance.new("TextLabel")
+    CopyLabel.Size = UDim2.new(1, -16, 1, 0)
+    CopyLabel.Position = UDim2.new(0, 8, 0, 0)
+    CopyLabel.BackgroundTransparency = 1
+    CopyLabel.Text = "Copyright VRS Artelier - Detecting..."
+    CopyLabel.Font = Enum.Font.GothamMedium
+    CopyLabel.TextSize = 9.5
+    CopyLabel.TextColor3 = VRSLib.Theme.TextMuted
+    CopyLabel.TextXAlignment = Enum.TextXAlignment.Center
+    CopyLabel.TextTruncate = Enum.TextTruncate.AtEnd
+    CopyLabel.Parent = CopyrightBar
+    ProtectLocalization(CopyLabel)
+
+    -- Auto-Detect Game Name from game.PlaceId via MarketplaceService
+    task.spawn(function()
+        local detectedName = nil
+        pcall(function()
+            local MarketplaceService = cloneref(game:GetService("MarketplaceService"))
+            local info = MarketplaceService:GetProductInfo(game.PlaceId)
+            if info and info.Name and info.Name ~= "" then
+                detectedName = info.Name
+            end
+        end)
+        if not detectedName or detectedName == "" then
+            pcall(function()
+                if game.Name and game.Name ~= "" and game.Name ~= "Game" then
+                    detectedName = game.Name
+                end
+            end)
+        end
+        local finalGame = detectedName or "Roblox Experience"
+        self.DetectedGame = finalGame
+        CopyLabel.Text = "Copyright VRS Artelier - " .. finalGame
     end)
 
     -- ==============================================================================
