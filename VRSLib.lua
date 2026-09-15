@@ -26,7 +26,7 @@ local RunService       = cloneref(game:GetService("RunService"))
 local LocalPlayer      = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
 local VRSLib = {
-    Version = "1.0.7",
+    Version = "1.1.0",
     Theme = {
         Background      = Color3.fromRGB(13, 14, 19),
         Sidebar         = Color3.fromRGB(16, 17, 24),
@@ -55,7 +55,7 @@ local VRSLib = {
     },
     -- Injected Lucide Icon Engine
     Icons = (function()
-        local GITHUB_REPO = "https://raw.githubusercontent.com/vrsspace/VRSLib/v1.0.7/"
+        local GITHUB_REPO = "https://raw.githubusercontent.com/vrsspace/VRSLib/v1.1.0/"
         local function TryImport(file)
             if isfile and isfile(file) then
                 local ok, res = pcall(function() return loadstring(readfile(file))() end)
@@ -315,7 +315,7 @@ function VRSLib:CreateWindow(config)
     local self = setmetatable({}, Window)
 
     self.Title          = config.Title or "VRS Artelier"
-    self.SubTitle       = config.SubTitle or "v1.0.7 Pro"
+    self.SubTitle       = config.SubTitle or "v1.1.0 Pro"
     self.DefaultSize    = config.Size or UDim2.fromOffset(1020, 620)
     self.MaximizedSize  = UDim2.fromOffset(1240, 740)
     self.Keybind        = config.Keybind or Enum.KeyCode.RightControl
@@ -437,7 +437,7 @@ function VRSLib:CreateWindow(config)
     SubTitleLabel.AutomaticSize = Enum.AutomaticSize.X
     SubTitleLabel.Position = UDim2.new(1, 6, 0, 0)
     SubTitleLabel.BackgroundTransparency = 1
-    SubTitleLabel.Text = config.SubTitle or (config.Title ~= "VRS Artelier" and config.Title) or "v1.0.7 Pro"
+    SubTitleLabel.Text = config.SubTitle or (config.Title ~= "VRS Artelier" and config.Title) or "v1.1.0 Pro"
     SubTitleLabel.Font = Enum.Font.Gotham
     SubTitleLabel.TextSize = 11
     SubTitleLabel.TextColor3 = VRSLib.Theme.TextMuted
@@ -662,7 +662,7 @@ function VRSLib:CreateWindow(config)
     SettingsBtn.MouseButton1Click:Connect(function()
         VRSLib:Notify({
             Title = "VRS Artelier",
-            Description = "Framework: VRS Artelier v1.0.7 Pro\nToggle Key: RightControl",
+            Description = "Framework: VRS Artelier v1.1.0 Pro\nToggle Key: RightControl",
             Duration = 3,
             Icon = VRSLib.Icons.Wings
         })
@@ -769,6 +769,7 @@ function VRSLib:CreateWindow(config)
 
     -- View Switchers on right: [ ⊞ Grid, ☰ List ] (Compact button removed completely)
     local ViewSwitchers = Instance.new("Frame")
+    self.ViewSwitchers = ViewSwitchers
     ViewSwitchers.Size = UDim2.new(0, 58, 0, 24)
     ViewSwitchers.Position = UDim2.new(1, -74, 0.5, -12)
     ViewSwitchers.BackgroundColor3 = VRSLib.Theme.Card
@@ -823,7 +824,47 @@ function VRSLib:CreateWindow(config)
         self.ViewButtons[item.Id] = { Button = btn, Icon = img }
     end
 
-    -- Scrolling Container for Cards
+    -- Horizontal Sub-Navbar (Shown when active tab has subtabs, like Obsidian)
+    local SubNavBar = Instance.new("Frame")
+    SubNavBar.Name = "SubNavBar"
+    SubNavBar.Size = UDim2.new(1, 0, 0, 32)
+    SubNavBar.Position = UDim2.new(0, 0, 0, 38)
+    SubNavBar.BackgroundColor3 = VRSLib.Theme.Sidebar
+    SubNavBar.BackgroundTransparency = 0.5
+    SubNavBar.BorderSizePixel = 0
+    SubNavBar.Visible = false
+    SubNavBar.Parent = ContentArea
+    self.SubNavBar = SubNavBar
+
+    local SubNavBorder = Instance.new("Frame")
+    SubNavBorder.Size = UDim2.new(1, 0, 0, 1)
+    SubNavBorder.Position = UDim2.new(0, 0, 1, -1)
+    SubNavBorder.BackgroundColor3 = VRSLib.Theme.Outline
+    SubNavBorder.BorderSizePixel = 0
+    SubNavBorder.Parent = SubNavBar
+
+    local SubNavScroll = Instance.new("ScrollingFrame")
+    SubNavScroll.Size = UDim2.new(1, 0, 1, 0)
+    SubNavScroll.BackgroundTransparency = 1
+    SubNavScroll.BorderSizePixel = 0
+    SubNavScroll.ScrollBarThickness = 0
+    SubNavScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+    SubNavScroll.AutomaticCanvasSize = Enum.AutomaticSize.X
+    SubNavScroll.Parent = SubNavBar
+    self.SubNavScroll = SubNavScroll
+
+    local SubNavLayout = Instance.new("UIListLayout")
+    SubNavLayout.FillDirection = Enum.FillDirection.Horizontal
+    SubNavLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+    SubNavLayout.Padding = UDim.new(0, 8)
+    SubNavLayout.Parent = SubNavScroll
+
+    local SubNavPadding = Instance.new("UIPadding")
+    SubNavPadding.PaddingLeft = UDim.new(0, 16)
+    SubNavPadding.PaddingRight = UDim.new(0, 16)
+    SubNavPadding.Parent = SubNavScroll
+
+    -- Scrolling Container for Content (Cards & Columns)
     local CardsScroll = Instance.new("ScrollingFrame")
     CardsScroll.Name = "CardsScroll"
     CardsScroll.Size = UDim2.new(1, 0, 1, -38)
@@ -837,19 +878,28 @@ function VRSLib:CreateWindow(config)
     CardsScroll.Parent = ContentArea
     self.CardsScroll = CardsScroll
 
+    -- Separate Container for standard 4-column 404hub modular card grid
+    local GridContainer = Instance.new("Frame")
+    GridContainer.Name = "GridContainer"
+    GridContainer.Size = UDim2.new(1, 0, 0, 0)
+    GridContainer.AutomaticSize = Enum.AutomaticSize.Y
+    GridContainer.BackgroundTransparency = 1
+    GridContainer.Parent = CardsScroll
+    self.GridContainer = GridContainer
+
     local GridPadding = Instance.new("UIPadding")
     GridPadding.PaddingLeft = UDim.new(0, 16)
     GridPadding.PaddingRight = UDim.new(0, 16)
     GridPadding.PaddingTop = UDim.new(0, 4)
     GridPadding.PaddingBottom = UDim.new(0, 28)
-    GridPadding.Parent = CardsScroll
+    GridPadding.Parent = GridContainer
 
     local GridLayout = Instance.new("UIGridLayout")
     GridLayout.CellPadding = UDim2.fromOffset(10, 10)
     GridLayout.CellSize = UDim2.fromOffset(193, 78) -- Recalculated dynamically by ReflowGrid()
     GridLayout.FillDirectionMaxCells = 4
     GridLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    GridLayout.Parent = CardsScroll
+    GridLayout.Parent = GridContainer
     self.GridLayout = GridLayout
 
     -- Automatically recalculate grid columns when container size changes
@@ -1043,6 +1093,706 @@ function Window:ToggleSidebar(collapsed)
     task.delay(0.26, function()
         self:ReflowGrid()
     end)
+end
+
+-- ==============================================================================
+-- DUAL-COLUMN SPLIT & GROUPBOX SYSTEM (OBSIDIAN-GRADE ARCHITECTURE)
+-- ==============================================================================
+function Window:CreateGroupbox(parentFrame, config)
+    config = config or {}
+    local title = config.Title or "Groupbox"
+    local iconId = VRSLib.Icons.Get(config.Icon or "folder")
+    local collapsed = config.Collapsed or false
+
+    local GroupCard = Instance.new("Frame")
+    GroupCard.Name = "Groupbox_" .. title
+    GroupCard.Size = UDim2.new(1, 0, 0, 0)
+    GroupCard.AutomaticSize = Enum.AutomaticSize.Y
+    GroupCard.BackgroundColor3 = VRSLib.Theme.Card
+    GroupCard.BorderSizePixel = 0
+    GroupCard.ClipsDescendants = true
+    GroupCard.Parent = parentFrame
+
+    local GCorner = Instance.new("UICorner")
+    GCorner.CornerRadius = UDim.new(0, 7)
+    GCorner.Parent = GroupCard
+
+    local GStroke = Instance.new("UIStroke")
+    GStroke.Color = VRSLib.Theme.CardStroke
+    GStroke.Thickness = 1
+    GStroke.Parent = GroupCard
+
+    -- Title Bar
+    local TitleBar = Instance.new("TextButton")
+    TitleBar.Name = "TitleBar"
+    TitleBar.Size = UDim2.new(1, 0, 0, 34)
+    TitleBar.BackgroundTransparency = 1
+    TitleBar.Text = ""
+    TitleBar.AutoButtonColor = false
+    TitleBar.Parent = GroupCard
+
+    local GIcon = Instance.new("ImageLabel")
+    GIcon.Size = UDim2.fromOffset(14, 14)
+    GIcon.Position = UDim2.new(0, 10, 0.5, -7)
+    GIcon.BackgroundTransparency = 1
+    GIcon.Image = iconId
+    GIcon.ImageColor3 = VRSLib.Theme.Accent
+    GIcon.Parent = TitleBar
+
+    local GTitle = Instance.new("TextLabel")
+    GTitle.Size = UDim2.new(1, -56, 1, 0)
+    GTitle.Position = UDim2.new(0, 30, 0, 0)
+    GTitle.BackgroundTransparency = 1
+    GTitle.Text = title
+    GTitle.Font = Enum.Font.GothamBold
+    GTitle.TextSize = 11.5
+    GTitle.TextColor3 = VRSLib.Theme.TextPrimary
+    GTitle.TextXAlignment = Enum.TextXAlignment.Left
+    GTitle.Parent = TitleBar
+    ProtectLocalization(GTitle)
+
+    local GChevron = Instance.new("ImageLabel")
+    GChevron.Size = UDim2.fromOffset(12, 12)
+    GChevron.Position = UDim2.new(1, -22, 0.5, -6)
+    GChevron.BackgroundTransparency = 1
+    GChevron.Image = VRSLib.Icons.Get("chevron-down")
+    GChevron.ImageColor3 = VRSLib.Theme.TextMuted
+    GChevron.Rotation = collapsed and -90 or 0
+    GChevron.Parent = TitleBar
+
+    -- Content Frame
+    local Content = Instance.new("Frame")
+    Content.Name = "Content"
+    Content.Size = UDim2.new(1, 0, 0, 0)
+    Content.AutomaticSize = Enum.AutomaticSize.Y
+    Content.Position = UDim2.new(0, 0, 0, 34)
+    Content.BackgroundTransparency = 1
+    Content.Visible = not collapsed
+    Content.Parent = GroupCard
+
+    local CList = Instance.new("UIListLayout")
+    CList.SortOrder = Enum.SortOrder.LayoutOrder
+    CList.Padding = UDim.new(0, 8)
+    CList.Parent = Content
+
+    local CPadding = Instance.new("UIPadding")
+    CPadding.PaddingLeft = UDim.new(0, 10)
+    CPadding.PaddingRight = UDim.new(0, 10)
+    CPadding.PaddingTop = UDim.new(0, 4)
+    CPadding.PaddingBottom = UDim.new(0, 12)
+    CPadding.Parent = Content
+
+    local BoxObj = {
+        Frame = GroupCard,
+        Content = Content,
+        Chevron = GChevron,
+        Window = self,
+        IsCollapsed = collapsed,
+    }
+
+    TitleBar.MouseButton1Click:Connect(function()
+        BoxObj.IsCollapsed = not BoxObj.IsCollapsed
+        Content.Visible = not BoxObj.IsCollapsed
+        TweenService:Create(GChevron, TweenInfo.new(0.2), {
+            Rotation = BoxObj.IsCollapsed and -90 or 0,
+            ImageColor3 = BoxObj.IsCollapsed and VRSLib.Theme.TextMuted or VRSLib.Theme.Accent
+        }):Play()
+    end)
+
+    -- 1. AddToggle (Pill Toggle Switch)
+    function BoxObj:AddToggle(ctrlConfig)
+        ctrlConfig = ctrlConfig or {}
+        local cTitle = ctrlConfig.Title or "Toggle"
+        local defVal = ctrlConfig.Default or false
+        local cb = ctrlConfig.Callback or function() end
+
+        local Row = Instance.new("Frame")
+        Row.Size = UDim2.new(1, 0, 0, 26)
+        Row.BackgroundTransparency = 1
+        Row.Parent = Content
+
+        local Lbl = Instance.new("TextLabel")
+        Lbl.Size = UDim2.new(1, -38, 1, 0)
+        Lbl.BackgroundTransparency = 1
+        Lbl.Text = cTitle
+        Lbl.Font = Enum.Font.GothamMedium
+        Lbl.TextSize = 11
+        Lbl.TextColor3 = VRSLib.Theme.TextMuted
+        Lbl.TextXAlignment = Enum.TextXAlignment.Left
+        Lbl.Parent = Row
+        ProtectLocalization(Lbl)
+
+        local Switch = Instance.new("TextButton")
+        Switch.Size = UDim2.fromOffset(30, 16)
+        Switch.Position = UDim2.new(1, -30, 0.5, -8)
+        Switch.BackgroundColor3 = (defVal and VRSLib.Theme.Accent or VRSLib.Theme.SwitchOff)
+        Switch.BorderSizePixel = 0
+        Switch.Text = ""
+        Switch.Parent = Row
+
+        local SCorner = Instance.new("UICorner")
+        SCorner.CornerRadius = UDim.new(1, 0)
+        SCorner.Parent = Switch
+
+        local Knob = Instance.new("Frame")
+        Knob.Size = UDim2.fromOffset(12, 12)
+        Knob.Position = (defVal and UDim2.new(1, -14, 0.5, -6) or UDim2.new(0, 2, 0.5, -6))
+        Knob.BackgroundColor3 = (defVal and VRSLib.Theme.SwitchOnKnob or VRSLib.Theme.SwitchOffKnob)
+        Knob.BorderSizePixel = 0
+        Knob.Parent = Switch
+
+        local KCorner = Instance.new("UICorner")
+        KCorner.CornerRadius = UDim.new(1, 0)
+        KCorner.Parent = Knob
+
+        local isVal = defVal
+        local function SetVal(v)
+            isVal = v
+            TweenService:Create(Switch, TweenInfo.new(0.2), {
+                BackgroundColor3 = isVal and VRSLib.Theme.Accent or VRSLib.Theme.SwitchOff
+            }):Play()
+            TweenService:Create(Knob, TweenInfo.new(0.2), {
+                Position = isVal and UDim2.new(1, -14, 0.5, -6) or UDim2.new(0, 2, 0.5, -6),
+                BackgroundColor3 = isVal and VRSLib.Theme.SwitchOnKnob or VRSLib.Theme.SwitchOffKnob
+            }):Play()
+            task.spawn(cb, isVal)
+        end
+
+        Switch.MouseButton1Click:Connect(function() SetVal(not isVal) end)
+        return { Set = SetVal, Frame = Row }
+    end
+
+    -- 2. AddButton (Action button with clean icon)
+    function BoxObj:AddButton(ctrlConfig)
+        ctrlConfig = ctrlConfig or {}
+        local cTitle = ctrlConfig.Title or "Button"
+        local cIcon = ctrlConfig.Icon and VRSLib.Icons.Get(ctrlConfig.Icon)
+        local cb = ctrlConfig.Callback or function() end
+
+        local Btn = Instance.new("TextButton")
+        Btn.Size = UDim2.new(1, 0, 0, 28)
+        Btn.BackgroundColor3 = VRSLib.Theme.InputBackground
+        Btn.BorderSizePixel = 0
+        Btn.Text = ""
+        Btn.AutoButtonColor = false
+        Btn.Parent = Content
+
+        local BCorner = Instance.new("UICorner")
+        BCorner.CornerRadius = UDim.new(0, 5)
+        BCorner.Parent = Btn
+
+        local BStroke = Instance.new("UIStroke")
+        BStroke.Color = VRSLib.Theme.CardStroke
+        BStroke.Thickness = 1
+        BStroke.Parent = Btn
+
+        local ContentBox = Instance.new("Frame")
+        ContentBox.Size = UDim2.new(1, 0, 1, 0)
+        ContentBox.BackgroundTransparency = 1
+        ContentBox.Parent = Btn
+
+        local CLayout = Instance.new("UIListLayout")
+        CLayout.FillDirection = Enum.FillDirection.Horizontal
+        CLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+        CLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+        CLayout.Padding = UDim.new(0, 6)
+        CLayout.Parent = ContentBox
+
+        if cIcon then
+            local BImg = Instance.new("ImageLabel")
+            BImg.Size = UDim2.fromOffset(13, 13)
+            BImg.BackgroundTransparency = 1
+            BImg.Image = cIcon
+            BImg.ImageColor3 = VRSLib.Theme.Accent
+            BImg.Parent = ContentBox
+        end
+
+        local BLbl = Instance.new("TextLabel")
+        BLbl.Size = UDim2.new(0, 0, 1, 0)
+        BLbl.AutomaticSize = Enum.AutomaticSize.X
+        BLbl.BackgroundTransparency = 1
+        BLbl.Text = cTitle
+        BLbl.Font = Enum.Font.GothamBold
+        BLbl.TextSize = 11
+        BLbl.TextColor3 = VRSLib.Theme.TextPrimary
+        BLbl.Parent = ContentBox
+        ProtectLocalization(BLbl)
+
+        Btn.MouseEnter:Connect(function()
+            TweenService:Create(Btn, TweenInfo.new(0.15), { BackgroundColor3 = VRSLib.Theme.CardHover }):Play()
+            TweenService:Create(BStroke, TweenInfo.new(0.15), { Color = VRSLib.Theme.Accent }):Play()
+        end)
+        Btn.MouseLeave:Connect(function()
+            TweenService:Create(Btn, TweenInfo.new(0.15), { BackgroundColor3 = VRSLib.Theme.InputBackground }):Play()
+            TweenService:Create(BStroke, TweenInfo.new(0.15), { Color = VRSLib.Theme.CardStroke }):Play()
+        end)
+        Btn.MouseButton1Click:Connect(function()
+            task.spawn(cb)
+        end)
+        return Btn
+    end
+
+    -- 3. AddSlider (Slider with Title on left and Value Badge [ 4 / 15 s ] on right)
+    function BoxObj:AddSlider(ctrlConfig)
+        ctrlConfig = ctrlConfig or {}
+        local cTitle = ctrlConfig.Title or "Slider"
+        local min = ctrlConfig.Min or 0
+        local max = ctrlConfig.Max or 100
+        local def = ctrlConfig.Default or min
+        local unit = ctrlConfig.Unit or ""
+        local cb = ctrlConfig.Callback or function() end
+
+        local SFrame = Instance.new("Frame")
+        SFrame.Size = UDim2.new(1, 0, 0, 42)
+        SFrame.BackgroundTransparency = 1
+        SFrame.Parent = Content
+
+        local TopRow = Instance.new("Frame")
+        TopRow.Size = UDim2.new(1, 0, 0, 18)
+        TopRow.BackgroundTransparency = 1
+        TopRow.Parent = SFrame
+
+        local TitleLbl = Instance.new("TextLabel")
+        TitleLbl.Size = UDim2.new(1, -70, 1, 0)
+        TitleLbl.BackgroundTransparency = 1
+        TitleLbl.Text = cTitle
+        TitleLbl.Font = Enum.Font.GothamMedium
+        TitleLbl.TextSize = 11
+        TitleLbl.TextColor3 = VRSLib.Theme.TextMuted
+        TitleLbl.TextXAlignment = Enum.TextXAlignment.Left
+        TitleLbl.Parent = TopRow
+        ProtectLocalization(TitleLbl)
+
+        local ValBadge = Instance.new("TextLabel")
+        ValBadge.Size = UDim2.new(0, 65, 1, 0)
+        ValBadge.Position = UDim2.new(1, -65, 0, 0)
+        ValBadge.BackgroundTransparency = 1
+        ValBadge.Text = tostring(def) .. (unit ~= "" and (" " .. unit) or "")
+        ValBadge.Font = Enum.Font.GothamBold
+        ValBadge.TextSize = 10.5
+        ValBadge.TextColor3 = VRSLib.Theme.Accent
+        ValBadge.TextXAlignment = Enum.TextXAlignment.Right
+        ValBadge.Parent = TopRow
+        ProtectLocalization(ValBadge)
+
+        local BarFrame = Instance.new("TextButton")
+        BarFrame.Size = UDim2.new(1, 0, 0, 14)
+        BarFrame.Position = UDim2.new(0, 0, 0, 22)
+        BarFrame.BackgroundTransparency = 1
+        BarFrame.Text = ""
+        BarFrame.AutoButtonColor = false
+        BarFrame.Parent = SFrame
+
+        local Track = Instance.new("Frame")
+        Track.Size = UDim2.new(1, 0, 0, 6)
+        Track.Position = UDim2.new(0, 0, 0.5, -3)
+        Track.BackgroundColor3 = VRSLib.Theme.InputBackground
+        Track.BorderSizePixel = 0
+        Track.Parent = BarFrame
+
+        local TCorner = Instance.new("UICorner")
+        TCorner.CornerRadius = UDim.new(1, 0)
+        TCorner.Parent = Track
+
+        local Fill = Instance.new("Frame")
+        Fill.Size = UDim2.new(math.clamp((def - min) / (max - min), 0, 1), 0, 1, 0)
+        Fill.BackgroundColor3 = VRSLib.Theme.Accent
+        Fill.BorderSizePixel = 0
+        Fill.Parent = Track
+
+        local FCorner = Instance.new("UICorner")
+        FCorner.CornerRadius = UDim.new(1, 0)
+        FCorner.Parent = Fill
+
+        local Knob = Instance.new("Frame")
+        Knob.Size = UDim2.fromOffset(12, 12)
+        Knob.Position = UDim2.new(1, -6, 0.5, -6)
+        Knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        Knob.BorderSizePixel = 0
+        Knob.Parent = Fill
+
+        local KCorner = Instance.new("UICorner")
+        KCorner.CornerRadius = UDim.new(1, 0)
+        KCorner.Parent = Knob
+
+        local dragging = false
+        local curVal = def
+
+        local function UpdateSlider(input)
+            local frac = math.clamp((input.Position.X - Track.AbsolutePosition.X) / Track.AbsoluteSize.X, 0, 1)
+            curVal = math.floor(min + (max - min) * frac + 0.5)
+            Fill.Size = UDim2.new(frac, 0, 1, 0)
+            ValBadge.Text = tostring(curVal) .. (unit ~= "" and (" " .. unit) or "")
+            task.spawn(cb, curVal)
+        end
+
+        BarFrame.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = true
+                UpdateSlider(input)
+            end
+        end)
+        UserInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = false
+            end
+        end)
+        UserInputService.InputChanged:Connect(function(input)
+            if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                UpdateSlider(input)
+            end
+        end)
+
+        return {
+            Set = function(val)
+                local frac = math.clamp((val - min) / (max - min), 0, 1)
+                curVal = val
+                Fill.Size = UDim2.new(frac, 0, 1, 0)
+                ValBadge.Text = tostring(curVal) .. (unit ~= "" and (" " .. unit) or "")
+                task.spawn(cb, curVal)
+            end,
+            Frame = SFrame
+        }
+    end
+
+    -- 4. AddDropdown (Clean popup selector)
+    function BoxObj:AddDropdown(ctrlConfig)
+        ctrlConfig = ctrlConfig or {}
+        local cTitle = ctrlConfig.Title or "Dropdown"
+        local values = ctrlConfig.Values or {}
+        local curSel = ctrlConfig.Default or values[1] or "Select..."
+        local cb = ctrlConfig.Callback or function() end
+
+        local DFrame = Instance.new("Frame")
+        DFrame.Size = UDim2.new(1, 0, 0, 48)
+        DFrame.BackgroundTransparency = 1
+        DFrame.ZIndex = 10
+        DFrame.Parent = Content
+
+        local Lbl = Instance.new("TextLabel")
+        Lbl.Size = UDim2.new(1, 0, 0, 16)
+        Lbl.BackgroundTransparency = 1
+        Lbl.Text = cTitle
+        Lbl.Font = Enum.Font.GothamMedium
+        Lbl.TextSize = 10.5
+        Lbl.TextColor3 = VRSLib.Theme.TextMuted
+        Lbl.TextXAlignment = Enum.TextXAlignment.Left
+        Lbl.Parent = DFrame
+        ProtectLocalization(Lbl)
+
+        local MainBtn = Instance.new("TextButton")
+        MainBtn.Size = UDim2.new(1, 0, 0, 26)
+        MainBtn.Position = UDim2.new(0, 0, 0, 18)
+        MainBtn.BackgroundColor3 = VRSLib.Theme.InputBackground
+        MainBtn.BorderSizePixel = 0
+        MainBtn.Text = ""
+        MainBtn.AutoButtonColor = false
+        MainBtn.Parent = DFrame
+
+        local DCorner = Instance.new("UICorner")
+        DCorner.CornerRadius = UDim.new(0, 5)
+        DCorner.Parent = MainBtn
+
+        local DStroke = Instance.new("UIStroke")
+        DStroke.Color = VRSLib.Theme.CardStroke
+        DStroke.Thickness = 1
+        DStroke.Parent = MainBtn
+
+        local SelText = Instance.new("TextLabel")
+        SelText.Size = UDim2.new(1, -26, 1, 0)
+        SelText.Position = UDim2.new(0, 8, 0, 0)
+        SelText.BackgroundTransparency = 1
+        SelText.Text = tostring(curSel)
+        SelText.Font = Enum.Font.Gotham
+        SelText.TextSize = 10.5
+        SelText.TextColor3 = VRSLib.Theme.TextPrimary
+        SelText.TextXAlignment = Enum.TextXAlignment.Left
+        SelText.TextTruncate = Enum.TextTruncate.AtEnd
+        SelText.Parent = MainBtn
+        ProtectLocalization(SelText)
+
+        local Chevron = Instance.new("ImageLabel")
+        Chevron.Size = UDim2.fromOffset(12, 12)
+        Chevron.Position = UDim2.new(1, -20, 0.5, -6)
+        Chevron.BackgroundTransparency = 1
+        Chevron.Image = VRSLib.Icons.Get("chevron-down")
+        Chevron.ImageColor3 = VRSLib.Theme.TextMuted
+        Chevron.Parent = MainBtn
+
+        -- Options Drop Frame
+        local DropList = Instance.new("Frame")
+        DropList.Size = UDim2.new(1, 0, 0, 0)
+        DropList.Position = UDim2.new(0, 0, 1, 4)
+        DropList.BackgroundColor3 = VRSLib.Theme.Card
+        DropList.BorderSizePixel = 0
+        DropList.Visible = false
+        DropList.ZIndex = 25
+        DropList.ClipsDescendants = true
+        DropList.Parent = MainBtn
+
+        local DLCorner = Instance.new("UICorner")
+        DLCorner.CornerRadius = UDim.new(0, 5)
+        DLCorner.Parent = DropList
+
+        local DLStroke = Instance.new("UIStroke")
+        DLStroke.Color = VRSLib.Theme.CardStroke
+        DLStroke.Thickness = 1
+        DLStroke.Parent = DropList
+
+        local DLLayout = Instance.new("UIListLayout")
+        DLLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        DLLayout.Padding = UDim.new(0, 2)
+        DLLayout.Parent = DropList
+
+        local isOpen = false
+        local function ToggleDrop(open)
+            isOpen = (open ~= nil and open) or not isOpen
+            DropList.Visible = isOpen
+            DFrame.Size = UDim2.new(1, 0, 0, isOpen and (48 + #values * 26 + 6) or 48)
+            TweenService:Create(Chevron, TweenInfo.new(0.15), { Rotation = isOpen and 180 or 0 }):Play()
+        end
+
+        for i, val in ipairs(values) do
+            local OptBtn = Instance.new("TextButton")
+            OptBtn.Size = UDim2.new(1, 0, 0, 24)
+            OptBtn.BackgroundTransparency = 1
+            OptBtn.Text = tostring(val)
+            OptBtn.Font = Enum.Font.Gotham
+            OptBtn.TextSize = 10.5
+            OptBtn.TextColor3 = (val == curSel and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted)
+            OptBtn.ZIndex = 26
+            OptBtn.Parent = DropList
+            ProtectLocalization(OptBtn)
+
+            OptBtn.MouseEnter:Connect(function()
+                OptBtn.BackgroundTransparency = 0.8
+                OptBtn.BackgroundColor3 = VRSLib.Theme.Accent
+            end)
+            OptBtn.MouseLeave:Connect(function()
+                OptBtn.BackgroundTransparency = 1
+            end)
+            OptBtn.MouseButton1Click:Connect(function()
+                curSel = val
+                SelText.Text = tostring(val)
+                ToggleDrop(false)
+                task.spawn(cb, val)
+            end)
+        end
+
+        DropList.Size = UDim2.new(1, 0, 0, #values * 26 + 4)
+        MainBtn.MouseButton1Click:Connect(function() ToggleDrop() end)
+
+        return {
+            Set = function(val)
+                curSel = val
+                SelText.Text = tostring(val)
+                task.spawn(cb, val)
+            end,
+            Frame = DFrame
+        }
+    end
+
+    -- 5. AddStatus (Glowing status row)
+    function BoxObj:AddStatus(ctrlConfig)
+        ctrlConfig = ctrlConfig or {}
+        local cLabel = ctrlConfig.Label or "Status:"
+        local cStatus = ctrlConfig.Status or "INACTIVE"
+        local cColor = ctrlConfig.Color or Color3.fromRGB(255, 75, 75)
+
+        local Row = Instance.new("Frame")
+        Row.Size = UDim2.new(1, 0, 0, 22)
+        Row.BackgroundTransparency = 1
+        Row.Parent = Content
+
+        local Lbl = Instance.new("TextLabel")
+        Lbl.Size = UDim2.new(0, 0, 1, 0)
+        Lbl.AutomaticSize = Enum.AutomaticSize.X
+        Lbl.BackgroundTransparency = 1
+        Lbl.Text = cLabel
+        Lbl.Font = Enum.Font.GothamMedium
+        Lbl.TextSize = 11
+        Lbl.TextColor3 = VRSLib.Theme.TextMuted
+        Lbl.TextXAlignment = Enum.TextXAlignment.Left
+        Lbl.Parent = Row
+        ProtectLocalization(Lbl)
+
+        local Dot = Instance.new("Frame")
+        Dot.Size = UDim2.fromOffset(8, 8)
+        Dot.Position = UDim2.new(0, 56, 0.5, -4)
+        Dot.BackgroundColor3 = cColor
+        Dot.BorderSizePixel = 0
+        Dot.Parent = Row
+
+        local DCorner = Instance.new("UICorner")
+        DCorner.CornerRadius = UDim.new(1, 0)
+        DCorner.Parent = Dot
+
+        local StatLbl = Instance.new("TextLabel")
+        StatLbl.Size = UDim2.new(1, -70, 1, 0)
+        StatLbl.Position = UDim2.new(0, 70, 0, 0)
+        StatLbl.BackgroundTransparency = 1
+        StatLbl.Text = cStatus
+        StatLbl.Font = Enum.Font.GothamBold
+        StatLbl.TextSize = 10.5
+        StatLbl.TextColor3 = cColor
+        StatLbl.TextXAlignment = Enum.TextXAlignment.Left
+        StatLbl.Parent = Row
+        ProtectLocalization(StatLbl)
+
+        return {
+            Set = function(newStatus, newColor)
+                StatLbl.Text = newStatus
+                if newColor then
+                    Dot.BackgroundColor3 = newColor
+                    StatLbl.TextColor3 = newColor
+                end
+            end,
+            Frame = Row
+        }
+    end
+
+    -- 6. AddLabel (Text line)
+    function BoxObj:AddLabel(ctrlConfig)
+        ctrlConfig = (type(ctrlConfig) == "string" and { Text = ctrlConfig }) or (ctrlConfig or {})
+        local cText = ctrlConfig.Text or "Label"
+        local cColor = ctrlConfig.Color or VRSLib.Theme.TextMuted
+
+        local Lbl = Instance.new("TextLabel")
+        Lbl.Size = UDim2.new(1, 0, 0, 18)
+        Lbl.BackgroundTransparency = 1
+        Lbl.Text = cText
+        Lbl.Font = Enum.Font.Gotham
+        Lbl.TextSize = 10.5
+        Lbl.TextColor3 = cColor
+        Lbl.TextXAlignment = Enum.TextXAlignment.Left
+        Lbl.TextTruncate = Enum.TextTruncate.AtEnd
+        Lbl.Parent = Content
+        ProtectLocalization(Lbl)
+
+        return {
+            Set = function(t) Lbl.Text = t end,
+            Frame = Lbl
+        }
+    end
+
+    -- 7. AddQueueList (Clean list of steps/items)
+    function BoxObj:AddQueueList(ctrlConfig)
+        ctrlConfig = ctrlConfig or {}
+        local items = ctrlConfig.Items or {}
+
+        local QFrame = Instance.new("Frame")
+        QFrame.Size = UDim2.new(1, 0, 0, 0)
+        QFrame.AutomaticSize = Enum.AutomaticSize.Y
+        QFrame.BackgroundTransparency = 1
+        QFrame.Parent = Content
+
+        local QList = Instance.new("UIListLayout")
+        QList.SortOrder = Enum.SortOrder.LayoutOrder
+        QList.Padding = UDim.new(0, 4)
+        QList.Parent = QFrame
+
+        for i, item in ipairs(items) do
+            local Row = Instance.new("Frame")
+            Row.Size = UDim2.new(1, 0, 0, 24)
+            Row.BackgroundColor3 = VRSLib.Theme.InputBackground
+            Row.BackgroundTransparency = 0.5
+            Row.BorderSizePixel = 0
+            Row.LayoutOrder = i
+            Row.Parent = QFrame
+
+            local RCorner = Instance.new("UICorner")
+            RCorner.CornerRadius = UDim.new(0, 4)
+            RCorner.Parent = Row
+
+            local RowText = Instance.new("TextLabel")
+            RowText.Size = UDim2.new(1, -70, 1, 0)
+            RowText.Position = UDim2.new(0, 8, 0, 0)
+            RowText.BackgroundTransparency = 1
+            RowText.Text = item.Text or tostring(item)
+            RowText.Font = Enum.Font.GothamMedium
+            RowText.TextSize = 10.5
+            RowText.TextColor3 = item.IsActive and VRSLib.Theme.TextPrimary or VRSLib.Theme.TextMuted
+            RowText.TextXAlignment = Enum.TextXAlignment.Left
+            RowText.Parent = Row
+            ProtectLocalization(RowText)
+
+            if item.Tag or item.IsActive then
+                local TagLbl = Instance.new("TextLabel")
+                TagLbl.Size = UDim2.new(0, 60, 1, 0)
+                TagLbl.Position = UDim2.new(1, -66, 0, 0)
+                TagLbl.BackgroundTransparency = 1
+                TagLbl.Text = item.Tag or (item.IsActive and "◀ ACTIVE" or "")
+                TagLbl.Font = Enum.Font.GothamBold
+                TagLbl.TextSize = 9.5
+                TagLbl.TextColor3 = item.IsActive and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted
+                TagLbl.TextXAlignment = Enum.TextXAlignment.Right
+                TagLbl.Parent = Row
+                ProtectLocalization(TagLbl)
+            end
+        end
+
+        return QFrame
+    end
+
+    return BoxObj
+end
+
+-- Method on TabObj to create dual columns
+function Window:SetupDualColumns(tabObj)
+    tabObj.LayoutType = "Columns"
+
+    local ColContainer = Instance.new("Frame")
+    ColContainer.Name = "ColContainer_" .. tabObj.Name
+    ColContainer.Size = UDim2.new(1, 0, 0, 0)
+    ColContainer.AutomaticSize = Enum.AutomaticSize.Y
+    ColContainer.BackgroundTransparency = 1
+    ColContainer.Visible = false
+    ColContainer.Parent = self.CardsScroll
+    tabObj.ColumnsContainer = ColContainer
+
+    local CPadding = Instance.new("UIPadding")
+    CPadding.PaddingLeft = UDim.new(0, 16)
+    CPadding.PaddingRight = UDim.new(0, 16)
+    CPadding.PaddingTop = UDim.new(0, 4)
+    CPadding.PaddingBottom = UDim.new(0, 28)
+    CPadding.Parent = ColContainer
+
+    local LeftColFrame = Instance.new("Frame")
+    LeftColFrame.Name = "LeftCol"
+    LeftColFrame.Size = UDim2.new(0.5, -6, 0, 0)
+    LeftColFrame.Position = UDim2.new(0, 0, 0, 0)
+    LeftColFrame.AutomaticSize = Enum.AutomaticSize.Y
+    LeftColFrame.BackgroundTransparency = 1
+    LeftColFrame.Parent = ColContainer
+
+    local LList = Instance.new("UIListLayout")
+    LList.SortOrder = Enum.SortOrder.LayoutOrder
+    LList.Padding = UDim.new(0, 12)
+    LList.Parent = LeftColFrame
+
+    local RightColFrame = Instance.new("Frame")
+    RightColFrame.Name = "RightCol"
+    RightColFrame.Size = UDim2.new(0.5, -6, 0, 0)
+    RightColFrame.Position = UDim2.new(0.5, 6, 0, 0)
+    RightColFrame.AutomaticSize = Enum.AutomaticSize.Y
+    RightColFrame.BackgroundTransparency = 1
+    RightColFrame.Parent = ColContainer
+
+    local RList = Instance.new("UIListLayout")
+    RList.SortOrder = Enum.SortOrder.LayoutOrder
+    RList.Padding = UDim.new(0, 12)
+    RList.Parent = RightColFrame
+
+    local function MakeColHelper(colFrame)
+        local h = { Frame = colFrame, Window = self, Tab = tabObj }
+        function h:AddGroupbox(cfg) return self.Window:CreateGroupbox(colFrame, cfg) end
+        return h
+    end
+
+    tabObj.LeftCol = MakeColHelper(LeftColFrame)
+    tabObj.RightCol = MakeColHelper(RightColFrame)
+
+    return tabObj.LeftCol, tabObj.RightCol
 end
 
 function Window:ReflowGrid()
@@ -1309,6 +2059,17 @@ function Window:CreateSidebarTab(config)
     function TabObj:AddModule(modConfig)
         return self.Window:AddModule(self, modConfig)
     end
+    function TabObj:AddColumns()
+        return self.Window:SetupDualColumns(self)
+    end
+    function TabObj:AddLeftGroupbox(cfg)
+        if not self.LeftCol then self:AddColumns() end
+        return self.LeftCol:AddGroupbox(cfg)
+    end
+    function TabObj:AddRightGroupbox(cfg)
+        if not self.RightCol then self:AddColumns() end
+        return self.RightCol:AddGroupbox(cfg)
+    end
 
     TabBtn.MouseEnter:Connect(function()
         if self.ActiveTab ~= TabObj then
@@ -1547,12 +2308,103 @@ function Window:SelectTab(tabObj)
     self.ActiveTab = tabObj
     self.CurrentCategory = tabObj.Category
 
+    local parentOfCurrent = tabObj.IsSubTab and tabObj.ParentTab or (tabObj.HasSubTabs and tabObj or nil)
+
+    -- Manage Top Horizontal SubNavBar
+    if parentOfCurrent and #parentOfCurrent.SubTabs > 0 then
+        self.SubNavBar.Visible = true
+        self.CardsScroll.Position = UDim2.new(0, 0, 0, 72)
+        self.CardsScroll.Size = UDim2.new(1, 0, 1, -72)
+
+        -- Clear old subnav buttons
+        for _, ch in ipairs(self.SubNavScroll:GetChildren()) do
+            if ch:IsA("TextButton") then ch:Destroy() end
+        end
+
+        for _, sub in ipairs(parentOfCurrent.SubTabs) do
+            local isActive = (sub == tabObj)
+            local SBtn = Instance.new("TextButton")
+            SBtn.Size = UDim2.new(0, 0, 1, 0)
+            SBtn.AutomaticSize = Enum.AutomaticSize.X
+            SBtn.BackgroundTransparency = 1
+            SBtn.Text = ""
+            SBtn.Parent = self.SubNavScroll
+
+            local SBox = Instance.new("Frame")
+            SBox.Size = UDim2.new(0, 0, 1, 0)
+            SBox.AutomaticSize = Enum.AutomaticSize.X
+            SBox.BackgroundTransparency = 1
+            SBox.Parent = SBtn
+
+            local SLayout = Instance.new("UIListLayout")
+            SLayout.FillDirection = Enum.FillDirection.Horizontal
+            SLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+            SLayout.Padding = UDim.new(0, 6)
+            SLayout.Parent = SBox
+
+            local SIcon = Instance.new("ImageLabel")
+            SIcon.Size = UDim2.fromOffset(13, 13)
+            SIcon.BackgroundTransparency = 1
+            SIcon.Image = sub.Icon.Image
+            SIcon.ImageColor3 = isActive and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted
+            SIcon.Parent = SBox
+
+            local SLbl = Instance.new("TextLabel")
+            SLbl.Size = UDim2.new(0, 0, 1, 0)
+            SLbl.AutomaticSize = Enum.AutomaticSize.X
+            SLbl.BackgroundTransparency = 1
+            SLbl.Text = sub.Name
+            SLbl.Font = Enum.Font.GothamBold
+            SLbl.TextSize = 11
+            SLbl.TextColor3 = isActive and VRSLib.Theme.TextPrimary or VRSLib.Theme.TextMuted
+            SLbl.Parent = SBox
+            ProtectLocalization(SLbl)
+
+            -- Active glowing underline
+            if isActive then
+                local ULine = Instance.new("Frame")
+                ULine.Size = UDim2.new(1, 0, 0, 2)
+                ULine.Position = UDim2.new(0, 0, 1, -2)
+                ULine.BackgroundColor3 = VRSLib.Theme.Accent
+                ULine.BorderSizePixel = 0
+                ULine.Parent = SBtn
+            end
+
+            SBtn.MouseButton1Click:Connect(function()
+                self:SelectTab(sub)
+            end)
+        end
+    else
+        self.SubNavBar.Visible = false
+        self.CardsScroll.Position = UDim2.new(0, 0, 0, 38)
+        self.CardsScroll.Size = UDim2.new(1, 0, 1, -38)
+    end
+
+    -- Switch between Grid Mode and Columns Mode
+    if tabObj.LayoutType == "Columns" then
+        self.GridContainer.Visible = false
+        if self.ViewSwitchers then self.ViewSwitchers.Visible = false end
+        for _, t in ipairs(self.Tabs) do
+            if t.ColumnsContainer then
+                t.ColumnsContainer.Visible = (t == tabObj)
+            end
+        end
+    else
+        self.GridContainer.Visible = true
+        if self.ViewSwitchers then self.ViewSwitchers.Visible = true end
+        for _, t in ipairs(self.Tabs) do
+            if t.ColumnsContainer then
+                t.ColumnsContainer.Visible = false
+            end
+        end
+        self:ReflowGrid()
+    end
+
     if tabObj.IsSubTab then
         self.BreadcrumbCategory.Text = string.upper(tabObj.ParentTab.Name) .. " / "
         self.BreadcrumbTab.Text = tabObj.Name
         self.BreadcrumbBadge.Text = tabObj.BadgeText.Text
 
-        -- Keep parent tab visually active & expanded
         if tabObj.ParentTab then
             TweenService:Create(tabObj.ParentTab.Button, TweenInfo.new(0.2), { BackgroundTransparency = 0.5, BackgroundColor3 = VRSLib.Theme.Card }):Play()
             TweenService:Create(tabObj.ParentTab.Label, TweenInfo.new(0.2), { TextColor3 = VRSLib.Theme.TextPrimary }):Play()
@@ -1666,7 +2518,7 @@ function Window:AddModule(tabOrConfig, optionalConfig)
     CardFrame.BackgroundColor3 = VRSLib.Theme.Card
     CardFrame.BorderSizePixel = 0
     CardFrame.ClipsDescendants = true
-    CardFrame.Parent = self.CardsScroll
+    CardFrame.Parent = self.GridContainer
     CardObj.Frame = CardFrame
 
     local CardCorner = Instance.new("UICorner")

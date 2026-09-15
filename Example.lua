@@ -15,7 +15,7 @@
 if _G.VRS_SCRIPT_UNLOAD then pcall(_G.VRS_SCRIPT_UNLOAD) end
 
 -- 1. Load UI Engine langsung dari Raw GitHub (Anti-Cache)
-local repo = "https://raw.githubusercontent.com/vrsspace/VRSLib/v1.0.7/"
+local repo = "https://raw.githubusercontent.com/vrsspace/VRSLib/v1.1.0/"
 local rawCode = game:HttpGet(repo .. "VRSLib.lua?v=" .. tick())
 local loadFunc, loadErr = loadstring(rawCode)
 if not loadFunc then
@@ -26,7 +26,7 @@ local VRSLib = loadFunc()
 -- 2. Buat Window VRS Artelier (Aksen Neon Magenta Pink & Wings Logo)
 local Window = VRSLib:CreateWindow({
     Title    = "VRS Artelier",
-    SubTitle = "v1.0.7",
+    SubTitle = "v1.1.0",
     Size     = UDim2.fromOffset(1020, 620), -- Ukuran lega (otomatis 5-6 kolom!)
     Accent   = Color3.fromRGB(255, 64, 140), -- VRS Signature Neon Magenta Pink (#FF408C)
     Keybind  = Enum.KeyCode.RightControl
@@ -514,7 +514,7 @@ Window:AddModule(TabSystem, {
 
 
 -- ------------------------------------------------------------------------------
--- [ DUNGEON & RPG MODES — SUB-DROP / COLLAPSIBLE ACCORDION ALA OBSIDIAN ]
+-- [ DUNGEON & RPG MODES — SUB-DROP & DUAL-COLUMN SPLIT SCREEN (ALA OBSIDIAN) ]
 -- ------------------------------------------------------------------------------
 Window:AddCategory("DUNGEON MODES", 30)
 
@@ -525,30 +525,183 @@ local TabDungeon = Window:AddTabGroup({
     LayoutOrder = 31
 })
 
-local SubRaid   = TabDungeon:AddSubTab({ Name = "Raid",   Icon = "flame" })
-local SubEvent  = TabDungeon:AddSubTab({ Name = "Event",  Icon = "calendar" })
-local SubBosses = TabDungeon:AddSubTab({ Name = "Bosses", Icon = "skull" })
+local SubAutoProg = TabDungeon:AddSubTab({ Name = "Auto Progress", Icon = "activity" })
+local SubEvent    = TabDungeon:AddSubTab({ Name = "Event Raid",    Icon = "skull" })
+local SubBoss     = TabDungeon:AddSubTab({ Name = "Boss Rush",     Icon = "flame" })
+local SubChal     = TabDungeon:AddSubTab({ Name = "Challenge",     Icon = "trophy" })
 
--- [ Sub-Tab: Raid ]
-Window:AddModule(SubRaid, {
-    Title       = "Auto Raid",
-    Description = "Automatically clears raid dungeons, destroys mobs, and collects rewards",
-    Icon        = "swords",
-    Type        = "Toggle",
-    Default     = false,
-    Callback    = function(v) print("[Raid] Auto Raid:", v) end
+-- ==============================================================================
+-- [ SUB-TAB: AUTO PROGRESS — DUAL COLUMN SPLIT SCREEN ]
+-- ==============================================================================
+local LeftCol, RightCol = SubAutoProg:AddColumns()
+
+-- [ Left Column - Box 1: Auto Progress Control ]
+local ControlBox = LeftCol:AddGroupbox({ Title = "Auto Progress Control", Icon = "play" })
+
+ControlBox:AddToggle({
+    Title = "Enable Auto Progress",
+    Default = false,
+    Callback = function(v) print("[Auto Progress] Enabled:", v) end
 })
 
-Window:AddModule(SubRaid, {
-    Title       = "Raid Fast Clear",
-    Description = "Bypasses wave countdowns and cuts raid duration in half",
-    Icon        = "zap",
-    Type        = "Toggle",
-    Default     = false,
-    Callback    = function(v) print("[Raid] Fast Clear:", v) end
+ControlBox:AddButton({
+    Title = "Start Auto Progress Now",
+    Icon = "play",
+    Callback = function()
+        VRSLib:Notify({ Title = "Auto Progress", Description = "Started progression sequence!", Duration = 2.5, Icon = "play" })
+    end
 })
 
--- [ Sub-Tab: Event ]
+ControlBox:AddButton({
+    Title = "Pause Auto Progress",
+    Icon = "pause",
+    Callback = function()
+        VRSLib:Notify({ Title = "Auto Progress", Description = "Progress paused.", Duration = 2, Icon = "pause" })
+    end
+})
+
+local statusRow = ControlBox:AddStatus({
+    Label = "Status:",
+    Status = "INACTIVE (Paused)",
+    Color = Color3.fromRGB(255, 75, 75)
+})
+
+ControlBox:AddLabel("Current Step: #1 / #8 (Frostspire Bastion - Easy)")
+ControlBox:AddLabel("Step Clears: 0 / 1 runs")
+ControlBox:AddLabel("Lifetime Progression Clears: 0")
+ControlBox:AddLabel("Next Dungeon: Frostspire Bastion (Normal)")
+
+ControlBox:AddButton({
+    Title = "Skip to Next Step",
+    Icon = "arrow-right",
+    Callback = function() print("[Auto Progress] Skipped step") end
+})
+
+ControlBox:AddButton({
+    Title = "Previous Step",
+    Icon = "arrow-left",
+    Callback = function() print("[Auto Progress] Previous step") end
+})
+
+ControlBox:AddButton({
+    Title = "Reset Progress to Step 1",
+    Icon = "refresh-cw",
+    Callback = function() print("[Auto Progress] Reset progress") end
+})
+
+-- [ Left Column - Box 2: Progression Queue ]
+local QueueBox = LeftCol:AddGroupbox({ Title = "Progression Queue (Template Steps)", Icon = "list" })
+QueueBox:AddQueueList({
+    Items = {
+        { Text = "[1] Frostspire Bastion (Easy) [0/1 runs]", IsActive = true },
+        { Text = "[2] Frostspire Bastion (Normal) [1 run(s)]" },
+        { Text = "[3] Frostspire Bastion (Hard) [1 run(s)]" },
+        { Text = "[4] Frostspire Bastion (Nightmare) [1 run(s)]" },
+        { Text = "[5] Underworld Gate (Easy) [1 run(s)]" },
+        { Text = "[6] Underworld Gate (Normal) [1 run(s)]" },
+        { Text = "[7] Underworld Gate (Hard) [1 run(s)]" },
+        { Text = "[8] Underworld Gate (Nightmare) [1 run(s)]" },
+    }
+})
+
+-- [ Right Column - Box 1: Progression Presets & Options ]
+local PresetBox = RightCol:AddGroupbox({ Title = "Progression Presets & Options", Icon = "settings" })
+
+PresetBox:AddDropdown({
+    Title = "Template Preset",
+    Values = { "Frostspire to Underworld", "Goblin Farm Route", "Daily Raid Rush" },
+    Default = "Frostspire to Underworld",
+    Callback = function(v) print("[Preset] Selected:", v) end
+})
+
+PresetBox:AddButton({
+    Title = "Load Selected Preset",
+    Icon = "download",
+    Callback = function()
+        VRSLib:Notify({ Title = "Presets", Description = "Loaded preset successfully!", Duration = 2.5, Icon = "check" })
+    end
+})
+
+PresetBox:AddDropdown({
+    Title = "When Template Finishes",
+    Values = { "Loop to Step 1", "Stop Script", "Return to Lobby" },
+    Default = "Loop to Step 1",
+    Callback = function(v) print("[Option] On Finish:", v) end
+})
+
+PresetBox:AddToggle({
+    Title = "Advance Only on Clear/Victory",
+    Default = true,
+    Callback = function(v) print("[Option] Advance on Clear:", v) end
+})
+
+PresetBox:AddSlider({
+    Title = "Lobby Return Delay",
+    Min = 1,
+    Max = 15,
+    Default = 4,
+    Unit = "s",
+    Callback = function(v) print("[Option] Return Delay:", v) end
+})
+
+PresetBox:AddSlider({
+    Title = "Next Match Queue Delay",
+    Min = 1,
+    Max = 10,
+    Default = 2,
+    Unit = "s",
+    Callback = function(v) print("[Option] Queue Delay:", v) end
+})
+
+-- [ Right Column - Box 2: Custom Step Builder ]
+local BuilderBox = RightCol:AddGroupbox({ Title = "Custom Step Builder", Icon = "plus-circle" })
+
+BuilderBox:AddDropdown({
+    Title = "Map",
+    Values = { "Goblin's Stronghold", "Frostspire Bastion", "Underworld Gate" },
+    Default = "Goblin's Stronghold",
+    Callback = function(v) print("[Builder] Map:", v) end
+})
+
+BuilderBox:AddDropdown({
+    Title = "Difficulty",
+    Values = { "Easy", "Normal", "Hard", "Nightmare" },
+    Default = "Nightmare",
+    Callback = function(v) print("[Builder] Difficulty:", v) end
+})
+
+BuilderBox:AddSlider({
+    Title = "Target Runs to Clear",
+    Min = 1,
+    Max = 50,
+    Default = 1,
+    Unit = "runs",
+    Callback = function(v) print("[Builder] Target Runs:", v) end
+})
+
+BuilderBox:AddButton({
+    Title = "+ Add Step to Template",
+    Icon = "plus",
+    Callback = function()
+        VRSLib:Notify({ Title = "Builder", Description = "Added step to template queue!", Duration = 2, Icon = "plus" })
+    end
+})
+
+BuilderBox:AddButton({
+    Title = "Remove Last Step",
+    Icon = "x",
+    Callback = function() print("[Builder] Removed last step") end
+})
+
+BuilderBox:AddButton({
+    Title = "Clear All Steps",
+    Icon = "trash",
+    Callback = function() print("[Builder] Cleared all steps") end
+})
+
+-- ==============================================================================
+-- [ SUB-TAB: EVENT RAID — MODULAR 4-COLUMN CARD GRID ]
+-- ==============================================================================
 Window:AddModule(SubEvent, {
     Title       = "Event Farm",
     Description = "Automatically farms limited seasonal event tokens and currencies",
@@ -568,23 +721,25 @@ Window:AddModule(SubEvent, {
     end
 })
 
--- [ Sub-Tab: Bosses ]
-Window:AddModule(SubBosses, {
+-- ==============================================================================
+-- [ SUB-TAB: BOSS RUSH — MODULAR 4-COLUMN CARD GRID ]
+-- ==============================================================================
+Window:AddModule(SubBoss, {
     Title       = "Boss Hitbox Ext",
     Description = "Extends world & raid boss hitboxes for safe long-distance melee hits",
     Icon        = "crosshair",
     Type        = "Toggle",
     Default     = false,
-    Callback    = function(v) print("[Bosses] Hitbox Ext:", v) end
+    Callback    = function(v) print("[Boss] Hitbox Ext:", v) end
 })
 
-Window:AddModule(SubBosses, {
+Window:AddModule(SubBoss, {
     Title       = "Auto Dodge Attacks",
     Description = "Automatically dodges boss red zone AoE attacks and dangerous projectiles",
     Icon        = "shield",
     Type        = "Toggle",
     Default     = false,
-    Callback    = function(v) print("[Bosses] Auto Dodge:", v) end
+    Callback    = function(v) print("[Boss] Auto Dodge:", v) end
 })
 
 -- Notifikasi Sukses Load
