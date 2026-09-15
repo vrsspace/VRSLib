@@ -26,7 +26,7 @@ local RunService       = cloneref(game:GetService("RunService"))
 local LocalPlayer      = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
 local VRSLib = {
-    Version = "1.0.0",
+    Version = "1.0.2",
     Theme = {
         Background      = Color3.fromRGB(13, 14, 19),
         Sidebar         = Color3.fromRGB(16, 17, 24),
@@ -55,7 +55,7 @@ local VRSLib = {
     },
     -- Injected Lucide Icon Engine
     Icons = (function()
-        local GITHUB_REPO = "https://raw.githubusercontent.com/vrsspace/VRSLib/v1.0.1/"
+        local GITHUB_REPO = "https://raw.githubusercontent.com/vrsspace/VRSLib/v1.0.2/"
         local function TryImport(file)
             if isfile and isfile(file) then
                 local ok, res = pcall(function() return loadstring(readfile(file))() end)
@@ -315,7 +315,7 @@ function VRSLib:CreateWindow(config)
     local self = setmetatable({}, Window)
 
     self.Title          = config.Title or "VRS Artelier"
-    self.SubTitle       = config.SubTitle or "v1.0.0 Pro"
+    self.SubTitle       = config.SubTitle or "v1.0.2 Pro"
     self.DefaultSize    = config.Size or UDim2.fromOffset(1020, 620)
     self.MaximizedSize  = UDim2.fromOffset(1240, 740)
     self.Keybind        = config.Keybind or Enum.KeyCode.RightControl
@@ -436,7 +436,7 @@ function VRSLib:CreateWindow(config)
     SubTitleLabel.AutomaticSize = Enum.AutomaticSize.X
     SubTitleLabel.Position = UDim2.new(1, 6, 0, 0)
     SubTitleLabel.BackgroundTransparency = 1
-    SubTitleLabel.Text = config.SubTitle or (config.Title ~= "VRS Artelier" and config.Title) or "v1.0.0 Pro"
+    SubTitleLabel.Text = config.SubTitle or (config.Title ~= "VRS Artelier" and config.Title) or "v1.0.2 Pro"
     SubTitleLabel.Font = Enum.Font.Gotham
     SubTitleLabel.TextSize = 11
     SubTitleLabel.TextColor3 = VRSLib.Theme.TextMuted
@@ -658,7 +658,7 @@ function VRSLib:CreateWindow(config)
     SettingsBtn.MouseButton1Click:Connect(function()
         VRSLib:Notify({
             Title = "VRS Artelier",
-            Description = "Framework: VRS Artelier v1.0.0 Pro\nToggle Key: RightControl",
+            Description = "Framework: VRS Artelier v1.0.2 Pro\nToggle Key: RightControl",
             Duration = 3,
             Icon = VRSLib.Icons.Wings
         })
@@ -979,20 +979,28 @@ function Window:ReflowGrid()
     if scrollW <= 100 then
         scrollW = self.MainFrame.AbsoluteSize.X - 175 - 10
     end
-    local availableW = scrollW - 32 -- 16px left + 16px right padding
-    if availableW <= 100 then availableW = 780 end
+    -- Deduct 32px (16px left + 16px right scroll padding)
+    local availableW = scrollW - 32
+    if availableW <= 200 then availableW = 780 end
 
     local gap = 10
     self.GridLayout.CellPadding = UDim2.fromOffset(gap, gap)
 
-    -- In 404hub: Target card width is 185px - 215px.
-    -- Default window width (1020px) produces exactly 4 spacious columns!
-    local targetCardW = 190
-    local cols = math.clamp(math.floor((availableW + gap) / (targetCardW + gap)), 3, 6)
+    -- 404hub Card Standard: STRICTLY 4 columns for default window!
+    -- Only expands to 5 columns if window is stretched very wide (> 1100px).
+    local cols = 4
+    if availableW >= 1100 then
+        cols = 5
+    elseif availableW < 650 then
+        cols = 3
+    else
+        cols = 4
+    end
 
     local cellW = math.floor((availableW - (cols - 1) * gap) / cols)
     local cellH = 76
 
+    -- STRICTLY lock column count so cards NEVER pack into 7-8 narrow columns!
     self.GridLayout.FillDirectionMaxCells = cols
     self.GridLayout.CellSize = UDim2.fromOffset(cellW, cellH)
 end
