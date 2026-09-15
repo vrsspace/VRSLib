@@ -26,7 +26,7 @@ local RunService       = cloneref(game:GetService("RunService"))
 local LocalPlayer      = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
 local VRSLib = {
-    Version = "1.1.7",
+    Version = "1.1.8",
     Theme = {
         Background      = Color3.fromRGB(13, 14, 19),
         Sidebar         = Color3.fromRGB(16, 17, 24),
@@ -316,7 +316,7 @@ function VRSLib:CreateWindow(config)
     local self = setmetatable({}, Window)
 
     self.Title          = config.Title or "VRS Artelier"
-    self.SubTitle       = config.SubTitle or "v1.1.7 Pro"
+    self.SubTitle       = config.SubTitle or "v1.1.8 Pro"
     self.DefaultSize    = config.Size or UDim2.fromOffset(1020, 620)
     self.MaximizedSize  = UDim2.fromOffset(1240, 740)
     self.Keybind        = config.Keybind or Enum.KeyCode.RightControl
@@ -384,7 +384,7 @@ function VRSLib:CreateWindow(config)
     -- ==============================================================================
     local Topbar = Instance.new("Frame")
     Topbar.Name = "Topbar"
-    Topbar.Size = UDim2.new(1, 0, 0, 52)
+    Topbar.Size = UDim2.new(1, 0, 0, 50)
     Topbar.BackgroundColor3 = VRSLib.Theme.Header
     Topbar.BorderSizePixel = 0
     Topbar.Parent = Main
@@ -417,7 +417,7 @@ function VRSLib:CreateWindow(config)
 
     local WingsLogo = Instance.new("ImageLabel")
     WingsLogo.Name = "WingsLogo"
-    WingsLogo.Size = UDim2.fromOffset(72, 54)
+    WingsLogo.Size = UDim2.fromOffset(54, 40)
     WingsLogo.AnchorPoint = Vector2.new(0.5, 0.5)
     WingsLogo.Position = UDim2.new(0.5, 0, 0.5, 0)
     WingsLogo.BackgroundTransparency = 1
@@ -426,10 +426,10 @@ function VRSLib:CreateWindow(config)
     WingsLogo.Parent = BrandBox
 
     BrandBox.MouseEnter:Connect(function()
-        TweenService:Create(WingsLogo, TweenInfo.new(0.2), { Size = UDim2.fromOffset(78, 58) }):Play()
+        TweenService:Create(WingsLogo, TweenInfo.new(0.2), { Size = UDim2.fromOffset(58, 43) }):Play()
     end)
     BrandBox.MouseLeave:Connect(function()
-        TweenService:Create(WingsLogo, TweenInfo.new(0.2), { Size = UDim2.fromOffset(72, 54) }):Play()
+        TweenService:Create(WingsLogo, TweenInfo.new(0.2), { Size = UDim2.fromOffset(54, 40) }):Play()
     end)
 
     -- Live Search Input Box: [ 🔍 Search modules... ] (Pusat / Centered)
@@ -524,11 +524,11 @@ function VRSLib:CreateWindow(config)
     MakeDraggable(Topbar, Main)
 
     -- ==============================================================================
-    -- BODY (SIDEBAR + MAIN CONTENT) — Positioned between Topbar (52px) & FooterBar (22px)
+    -- BODY (SIDEBAR + MAIN CONTENT) — Positioned between Topbar (50px) & FooterBar (22px)
     -- ==============================================================================
     local Body = Instance.new("Frame")
-    Body.Size = UDim2.new(1, 0, 1, -74)
-    Body.Position = UDim2.new(0, 0, 0, 52)
+    Body.Size = UDim2.new(1, 0, 1, -72)
+    Body.Position = UDim2.new(0, 0, 0, 50)
     Body.BackgroundTransparency = 1
     Body.Parent = Main
 
@@ -1064,31 +1064,38 @@ function VRSLib:CreateWindow(config)
         end
     end)
 
-    -- Floating Mobile / PC Draggable Wings Widget
+    -- Floating Mobile / PC Draggable Wings Widget (Clean Standalone Logo, No Circle Background or Border)
     local FloatingToggle = Instance.new("ImageButton")
     FloatingToggle.Name = "VRS_FloatingWings"
-    FloatingToggle.Size = UDim2.fromOffset(44, 44)
+    FloatingToggle.Size = UDim2.fromOffset(56, 42)
     FloatingToggle.Position = UDim2.new(0, 25, 0.45, 0)
-    FloatingToggle.BackgroundColor3 = VRSLib.Theme.Card
+    FloatingToggle.BackgroundTransparency = 1
     FloatingToggle.BorderSizePixel = 0
     FloatingToggle.AutoButtonColor = false
+    FloatingToggle.ScaleType = Enum.ScaleType.Stretch
+    ApplyBrandLogo(FloatingToggle)
     FloatingToggle.Parent = ScreenGui
 
-    local FloatCorner = Instance.new("UICorner")
-    FloatCorner.CornerRadius = UDim.new(1, 0)
-    FloatCorner.Parent = FloatingToggle
+    -- Subtle Neon Ambient Glow behind floating wings
+    local FloatGlow = Instance.new("ImageLabel")
+    FloatGlow.Name = "Glow"
+    FloatGlow.Size = UDim2.new(1, 24, 1, 24)
+    FloatGlow.Position = UDim2.new(0, -12, 0, -12)
+    FloatGlow.BackgroundTransparency = 1
+    FloatGlow.Image = "rbxassetid://5028857084"
+    FloatGlow.ImageColor3 = VRSLib.Theme.Accent
+    FloatGlow.ImageTransparency = 0.82
+    FloatGlow.ZIndex = 0
+    FloatGlow.Parent = FloatingToggle
 
-    local FloatStroke = Instance.new("UIStroke")
-    FloatStroke.Color = VRSLib.Theme.Accent
-    FloatStroke.Thickness = 1.4
-    FloatStroke.Parent = FloatingToggle
-
-    local FloatIcon = Instance.new("ImageLabel")
-    FloatIcon.Size = UDim2.fromOffset(26, 26)
-    FloatIcon.Position = UDim2.new(0.5, -13, 0.5, -13)
-    FloatIcon.BackgroundTransparency = 1
-    ApplyBrandLogo(FloatIcon)
-    FloatIcon.Parent = FloatingToggle
+    FloatingToggle.MouseEnter:Connect(function()
+        TweenService:Create(FloatingToggle, TweenInfo.new(0.2), { Size = UDim2.fromOffset(62, 47) }):Play()
+        TweenService:Create(FloatGlow, TweenInfo.new(0.2), { ImageTransparency = 0.55 }):Play()
+    end)
+    FloatingToggle.MouseLeave:Connect(function()
+        TweenService:Create(FloatingToggle, TweenInfo.new(0.2), { Size = UDim2.fromOffset(56, 42) }):Play()
+        TweenService:Create(FloatGlow, TweenInfo.new(0.2), { ImageTransparency = 0.82 }):Play()
+    end)
 
     MakeDraggable(FloatingToggle, FloatingToggle)
     FloatingToggle.MouseButton1Click:Connect(function()
