@@ -26,7 +26,7 @@ local RunService       = cloneref(game:GetService("RunService"))
 local LocalPlayer      = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
 local VRSLib = {
-    Version = "1.0.2",
+    Version = "1.0.3",
     Theme = {
         Background      = Color3.fromRGB(13, 14, 19),
         Sidebar         = Color3.fromRGB(16, 17, 24),
@@ -55,7 +55,7 @@ local VRSLib = {
     },
     -- Injected Lucide Icon Engine
     Icons = (function()
-        local GITHUB_REPO = "https://raw.githubusercontent.com/vrsspace/VRSLib/v1.0.2/"
+        local GITHUB_REPO = "https://raw.githubusercontent.com/vrsspace/VRSLib/v1.0.3/"
         local function TryImport(file)
             if isfile and isfile(file) then
                 local ok, res = pcall(function() return loadstring(readfile(file))() end)
@@ -315,7 +315,7 @@ function VRSLib:CreateWindow(config)
     local self = setmetatable({}, Window)
 
     self.Title          = config.Title or "VRS Artelier"
-    self.SubTitle       = config.SubTitle or "v1.0.2 Pro"
+    self.SubTitle       = config.SubTitle or "v1.0.3 Pro"
     self.DefaultSize    = config.Size or UDim2.fromOffset(1020, 620)
     self.MaximizedSize  = UDim2.fromOffset(1240, 740)
     self.Keybind        = config.Keybind or Enum.KeyCode.RightControl
@@ -436,7 +436,7 @@ function VRSLib:CreateWindow(config)
     SubTitleLabel.AutomaticSize = Enum.AutomaticSize.X
     SubTitleLabel.Position = UDim2.new(1, 6, 0, 0)
     SubTitleLabel.BackgroundTransparency = 1
-    SubTitleLabel.Text = config.SubTitle or (config.Title ~= "VRS Artelier" and config.Title) or "v1.0.2 Pro"
+    SubTitleLabel.Text = config.SubTitle or (config.Title ~= "VRS Artelier" and config.Title) or "v1.0.3 Pro"
     SubTitleLabel.Font = Enum.Font.Gotham
     SubTitleLabel.TextSize = 11
     SubTitleLabel.TextColor3 = VRSLib.Theme.TextMuted
@@ -658,7 +658,7 @@ function VRSLib:CreateWindow(config)
     SettingsBtn.MouseButton1Click:Connect(function()
         VRSLib:Notify({
             Title = "VRS Artelier",
-            Description = "Framework: VRS Artelier v1.0.2 Pro\nToggle Key: RightControl",
+            Description = "Framework: VRS Artelier v1.0.3 Pro\nToggle Key: RightControl",
             Duration = 3,
             Icon = VRSLib.Icons.Wings
         })
@@ -808,7 +808,7 @@ function VRSLib:CreateWindow(config)
 
     local GridLayout = Instance.new("UIGridLayout")
     GridLayout.CellPadding = UDim2.fromOffset(10, 10)
-    GridLayout.CellSize = UDim2.fromOffset(195, 76) -- Recalculated dynamically by ReflowGrid()
+    GridLayout.CellSize = UDim2.fromOffset(193, 78) -- Recalculated dynamically by ReflowGrid()
     GridLayout.FillDirectionMaxCells = 4
     GridLayout.SortOrder = Enum.SortOrder.LayoutOrder
     GridLayout.Parent = CardsScroll
@@ -975,9 +975,9 @@ end
 -- ==============================================================================
 function Window:ReflowGrid()
     if self.CurrentView ~= "Grid" then return end
-    local scrollW = self.CardsScroll.AbsoluteWindowSize.X
+    local scrollW = (self.CardsScroll and self.CardsScroll.AbsoluteSize.X > 50) and self.CardsScroll.AbsoluteSize.X or (self.MainFrame.AbsoluteSize.X - 186)
     if scrollW <= 100 then
-        scrollW = self.MainFrame.AbsoluteSize.X - 175 - 10
+        scrollW = self.MainFrame.AbsoluteSize.X - 186
     end
     -- Deduct 32px (16px left + 16px right scroll padding)
     local availableW = scrollW - 32
@@ -986,19 +986,19 @@ function Window:ReflowGrid()
     local gap = 10
     self.GridLayout.CellPadding = UDim2.fromOffset(gap, gap)
 
-    -- 404hub Card Standard: STRICTLY 4 columns for default window!
-    -- Only expands to 5 columns if window is stretched very wide (> 1100px).
+    -- STRICTLY 4 columns for standard window (1020px)!
+    -- 4 spacious cards (~193px width x 78px height) like 404hub
     local cols = 4
-    if availableW >= 1100 then
+    if availableW >= 1150 then
         cols = 5
-    elseif availableW < 650 then
+    elseif availableW < 600 then
         cols = 3
     else
         cols = 4
     end
 
     local cellW = math.floor((availableW - (cols - 1) * gap) / cols)
-    local cellH = 76
+    local cellH = 78
 
     -- STRICTLY lock column count so cards NEVER pack into 7-8 narrow columns!
     self.GridLayout.FillDirectionMaxCells = cols
@@ -1273,7 +1273,7 @@ function Window:AddModule(tabOrConfig, optionalConfig)
 
     local CardFrame = Instance.new("Frame")
     CardFrame.Name = "Card_" .. title
-    CardFrame.Size = UDim2.fromOffset(148, 78)
+    CardFrame.Size = UDim2.fromOffset(193, 78)
     CardFrame.BackgroundColor3 = VRSLib.Theme.Card
     CardFrame.BorderSizePixel = 0
     CardFrame.ClipsDescendants = true
@@ -1292,26 +1292,26 @@ function Window:AddModule(tabOrConfig, optionalConfig)
 
     -- Top Row
     local TopRow = Instance.new("Frame")
-    TopRow.Size = UDim2.new(1, -14, 0, 22)
-    TopRow.Position = UDim2.new(0, 7, 0, 7)
+    TopRow.Size = UDim2.new(1, -16, 0, 22)
+    TopRow.Position = UDim2.new(0, 8, 0, 8)
     TopRow.BackgroundTransparency = 1
     TopRow.Parent = CardFrame
 
     local ModIcon = Instance.new("ImageLabel")
-    ModIcon.Size = UDim2.fromOffset(14, 14)
-    ModIcon.Position = UDim2.new(0, 0, 0.5, -7)
+    ModIcon.Size = UDim2.fromOffset(15, 15)
+    ModIcon.Position = UDim2.new(0, 0, 0.5, -7.5)
     ModIcon.BackgroundTransparency = 1
     ModIcon.Image = iconId
     ModIcon.ImageColor3 = VRSLib.Theme.TextMuted
     ModIcon.Parent = TopRow
 
     local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Size = UDim2.new(1, -44, 1, 0)
-    TitleLabel.Position = UDim2.new(0, 18, 0, 0)
+    TitleLabel.Size = UDim2.new(1, -54, 1, 0)
+    TitleLabel.Position = UDim2.new(0, 20, 0, 0)
     TitleLabel.BackgroundTransparency = 1
     TitleLabel.Text = title
     TitleLabel.Font = Enum.Font.GothamBold
-    TitleLabel.TextSize = 11.5
+    TitleLabel.TextSize = 11
     TitleLabel.TextColor3 = VRSLib.Theme.TextPrimary
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
     TitleLabel.TextTruncate = Enum.TextTruncate.AtEnd
@@ -1320,8 +1320,8 @@ function Window:AddModule(tabOrConfig, optionalConfig)
 
     -- Description
     local DescLabel = Instance.new("TextLabel")
-    DescLabel.Size = UDim2.new(1, -14, 0, 36)
-    DescLabel.Position = UDim2.new(0, 7, 0, 33)
+    DescLabel.Size = UDim2.new(1, -16, 0, 36)
+    DescLabel.Position = UDim2.new(0, 8, 0, 33)
     DescLabel.BackgroundTransparency = 1
     DescLabel.Text = desc
     DescLabel.Font = Enum.Font.Gotham
@@ -1330,6 +1330,7 @@ function Window:AddModule(tabOrConfig, optionalConfig)
     DescLabel.TextXAlignment = Enum.TextXAlignment.Left
     DescLabel.TextYAlignment = Enum.TextYAlignment.Top
     DescLabel.TextWrapped = true
+    DescLabel.TextTruncate = Enum.TextTruncate.AtEnd
     DescLabel.Parent = CardFrame
     ProtectLocalization(DescLabel)
 
@@ -1593,15 +1594,13 @@ function Window:SetViewMode(mode)
     if mode == "Grid" then
         self:ReflowGrid()
     elseif mode == "List" then
-        local scrollW = self.CardsScroll.AbsoluteWindowSize.X
-        if scrollW <= 100 then scrollW = self.MainFrame.AbsoluteSize.X - 185 end
+        local scrollW = (self.CardsScroll and self.CardsScroll.AbsoluteSize.X > 50) and self.CardsScroll.AbsoluteSize.X or (self.MainFrame.AbsoluteSize.X - 186)
         local availableW = scrollW - 32
         self.GridLayout.FillDirectionMaxCells = 1
         self.GridLayout.CellPadding = UDim2.fromOffset(8, 6)
         self.GridLayout.CellSize = UDim2.fromOffset(availableW, 52)
     elseif mode == "Compact" then
-        local scrollW = self.CardsScroll.AbsoluteWindowSize.X
-        if scrollW <= 100 then scrollW = self.MainFrame.AbsoluteSize.X - 185 end
+        local scrollW = (self.CardsScroll and self.CardsScroll.AbsoluteSize.X > 50) and self.CardsScroll.AbsoluteSize.X or (self.MainFrame.AbsoluteSize.X - 186)
         local availableW = scrollW - 32
         local cols = math.clamp(math.floor((availableW + 8) / 140), 3, 6)
         local cellW = math.floor((availableW - (cols - 1) * 8) / cols)
