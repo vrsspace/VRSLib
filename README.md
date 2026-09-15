@@ -66,5 +66,5 @@ local Window = VRSLib:CreateWindow({
 ### Menjalankan Showcase Lengkap (47 Modules)
 Tinggal eksekusi 1 baris ini di executor Anda:
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/vrsspace/VRSLib/main/Example.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/vrsspace/VRSLib/v1.0.1/Example.lua"))()
 ```

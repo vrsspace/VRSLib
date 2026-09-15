@@ -55,7 +55,7 @@ local VRSLib = {
     },
     -- Injected Lucide Icon Engine
     Icons = (function()
-        local GITHUB_REPO = "https://raw.githubusercontent.com/vrsspace/VRSLib/main/"
+        local GITHUB_REPO = "https://raw.githubusercontent.com/vrsspace/VRSLib/v1.0.1/"
         local function TryImport(file)
             if isfile and isfile(file) then
                 local ok, res = pcall(function() return loadstring(readfile(file))() end)

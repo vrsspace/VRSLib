@@ -15,7 +15,7 @@
 if _G.VRS_SCRIPT_UNLOAD then pcall(_G.VRS_SCRIPT_UNLOAD) end
 
 -- 1. Load UI Engine langsung dari Raw GitHub (Anti-Cache)
-local repo = "https://raw.githubusercontent.com/vrsspace/VRSLib/main/"
+local repo = "https://raw.githubusercontent.com/vrsspace/VRSLib/v1.0.1/"
 local rawCode = game:HttpGet(repo .. "VRSLib.lua?v=" .. tick())
 local loadFunc, loadErr = loadstring(rawCode)
 if not loadFunc then
