@@ -1116,6 +1116,19 @@ function VRSLib:CreateWindow(config)
         self:ReflowGrid()
     end)
 
+    self.Toggles = {}
+    self.Options = {}
+    self.Toggled = true
+    VRSLib.Toggles = self.Toggles
+    VRSLib.Options = self.Options
+    VRSLib.Toggle = function() self:Toggle() end
+    _G.Toggles = self.Toggles
+    _G.Options = self.Options
+    if getgenv then
+        getgenv().Toggles = self.Toggles
+        getgenv().Options = self.Options
+    end
+
     self:InitQuickCategory()
     table.insert(VRSLib.Windows, self)
     task.defer(function() self:ReflowGrid() end)
@@ -1162,9 +1175,14 @@ end
 -- ==============================================================================
 -- DUAL-COLUMN SPLIT & GROUPBOX SYSTEM (OBSIDIAN-GRADE ARCHITECTURE)
 -- ==============================================================================
-function Window:CreateGroupbox(parentFrame, config)
-    config = config or {}
-    local title = config.Title or "Groupbox"
+function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon)
+    local config
+    if type(configOrTitle) == "string" then
+        config = { Title = configOrTitle, Icon = optionalIcon }
+    else
+        config = configOrTitle or {}
+    end
+    local title = config.Title or config.Name or config.Text or "Groupbox"
     local iconId = VRSLib.Icons.Get(config.Icon or "folder")
     local collapsed = config.Collapsed or false
 
@@ -1263,12 +1281,31 @@ function Window:CreateGroupbox(parentFrame, config)
         }):Play()
     end)
 
-    -- 1. AddToggle (Pill Toggle Switch)
-    function BoxObj:AddToggle(ctrlConfig)
-        ctrlConfig = ctrlConfig or {}
-        local cTitle = ctrlConfig.Title or "Toggle"
+    -- Divider separator
+    function BoxObj:AddDivider()
+        local Div = Instance.new("Frame")
+        Div.Name = "Divider"
+        Div.Size = UDim2.new(1, 0, 0, 1)
+        Div.BackgroundColor3 = VRSLib.Theme.CardStroke
+        Div.BorderSizePixel = 0
+        Div.Parent = Content
+        return Div
+    end
+
+    -- 1. AddToggle (Pill Toggle Switch - Universal Dual Format)
+    function BoxObj:AddToggle(idOrConfig, optionalConfig)
+        local id, ctrlConfig
+        if type(idOrConfig) == "string" then
+            id = idOrConfig
+            ctrlConfig = optionalConfig or {}
+        else
+            ctrlConfig = idOrConfig or {}
+            id = ctrlConfig.Id or ctrlConfig.Title or ctrlConfig.Text or "Toggle"
+        end
+
+        local cTitle = ctrlConfig.Title or ctrlConfig.Text or tostring(id)
         local defVal = ctrlConfig.Default or false
-        local cb = ctrlConfig.Callback or function() end
+        local cb = ctrlConfig.Callback or ctrlConfig.Func or function() end
 
         local Row = Instance.new("Frame")
         Row.Size = UDim2.new(1, 0, 0, 26)
@@ -1310,8 +1347,10 @@ function Window:CreateGroupbox(parentFrame, config)
         KCorner.Parent = Knob
 
         local isVal = defVal
+        local toggleObj
         local function SetVal(v)
             isVal = v
+            if toggleObj then toggleObj.Value = v end
             TweenService:Create(Switch, TweenInfo.new(0.2), {
                 BackgroundColor3 = isVal and VRSLib.Theme.Accent or VRSLib.Theme.SwitchOff
             }):Play()
@@ -1323,15 +1362,34 @@ function Window:CreateGroupbox(parentFrame, config)
         end
 
         Switch.MouseButton1Click:Connect(function() SetVal(not isVal) end)
-        return { Set = SetVal, Frame = Row }
+
+        toggleObj = {
+            Value = isVal,
+            Set = SetVal,
+            SetValue = function(selfOrVal, maybeVal)
+                local v = (maybeVal ~= nil and maybeVal) or selfOrVal
+                SetVal(v)
+            end,
+            Frame = Row
+        }
+
+        if self.Window.Toggles then self.Window.Toggles[id] = toggleObj end
+        if _G.Toggles then _G.Toggles[id] = toggleObj end
+        if getgenv then getgenv().Toggles[id] = toggleObj end
+        return toggleObj
     end
 
-    -- 2. AddButton (Action button with clean icon)
-    function BoxObj:AddButton(ctrlConfig)
-        ctrlConfig = ctrlConfig or {}
-        local cTitle = ctrlConfig.Title or "Button"
+    -- 2. AddButton (Action button with clean icon - Dual Format)
+    function BoxObj:AddButton(textOrConfig, optionalFunc)
+        local ctrlConfig
+        if type(textOrConfig) == "string" then
+            ctrlConfig = { Title = textOrConfig, Callback = optionalFunc }
+        else
+            ctrlConfig = textOrConfig or {}
+        end
+        local cTitle = ctrlConfig.Title or ctrlConfig.Text or "Button"
         local cIcon = ctrlConfig.Icon and VRSLib.Icons.Get(ctrlConfig.Icon)
-        local cb = ctrlConfig.Callback or function() end
+        local cb = ctrlConfig.Callback or ctrlConfig.Func or function() end
 
         local Btn = Instance.new("TextButton")
         Btn.Size = UDim2.new(1, 0, 0, 28)
@@ -1396,15 +1454,23 @@ function Window:CreateGroupbox(parentFrame, config)
         return Btn
     end
 
-    -- 3. AddSlider (Slider with Title on left and Value Badge [ 4 / 15 s ] on right)
-    function BoxObj:AddSlider(ctrlConfig)
-        ctrlConfig = ctrlConfig or {}
-        local cTitle = ctrlConfig.Title or "Slider"
+    -- 3. AddSlider (Slider with Title on left and Value Badge - Dual Format)
+    function BoxObj:AddSlider(idOrConfig, optionalConfig)
+        local id, ctrlConfig
+        if type(idOrConfig) == "string" then
+            id = idOrConfig
+            ctrlConfig = optionalConfig or {}
+        else
+            ctrlConfig = idOrConfig or {}
+            id = ctrlConfig.Id or ctrlConfig.Title or ctrlConfig.Text or "Slider"
+        end
+
+        local cTitle = ctrlConfig.Title or ctrlConfig.Text or tostring(id)
         local min = ctrlConfig.Min or 0
         local max = ctrlConfig.Max or 100
         local def = ctrlConfig.Default or min
-        local unit = ctrlConfig.Unit or ""
-        local cb = ctrlConfig.Callback or function() end
+        local unit = ctrlConfig.Unit or ctrlConfig.Suffix or ""
+        local cb = ctrlConfig.Callback or ctrlConfig.Func or function() end
 
         local SFrame = Instance.new("Frame")
         SFrame.Size = UDim2.new(1, 0, 0, 42)
@@ -1481,10 +1547,12 @@ function Window:CreateGroupbox(parentFrame, config)
 
         local dragging = false
         local curVal = def
+        local sliderObj
 
         local function UpdateSlider(input)
             local frac = math.clamp((input.Position.X - Track.AbsolutePosition.X) / Track.AbsoluteSize.X, 0, 1)
             curVal = math.floor(min + (max - min) * frac + 0.5)
+            if sliderObj then sliderObj.Value = curVal end
             Fill.Size = UDim2.new(frac, 0, 1, 0)
             ValBadge.Text = tostring(curVal) .. (unit ~= "" and (" " .. unit) or "")
             task.spawn(cb, curVal)
@@ -1507,25 +1575,44 @@ function Window:CreateGroupbox(parentFrame, config)
             end
         end)
 
-        return {
+        sliderObj = {
+            Value = curVal,
             Set = function(val)
                 local frac = math.clamp((val - min) / (max - min), 0, 1)
                 curVal = val
+                sliderObj.Value = val
                 Fill.Size = UDim2.new(frac, 0, 1, 0)
                 ValBadge.Text = tostring(curVal) .. (unit ~= "" and (" " .. unit) or "")
                 task.spawn(cb, curVal)
             end,
+            SetValue = function(selfOrVal, maybeVal)
+                local v = (maybeVal ~= nil and maybeVal) or selfOrVal
+                sliderObj.Set(v)
+            end,
             Frame = SFrame
         }
+
+        if self.Window.Options then self.Window.Options[id] = sliderObj end
+        if _G.Options then _G.Options[id] = sliderObj end
+        if getgenv then getgenv().Options[id] = sliderObj end
+        return sliderObj
     end
 
-    -- 4. AddDropdown (Clean popup selector)
-    function BoxObj:AddDropdown(ctrlConfig)
-        ctrlConfig = ctrlConfig or {}
-        local cTitle = ctrlConfig.Title or "Dropdown"
-        local values = ctrlConfig.Values or {}
+    -- 4. AddDropdown (Clean popup selector - Dual Format)
+    function BoxObj:AddDropdown(idOrConfig, optionalConfig)
+        local id, ctrlConfig
+        if type(idOrConfig) == "string" then
+            id = idOrConfig
+            ctrlConfig = optionalConfig or {}
+        else
+            ctrlConfig = idOrConfig or {}
+            id = ctrlConfig.Id or ctrlConfig.Title or ctrlConfig.Text or "Dropdown"
+        end
+
+        local cTitle = ctrlConfig.Title or ctrlConfig.Text or tostring(id)
+        local values = ctrlConfig.Values or ctrlConfig.Items or {}
         local curSel = ctrlConfig.Default or values[1] or "Select..."
-        local cb = ctrlConfig.Callback or function() end
+        local cb = ctrlConfig.Callback or ctrlConfig.Func or function() end
 
         local DFrame = Instance.new("Frame")
         DFrame.Size = UDim2.new(1, 0, 0, 48)
@@ -1583,7 +1670,6 @@ function Window:CreateGroupbox(parentFrame, config)
         Chevron.ImageColor3 = VRSLib.Theme.TextMuted
         Chevron.Parent = MainBtn
 
-        -- Options Drop Frame
         local DropList = Instance.new("Frame")
         DropList.Size = UDim2.new(1, 0, 0, 0)
         DropList.Position = UDim2.new(0, 0, 1, 4)
@@ -1616,6 +1702,7 @@ function Window:CreateGroupbox(parentFrame, config)
             TweenService:Create(Chevron, TweenInfo.new(0.15), { Rotation = isOpen and 180 or 0 }):Play()
         end
 
+        local dropObj
         for i, val in ipairs(values) do
             local OptBtn = Instance.new("TextButton")
             OptBtn.Size = UDim2.new(1, 0, 0, 24)
@@ -1637,6 +1724,7 @@ function Window:CreateGroupbox(parentFrame, config)
             end)
             OptBtn.MouseButton1Click:Connect(function()
                 curSel = val
+                if dropObj then dropObj.Value = val end
                 SelText.Text = tostring(val)
                 ToggleDrop(false)
                 task.spawn(cb, val)
@@ -1646,14 +1734,25 @@ function Window:CreateGroupbox(parentFrame, config)
         DropList.Size = UDim2.new(1, 0, 0, #values * 26 + 4)
         MainBtn.MouseButton1Click:Connect(function() ToggleDrop() end)
 
-        return {
+        dropObj = {
+            Value = curSel,
             Set = function(val)
                 curSel = val
+                dropObj.Value = val
                 SelText.Text = tostring(val)
                 task.spawn(cb, val)
             end,
+            SetValue = function(selfOrVal, maybeVal)
+                local v = (maybeVal ~= nil and maybeVal) or selfOrVal
+                dropObj.Set(v)
+            end,
             Frame = DFrame
         }
+
+        if self.Window.Options then self.Window.Options[id] = dropObj end
+        if _G.Options then _G.Options[id] = dropObj end
+        if getgenv then getgenv().Options[id] = dropObj end
+        return dropObj
     end
 
     -- 5. AddStatus (Glowing status row)
@@ -1715,11 +1814,10 @@ function Window:CreateGroupbox(parentFrame, config)
         }
     end
 
-    -- 6. AddLabel (Text line)
-    function BoxObj:AddLabel(ctrlConfig)
-        ctrlConfig = (type(ctrlConfig) == "string" and { Text = ctrlConfig }) or (ctrlConfig or {})
-        local cText = ctrlConfig.Text or "Label"
-        local cColor = ctrlConfig.Color or VRSLib.Theme.TextMuted
+    -- 6. AddLabel (Text line - Supports Chained AddKeyPicker)
+    function BoxObj:AddLabel(ctrlConfig, optionalColor)
+        local cText = (type(ctrlConfig) == "string" and ctrlConfig) or (ctrlConfig and (ctrlConfig.Text or ctrlConfig.Title)) or "Label"
+        local cColor = (type(ctrlConfig) == "table" and ctrlConfig.Color) or (typeof(optionalColor) == "Color3" and optionalColor) or VRSLib.Theme.TextMuted
 
         local Lbl = Instance.new("TextLabel")
         Lbl.Size = UDim2.new(1, 0, 0, 18)
@@ -1733,13 +1831,68 @@ function Window:CreateGroupbox(parentFrame, config)
         Lbl.Parent = Content
         ProtectLocalization(Lbl)
 
-        return {
-            Set = function(t) Lbl.Text = t end,
+        local labelObj
+        labelObj = {
+            Set = function(t) Lbl.Text = tostring(t) end,
+            SetText = function(selfOrText, maybeText)
+                local t = (maybeText ~= nil and maybeText) or selfOrText
+                Lbl.Text = tostring(t)
+            end,
+            AddKeyPicker = function(selfOrId, idOrCfg, optionalCfg)
+                local id = (type(selfOrId) == "string" and selfOrId) or (type(idOrCfg) == "string" and idOrCfg) or "Keybind"
+                local cfg = (type(idOrCfg) == "table" and idOrCfg) or optionalCfg or {}
+                local keyName = cfg.Default or "RightControl"
+                local keyObj = {
+                    Value = keyName,
+                    SetValue = function(self, v)
+                        if type(v) == "table" then v = v[1] end
+                        self.Value = tostring(v)
+                    end
+                }
+                if self.Window and self.Window.Options then self.Window.Options[id] = keyObj end
+                if _G.Options then _G.Options[id] = keyObj end
+                if getgenv then getgenv().Options[id] = keyObj end
+                return keyObj
+            end,
             Frame = Lbl
         }
+        return labelObj
     end
 
-    -- 7. AddQueueList (Clean list of steps/items)
+    -- 7. AddKeyPicker
+    function BoxObj:AddKeyPicker(idOrConfig, optionalConfig)
+        local id = (type(idOrConfig) == "string" and idOrConfig) or (idOrConfig and idOrConfig.Id) or "Keybind"
+        local cfg = (type(idOrConfig) == "table" and idOrConfig) or optionalConfig or {}
+        local keyName = cfg.Default or "RightControl"
+        local keyObj = {
+            Value = keyName,
+            SetValue = function(self, v)
+                if type(v) == "table" then v = v[1] end
+                self.Value = tostring(v)
+            end
+        }
+        if self.Window.Options then self.Window.Options[id] = keyObj end
+        if _G.Options then _G.Options[id] = keyObj end
+        if getgenv then getgenv().Options[id] = keyObj end
+        return keyObj
+    end
+
+    -- 8. AddColorPicker
+    function BoxObj:AddColorPicker(idOrConfig, optionalConfig)
+        local id = (type(idOrConfig) == "string" and idOrConfig) or (idOrConfig and idOrConfig.Id) or "ColorPicker"
+        local cfg = (type(idOrConfig) == "table" and idOrConfig) or optionalConfig or {}
+        local defColor = cfg.Default or Color3.fromRGB(255, 64, 140)
+        local colorObj = {
+            Value = defColor,
+            SetValue = function(self, c) self.Value = c end
+        }
+        if self.Window.Options then self.Window.Options[id] = colorObj end
+        if _G.Options then _G.Options[id] = colorObj end
+        if getgenv then getgenv().Options[id] = colorObj end
+        return colorObj
+    end
+
+    -- 9. AddQueueList (Clean list of steps/items)
     function BoxObj:AddQueueList(ctrlConfig)
         ctrlConfig = ctrlConfig or {}
         local items = ctrlConfig.Items or {}
@@ -1796,9 +1949,7 @@ function Window:CreateGroupbox(parentFrame, config)
         end
 
         return QFrame
-    end
-
-    return BoxObj
+    end    return BoxObj
 end
 
 -- Method on TabObj to create dual columns
@@ -1849,7 +2000,9 @@ function Window:SetupDualColumns(tabObj)
 
     local function MakeColHelper(colFrame)
         local h = { Frame = colFrame, Window = self, Tab = tabObj }
-        function h:AddGroupbox(cfg) return self.Window:CreateGroupbox(colFrame, cfg) end
+        function h:AddGroupbox(cfgOrTitle, optionalIcon)
+            return self.Window:CreateGroupbox(colFrame, cfgOrTitle, optionalIcon)
+        end
         return h
     end
 
@@ -2126,13 +2279,13 @@ function Window:CreateSidebarTab(config)
     function TabObj:AddColumns()
         return self.Window:SetupDualColumns(self)
     end
-    function TabObj:AddLeftGroupbox(cfg)
+    function TabObj:AddLeftGroupbox(titleOrCfg, optionalIcon)
         if not self.LeftCol then self:AddColumns() end
-        return self.LeftCol:AddGroupbox(cfg)
+        return self.LeftCol:AddGroupbox(titleOrCfg, optionalIcon)
     end
-    function TabObj:AddRightGroupbox(cfg)
+    function TabObj:AddRightGroupbox(titleOrCfg, optionalIcon)
         if not self.RightCol then self:AddColumns() end
-        return self.RightCol:AddGroupbox(cfg)
+        return self.RightCol:AddGroupbox(titleOrCfg, optionalIcon)
     end
 
     TabBtn.MouseEnter:Connect(function()
@@ -2325,14 +2478,14 @@ function Window:CreateSidebarTab(config)
             return self.Window:SetupDualColumns(self)
         end
 
-        function SubTabObj:AddLeftGroupbox(cfg)
+        function SubTabObj:AddLeftGroupbox(titleOrCfg, optionalIcon)
             if not self.LeftCol then self:AddColumns() end
-            return self.LeftCol:AddGroupbox(cfg)
+            return self.LeftCol:AddGroupbox(titleOrCfg, optionalIcon)
         end
 
-        function SubTabObj:AddRightGroupbox(cfg)
+        function SubTabObj:AddRightGroupbox(titleOrCfg, optionalIcon)
             if not self.RightCol then self:AddColumns() end
-            return self.RightCol:AddGroupbox(cfg)
+            return self.RightCol:AddGroupbox(titleOrCfg, optionalIcon)
         end
 
         SubBtn.MouseEnter:Connect(function()
@@ -2370,12 +2523,22 @@ function Window:CreateSidebarTab(config)
     return TabObj
 end
 
-function Window:AddTab(config)
+function Window:AddTab(tabNameOrConfig, optionalIcon, optionalCategory)
+    local config
+    if type(tabNameOrConfig) == "string" then
+        config = {
+            Name = tabNameOrConfig,
+            Icon = optionalIcon or "folder",
+            Category = optionalCategory or "UNIVERSAL"
+        }
+    else
+        config = tabNameOrConfig or {}
+    end
     return self:CreateSidebarTab(config)
 end
 
-function Window:AddTabGroup(config)
-    return self:CreateSidebarTab(config)
+function Window:AddTabGroup(tabNameOrConfig, optionalIcon, optionalCategory)
+    return self:AddTab(tabNameOrConfig, optionalIcon, optionalCategory)
 end
 
 function Window:SelectTab(tabObj)
