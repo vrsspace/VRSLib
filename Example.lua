@@ -1,0 +1,540 @@
+--[[
+    ==============================================================================
+    🌸 VRS ARTELIER — MODULAR CARD SHOWCASE (47 MODULES)
+    ==============================================================================
+    - 100% Signature VRS Neon Magenta Pink (#FF408C) & Cyber-Dark (#0D0E13)
+    - Wings Logo di Kiri Atas & Floating Widget Mobile
+    - Window Bebas Di-Tarik/Di-Besar-Lebarin (Corner Grip ⤡ & Border Draggers)
+    - Dynamic Columns Reflow (3 hingga 6 Kolom otomatis!)
+    - Tombol [X] Berfungsi Menutup Hub & Unload Script Bersih
+    - Lengkap 47 Modules (Visuals 16, Movement 13, World 6, System 12)
+    ==============================================================================
+]]
+
+-- Anti-multi execution
+if _G.VRS_SCRIPT_UNLOAD then pcall(_G.VRS_SCRIPT_UNLOAD) end
+
+-- 1. Load UI Engine langsung dari GitHub Repository (Anti-Cache) atau Lokal
+local VRSLib
+local function FetchLibrary()
+    -- Cek lokal workspace executor (untuk testing cepat tanpa upload GitHub)
+    if isfile and isfile("VRSLib.lua") then
+        local ok, lib = pcall(function() return loadstring(readfile("VRSLib.lua"))() end)
+        if ok and lib then return lib end
+    end
+
+    -- Tarik dari Raw GitHub dengan Anti-Cache (?v=timestamp agar tidak kena cache Roblox)
+    local RAW_URL = "https://raw.githubusercontent.com/vrsspace/VRSLib/main/VRSLib.lua?v=" .. tick()
+    local ok, lib = pcall(function()
+        return loadstring(game:HttpGet(RAW_URL))()
+    end)
+    if ok and lib then return lib end
+
+    -- Fallback disk lokal
+    local localDisk = "d:\\Data Project's\\Roblox Project\\SC\\[ UI LIB DATA ]\\VRSLib.lua"
+    local s, res = pcall(function()
+        if readfile then return loadstring(readfile(localDisk))() end
+    end)
+    if s and res then return res end
+
+    error("[VRS Loader] Gagal memuat library dari GitHub maupun lokal!")
+end
+
+VRSLib = FetchLibrary()
+
+-- 2. Buat Window VRS Artelier (Aksen Neon Magenta Pink & Wings Logo)
+local Window = VRSLib:CreateWindow({
+    Title    = "VRS Artelier",
+    SubTitle = "v1.0.0",
+    Size     = UDim2.fromOffset(1020, 620), -- Ukuran lega (otomatis 5-6 kolom!)
+    Accent   = Color3.fromRGB(255, 64, 140), -- VRS Signature Neon Magenta Pink (#FF408C)
+    Keybind  = Enum.KeyCode.RightControl
+})
+
+-- Register Unload Handler (Dijalankan saat tombol [X] di pojok kanan atas ditekan)
+Window.OnUnload = function()
+    _G.VRS_ACTIVE = false
+    print("[VRS Artelier] Script unloaded & all listeners disconnected cleanly.")
+end
+_G.VRS_SCRIPT_UNLOAD = Window.OnUnload
+_G.VRS_ACTIVE = true
+
+-- 3. Kategori Universal & Tab Navigasi
+Window:AddCategory("UNIVERSAL", 10)
+
+local TabVisuals  = Window:AddTab({ Name = "Visuals",  Category = "UNIVERSAL", Icon = "Visuals",  LayoutOrder = 11 })
+local TabMovement = Window:AddTab({ Name = "Movement", Category = "UNIVERSAL", Icon = "Movement", LayoutOrder = 12 })
+local TabWorld    = Window:AddTab({ Name = "World",    Category = "UNIVERSAL", Icon = "World",    LayoutOrder = 13 })
+local TabSystem   = Window:AddTab({ Name = "System",   Category = "UNIVERSAL", Icon = "System",   LayoutOrder = 14 })
+
+-- ==============================================================================
+-- 4. MODULES (TOTAL 47 MODULES LENGKAP PERSIS SEPERTI 404HUB)
+-- ==============================================================================
+
+-- ------------------------------------------------------------------------------
+-- [ VISUALS — 16 MODULES ]
+-- ------------------------------------------------------------------------------
+Window:AddModule(TabVisuals, {
+    Title       = "ESP",
+    Description = "Player ESP editor — 2D/3D boxes, chams, avatar, name lines, health...",
+    Icon        = "lucide-eye",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Visuals] ESP:", v) end
+})
+
+local fov = Window:AddModule(TabVisuals, {
+    Title       = "FOV",
+    Description = "Override the camera field of view",
+    Icon        = "lucide-camera",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Visuals] FOV:", v) end
+})
+fov:AddSlider({
+    Name     = "FOV Angle",
+    Min      = 70,
+    Max      = 120,
+    Default  = 90,
+    Callback = function(v) workspace.CurrentCamera.FieldOfView = v end
+})
+
+Window:AddModule(TabVisuals, {
+    Title       = "Atmosphere",
+    Description = "Volumetric air + horizon haze",
+    Icon        = "Cloud",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Visuals] Atmosphere:", v) end
+})
+
+Window:AddModule(TabVisuals, {
+    Title       = "Bloom",
+    Description = "Soft glow over bright areas",
+    Icon        = "Sun",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Visuals] Bloom:", v) end
+})
+
+Window:AddModule(TabVisuals, {
+    Title       = "Blur",
+    Description = "Soft full-screen blur",
+    Icon        = "lucide-eye-off",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Visuals] Blur:", v) end
+})
+
+Window:AddModule(TabVisuals, {
+    Title       = "Color correction",
+    Description = "Saturation, contrast and tint over the scene",
+    Icon        = "lucide-sliders",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Visuals] Color correction:", v) end
+})
+
+Window:AddModule(TabVisuals, {
+    Title       = "Custom Fog",
+    Description = "Classic distance fog",
+    Icon        = "Cloud",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Visuals] Custom Fog:", v) end
+})
+
+Window:AddModule(TabVisuals, {
+    Title       = "Custom Sky",
+    Description = "Stars, sun/moon and custom skybox",
+    Icon        = "Cloud",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Visuals] Custom Sky:", v) end
+})
+
+local cTime = Window:AddModule(TabVisuals, {
+    Title       = "Custom Time",
+    Description = "Pin the time of day",
+    Icon        = "Clock",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Visuals] Custom Time:", v) end
+})
+cTime:AddSlider({
+    Name     = "Hour",
+    Min      = 0,
+    Max      = 24,
+    Default  = 14,
+    Callback = function(v) game:GetService("Lighting").ClockTime = v end
+})
+
+Window:AddModule(TabVisuals, {
+    Title       = "Freecam",
+    Description = "Detach the camera and fly freely — WASD + Q/E, Shift to speed",
+    Icon        = "lucide-camera",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Visuals] Freecam:", v) end
+})
+
+Window:AddModule(TabVisuals, {
+    Title       = "Fullbright",
+    Description = "Flat full-scene lighting, no shadows",
+    Icon        = "Sun",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Visuals] Fullbright:", v) end
+})
+
+local lightMod = Window:AddModule(TabVisuals, {
+    Title       = "Lighting...",
+    Description = "Brightness, shadows, fog and ambient",
+    Icon        = "Sun",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Visuals] Lighting:", v) end
+})
+lightMod:AddSlider({ Name = "Brightness", Min = 1, Max = 5, Default = 2 })
+
+Window:AddModule(TabVisuals, {
+    Title       = "NoRender",
+    Description = "Stop drawing the 3D world (UI stays visible)",
+    Icon        = "lucide-eye-off",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Visuals] NoRender:", v) end
+})
+
+Window:AddModule(TabVisuals, {
+    Title       = "Perspective",
+    Description = "Force first or third person camera view",
+    Icon        = "lucide-view",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Visuals] Perspective:", v) end
+})
+
+Window:AddModule(TabVisuals, {
+    Title       = "Tracers",
+    Description = "Draw a line from your screen to every player",
+    Icon        = "lucide-crosshair",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Visuals] Tracers:", v) end
+})
+
+Window:AddModule(TabVisuals, {
+    Title       = "X-Ray",
+    Description = "See through walls and world geometry",
+    Icon        = "lucide-eye",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Visuals] X-Ray:", v) end
+})
+
+-- ------------------------------------------------------------------------------
+-- [ MOVEMENT — 13 MODULES ]
+-- ------------------------------------------------------------------------------
+local fly = Window:AddModule(TabMovement, {
+    Title       = "Fly",
+    Description = "Vape-style flight — WASD + Up/Down",
+    Icon        = "lucide-feather",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Movement] Fly:", v) end
+})
+fly:AddSlider({ Name = "Fly Speed", Min = 10, Max = 250, Default = 60 })
+
+Window:AddModule(TabMovement, {
+    Title       = "Fling",
+    Description = "Throw other players across the map — spin them or walk them down",
+    Icon        = "lucide-move",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Movement] Fling:", v) end
+})
+
+Window:AddModule(TabMovement, {
+    Title       = "Ctrl Lock",
+    Description = "Toggle shift-lock with your own key — bind one below",
+    Icon        = "Key",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Movement] Ctrl Lock:", v) end
+})
+
+Window:AddModule(TabMovement, {
+    Title       = "Alignment Keys",
+    Description = "Nudge the camera yaw one step at a time",
+    Icon        = "Key",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Movement] Alignment Keys:", v) end
+})
+
+Window:AddModule(TabMovement, {
+    Title       = "Jesus",
+    Description = "Walk on terrain water surfaces seamlessly",
+    Icon        = "lucide-navigation",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Movement] Jesus:", v) end
+})
+
+local jmp = Window:AddModule(TabMovement, {
+    Title       = "Jump",
+    Description = "Jump higher, infinitely, or automatically — pick a bypass",
+    Icon        = "lucide-arrow-up",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Movement] Jump:", v) end
+})
+jmp:AddSlider({ Name = "JumpPower", Min = 50, Max = 300, Default = 100 })
+
+Window:AddModule(TabMovement, {
+    Title       = "NoClip",
+    Description = "Walk through walls without obstruction",
+    Icon        = "lucide-shield",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Movement] NoClip:", v) end
+})
+
+Window:AddModule(TabMovement, {
+    Title       = "Spider",
+    Description = "Climb walls by holding into them",
+    Icon        = "lucide-bug",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Movement] Spider:", v) end
+})
+
+Window:AddModule(TabMovement, {
+    Title       = "Spin",
+    Description = "Spin your character in place rapidly",
+    Icon        = "lucide-refresh-cw",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Movement] Spin:", v) end
+})
+
+local ws = Window:AddModule(TabMovement, {
+    Title       = "WalkSpeed",
+    Description = "Vape-style speed — configurable bypasses",
+    Icon        = "lucide-gauge",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Movement] WalkSpeed:", v) end
+})
+ws:AddSlider({ Name = "Speed", Min = 16, Max = 250, Default = 50 })
+
+Window:AddModule(TabMovement, {
+    Title       = "Bunny Hop",
+    Description = "Preserve sprint momentum upon landing",
+    Icon        = "lucide-move-diagonal",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Movement] Bunny Hop:", v) end
+})
+
+Window:AddModule(TabMovement, {
+    Title       = "Air Walk",
+    Description = "Creates a solid invisible platform under your feet",
+    Icon        = "lucide-wind",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Movement] Air Walk:", v) end
+})
+
+Window:AddModule(TabMovement, {
+    Title       = "No Slowdown",
+    Description = "Ignore water, spiderweb, and item drag slows",
+    Icon        = "lucide-gauge",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Movement] No Slowdown:", v) end
+})
+
+-- ------------------------------------------------------------------------------
+-- [ WORLD — 6 MODULES ]
+-- ------------------------------------------------------------------------------
+Window:AddModule(TabWorld, {
+    Title       = "Click Detectors",
+    Description = "Click from any distance, and fire them all at once",
+    Icon        = "lucide-mouse-pointer-click",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[World] Click Detectors:", v) end
+})
+
+Window:AddModule(TabWorld, {
+    Title       = "Fire Touch...",
+    Description = "Fire nearby parts' touch interests",
+    Icon        = "lucide-flame",
+    Type        = "Action",
+    Callback    = function()
+        VRSLib:Notify({ Title = "World", Description = "Fired nearby parts' touch interests!", Duration = 2, Icon = "Play" })
+    end
+})
+
+local hb = Window:AddModule(TabWorld, {
+    Title       = "Hitbox",
+    Description = "Expand other players' hit parts — pick the bones below",
+    Icon        = "lucide-box",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[World] Hitbox:", v) end
+})
+hb:AddSlider({ Name = "Size", Min = 2, Max = 30, Default = 12 })
+
+Window:AddModule(TabWorld, {
+    Title       = "Proximity...",
+    Description = "Instant - no limit prompts, and fire them all at once",
+    Icon        = "lucide-target",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[World] Proximity:", v) end
+})
+
+Window:AddModule(TabWorld, {
+    Title       = "Removals",
+    Description = "Strip ads, terrain, nil instances and set the void height",
+    Icon        = "lucide-trash-2",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[World] Removals:", v) end
+})
+
+local grav = Window:AddModule(TabWorld, {
+    Title       = "Gravity Override",
+    Description = "Override workspace world gravity scale",
+    Icon        = "lucide-globe",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[World] Gravity:", v) end
+})
+grav:AddSlider({ Name = "Gravity", Min = 0, Max = 196, Default = 50, Callback = function(v) workspace.Gravity = v end })
+
+-- ------------------------------------------------------------------------------
+-- [ SYSTEM & SECURITY — 12 MODULES ]
+-- ------------------------------------------------------------------------------
+Window:AddModule(TabSystem, {
+    Title       = "Anti-Kick",
+    Description = "Block client-side kicks",
+    Icon        = "lucide-shield",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[System] Anti-Kick:", v) end
+})
+
+Window:AddModule(TabSystem, {
+    Title       = "Anti-Teleport",
+    Description = "Block client-side teleports",
+    Icon        = "lucide-shield-alert",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[System] Anti-Teleport:", v) end
+})
+
+Window:AddModule(TabSystem, {
+    Title       = "Antifling",
+    Description = "Stop other players from flinging you",
+    Icon        = "lucide-shield-check",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[System] Antifling:", v) end
+})
+
+Window:AddModule(TabSystem, {
+    Title       = "Anti Ragdoll",
+    Description = "Stops knockback from ragdolling you",
+    Icon        = "Player",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[System] Anti Ragdoll:", v) end
+})
+
+Window:AddModule(TabSystem, {
+    Title       = "Anti-AFK",
+    Description = "Stop the game kicking you for being idle",
+    Icon        = "Clock",
+    Type        = "Toggle",
+    Default     = true,
+    Callback    = function(v) print("[System] Anti-AFK:", v) end
+})
+
+Window:AddModule(TabSystem, {
+    Title       = "AntiLag",
+    Description = "Lower quality and strip effects to boost FPS",
+    Icon        = "lucide-gauge",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[System] AntiLag:", v) end
+})
+
+Window:AddModule(TabSystem, {
+    Title       = "Anti Gamepl...",
+    Description = "Remove the gameplay-paused overlay",
+    Icon        = "Play",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[System] Anti Gameplay...", v) end
+})
+
+Window:AddModule(TabSystem, {
+    Title       = "Auto-Rejoin",
+    Description = "Rejoin automatically if you get kicked or disconnected",
+    Icon        = "Refresh",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[System] Auto-Rejoin:", v) end
+})
+
+Window:AddModule(TabSystem, {
+    Title       = "Clear Error",
+    Description = "Dismiss the kick/disconnect error popup",
+    Icon        = "Close",
+    Type        = "Action",
+    Callback    = function()
+        VRSLib:Notify({ Title = "Clear Error", Description = "Dismissed kick / disconnect popup!", Duration = 2.5, Icon = "Close" })
+    end
+})
+
+Window:AddModule(TabSystem, {
+    Title       = "Rejoin",
+    Description = "Rejoin the current server instance immediately",
+    Icon        = "Refresh",
+    Type        = "Action",
+    Callback    = function()
+        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, game:GetService("Players").LocalPlayer)
+    end
+})
+
+Window:AddModule(TabSystem, {
+    Title       = "Server Hop",
+    Description = "Teleport to a random different server",
+    Icon        = "World",
+    Type        = "Action",
+    Callback    = function()
+        VRSLib:Notify({ Title = "Server Hop", Description = "Finding active server...", Duration = 3, Icon = "World" })
+    end
+})
+
+Window:AddModule(TabSystem, {
+    Title       = "Teleport Tool",
+    Description = "Teleport once to the mouse — click, or assign a hotkey",
+    Icon        = "lucide-mouse-pointer",
+    Type        = "Action",
+    Callback    = function()
+        VRSLib:Notify({ Title = "Teleport Tool", Description = "Equipped Click Teleport tool.", Duration = 2.5, Icon = "Play" })
+    end
+})
+
+-- Notifikasi Sukses Load
+VRSLib:Notify({
+    Title       = "VRS Artelier",
+    Description = "Loaded 47 modules successfully!\nToggle with RightControl or floating Wings button.\nPress [X] to unload.",
+    Duration    = 4,
+    Icon        = "Wings"
+})
