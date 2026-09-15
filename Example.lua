@@ -16,7 +16,12 @@ if _G.VRS_SCRIPT_UNLOAD then pcall(_G.VRS_SCRIPT_UNLOAD) end
 
 -- 1. Load UI Engine langsung dari Raw GitHub (Anti-Cache)
 local repo = "https://raw.githubusercontent.com/vrsspace/VRSLib/main/"
-local VRSLib = loadstring(game:HttpGet(repo .. "VRSLib.lua?v=" .. tick()))()
+local rawCode = game:HttpGet(repo .. "VRSLib.lua?v=" .. tick())
+local loadFunc, loadErr = loadstring(rawCode)
+if not loadFunc then
+    error("[VRS Artelier] Compilation error: " .. tostring(loadErr))
+end
+local VRSLib = loadFunc()
 
 -- 2. Buat Window VRS Artelier (Aksen Neon Magenta Pink & Wings Logo)
 local Window = VRSLib:CreateWindow({
