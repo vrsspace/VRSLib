@@ -26,7 +26,7 @@ local RunService       = cloneref(game:GetService("RunService"))
 local LocalPlayer      = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
 local VRSLib = {
-    Version = "1.1.1",
+    Version = "1.1.2",
     Theme = {
         Background      = Color3.fromRGB(13, 14, 19),
         Sidebar         = Color3.fromRGB(16, 17, 24),
@@ -315,7 +315,7 @@ function VRSLib:CreateWindow(config)
     local self = setmetatable({}, Window)
 
     self.Title          = config.Title or "VRS Artelier"
-    self.SubTitle       = config.SubTitle or "v1.1.1 Pro"
+    self.SubTitle       = config.SubTitle or "v1.1.2 Pro"
     self.DefaultSize    = config.Size or UDim2.fromOffset(1020, 620)
     self.MaximizedSize  = UDim2.fromOffset(1240, 740)
     self.Keybind        = config.Keybind or Enum.KeyCode.RightControl
@@ -437,7 +437,7 @@ function VRSLib:CreateWindow(config)
     SubTitleLabel.AutomaticSize = Enum.AutomaticSize.X
     SubTitleLabel.Position = UDim2.new(1, 6, 0, 0)
     SubTitleLabel.BackgroundTransparency = 1
-    SubTitleLabel.Text = config.SubTitle or (config.Title ~= "VRS Artelier" and config.Title) or "v1.1.1 Pro"
+    SubTitleLabel.Text = config.SubTitle or (config.Title ~= "VRS Artelier" and config.Title) or "v1.1.2 Pro"
     SubTitleLabel.Font = Enum.Font.Gotham
     SubTitleLabel.TextSize = 11
     SubTitleLabel.TextColor3 = VRSLib.Theme.TextMuted
@@ -447,11 +447,12 @@ function VRSLib:CreateWindow(config)
     ProtectLocalization(TitleLabel)
     ProtectLocalization(SubTitleLabel)
 
-    -- Live Search Input Box: [ 🔍 Search modules... ]
+    -- Live Search Input Box: [ 🔍 Search modules... ] (Pusat / Centered)
     local SearchFrame = Instance.new("Frame")
     SearchFrame.Name = "SearchBox"
-    SearchFrame.Size = UDim2.new(0, 240, 0, 28)
-    SearchFrame.Position = UDim2.new(0, 225, 0.5, -14)
+    SearchFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    SearchFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    SearchFrame.Size = UDim2.new(0, 260, 0, 28)
     SearchFrame.BackgroundColor3 = VRSLib.Theme.InputBackground
     SearchFrame.BorderSizePixel = 0
     SearchFrame.Parent = Topbar
@@ -824,14 +825,15 @@ function VRSLib:CreateWindow(config)
         self.ViewButtons[item.Id] = { Button = btn, Icon = img }
     end
 
-    -- Horizontal Sub-Navbar (Shown when active tab has subtabs, like Obsidian)
+    -- Horizontal Sub-Navbar (Centered Layout, Obsidian-Grade Architecture)
     local SubNavBar = Instance.new("Frame")
     SubNavBar.Name = "SubNavBar"
-    SubNavBar.Size = UDim2.new(1, 0, 0, 32)
+    SubNavBar.Size = UDim2.new(1, 0, 0, 34)
     SubNavBar.Position = UDim2.new(0, 0, 0, 38)
     SubNavBar.BackgroundColor3 = VRSLib.Theme.Sidebar
     SubNavBar.BackgroundTransparency = 0.5
     SubNavBar.BorderSizePixel = 0
+    SubNavBar.ClipsDescendants = true
     SubNavBar.Visible = false
     SubNavBar.Parent = ContentArea
     self.SubNavBar = SubNavBar
@@ -843,26 +845,24 @@ function VRSLib:CreateWindow(config)
     SubNavBorder.BorderSizePixel = 0
     SubNavBorder.Parent = SubNavBar
 
-    local SubNavScroll = Instance.new("ScrollingFrame")
-    SubNavScroll.Size = UDim2.new(1, 0, 1, 0)
-    SubNavScroll.BackgroundTransparency = 1
-    SubNavScroll.BorderSizePixel = 0
-    SubNavScroll.ScrollBarThickness = 0
-    SubNavScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-    SubNavScroll.AutomaticCanvasSize = Enum.AutomaticSize.X
-    SubNavScroll.Parent = SubNavBar
-    self.SubNavScroll = SubNavScroll
+    -- Centered SubNav Items Container
+    local SubNavContainer = Instance.new("Frame")
+    SubNavContainer.Name = "SubNavContainer"
+    SubNavContainer.Size = UDim2.new(0, 0, 1, 0)
+    SubNavContainer.AutomaticSize = Enum.AutomaticSize.X
+    SubNavContainer.AnchorPoint = Vector2.new(0.5, 0.5)
+    SubNavContainer.Position = UDim2.new(0.5, 0, 0.5, 0)
+    SubNavContainer.BackgroundTransparency = 1
+    SubNavContainer.Parent = SubNavBar
+    self.SubNavContainer = SubNavContainer
+    self.SubNavScroll = SubNavContainer -- alias for backwards compatibility
 
     local SubNavLayout = Instance.new("UIListLayout")
     SubNavLayout.FillDirection = Enum.FillDirection.Horizontal
+    SubNavLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
     SubNavLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-    SubNavLayout.Padding = UDim.new(0, 8)
-    SubNavLayout.Parent = SubNavScroll
-
-    local SubNavPadding = Instance.new("UIPadding")
-    SubNavPadding.PaddingLeft = UDim.new(0, 16)
-    SubNavPadding.PaddingRight = UDim.new(0, 16)
-    SubNavPadding.Parent = SubNavScroll
+    SubNavLayout.Padding = UDim.new(0, 14)
+    SubNavLayout.Parent = SubNavContainer
 
     -- Scrolling Container for Content (Cards & Columns)
     local CardsScroll = Instance.new("ScrollingFrame")
@@ -2342,6 +2342,7 @@ function Window:SelectTab(tabObj)
             SBtn.AutomaticSize = Enum.AutomaticSize.X
             SBtn.BackgroundTransparency = 1
             SBtn.Text = ""
+            SBtn.AutoButtonColor = false
             SBtn.Parent = self.SubNavScroll
 
             local SBox = Instance.new("Frame")
@@ -2349,6 +2350,11 @@ function Window:SelectTab(tabObj)
             SBox.AutomaticSize = Enum.AutomaticSize.X
             SBox.BackgroundTransparency = 1
             SBox.Parent = SBtn
+
+            local SPadding = Instance.new("UIPadding")
+            SPadding.PaddingLeft = UDim.new(0, 8)
+            SPadding.PaddingRight = UDim.new(0, 8)
+            SPadding.Parent = SBox
 
             local SLayout = Instance.new("UIListLayout")
             SLayout.FillDirection = Enum.FillDirection.Horizontal
@@ -2383,6 +2389,19 @@ function Window:SelectTab(tabObj)
                 ULine.BorderSizePixel = 0
                 ULine.Parent = SBtn
             end
+
+            SBtn.MouseEnter:Connect(function()
+                if not (sub == self.ActiveTab) then
+                    TweenService:Create(SLbl, TweenInfo.new(0.15), { TextColor3 = VRSLib.Theme.TextPrimary }):Play()
+                    TweenService:Create(SIcon, TweenInfo.new(0.15), { ImageColor3 = Color3.fromRGB(220, 220, 230) }):Play()
+                end
+            end)
+            SBtn.MouseLeave:Connect(function()
+                if not (sub == self.ActiveTab) then
+                    TweenService:Create(SLbl, TweenInfo.new(0.15), { TextColor3 = VRSLib.Theme.TextMuted }):Play()
+                    TweenService:Create(SIcon, TweenInfo.new(0.15), { ImageColor3 = VRSLib.Theme.TextMuted }):Play()
+                end
+            end)
 
             SBtn.MouseButton1Click:Connect(function()
                 self:SelectTab(sub)
