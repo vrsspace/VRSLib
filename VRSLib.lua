@@ -26,7 +26,7 @@ local RunService       = cloneref(game:GetService("RunService"))
 local LocalPlayer      = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
 local VRSLib = {
-    Version = "1.0.4",
+    Version = "1.0.5",
     Theme = {
         Background      = Color3.fromRGB(13, 14, 19),
         Sidebar         = Color3.fromRGB(16, 17, 24),
@@ -55,7 +55,7 @@ local VRSLib = {
     },
     -- Injected Lucide Icon Engine
     Icons = (function()
-        local GITHUB_REPO = "https://raw.githubusercontent.com/vrsspace/VRSLib/v1.0.4/"
+        local GITHUB_REPO = "https://raw.githubusercontent.com/vrsspace/VRSLib/v1.0.5/"
         local function TryImport(file)
             if isfile and isfile(file) then
                 local ok, res = pcall(function() return loadstring(readfile(file))() end)
@@ -315,7 +315,7 @@ function VRSLib:CreateWindow(config)
     local self = setmetatable({}, Window)
 
     self.Title          = config.Title or "VRS Artelier"
-    self.SubTitle       = config.SubTitle or "v1.0.4 Pro"
+    self.SubTitle       = config.SubTitle or "v1.0.5 Pro"
     self.DefaultSize    = config.Size or UDim2.fromOffset(1020, 620)
     self.MaximizedSize  = UDim2.fromOffset(1240, 740)
     self.Keybind        = config.Keybind or Enum.KeyCode.RightControl
@@ -436,7 +436,7 @@ function VRSLib:CreateWindow(config)
     SubTitleLabel.AutomaticSize = Enum.AutomaticSize.X
     SubTitleLabel.Position = UDim2.new(1, 6, 0, 0)
     SubTitleLabel.BackgroundTransparency = 1
-    SubTitleLabel.Text = config.SubTitle or (config.Title ~= "VRS Artelier" and config.Title) or "v1.0.4 Pro"
+    SubTitleLabel.Text = config.SubTitle or (config.Title ~= "VRS Artelier" and config.Title) or "v1.0.5 Pro"
     SubTitleLabel.Font = Enum.Font.Gotham
     SubTitleLabel.TextSize = 11
     SubTitleLabel.TextColor3 = VRSLib.Theme.TextMuted
@@ -551,6 +551,9 @@ function VRSLib:CreateWindow(config)
     local Sidebar = Instance.new("Frame")
     Sidebar.Name = "Sidebar"
     Sidebar.Size = UDim2.new(0, 185, 1, 0)
+    Sidebar.ClipsDescendants = true
+    self.Sidebar = Sidebar
+    self.SidebarCollapsed = false
     Sidebar.BackgroundColor3 = VRSLib.Theme.Sidebar
     Sidebar.BorderSizePixel = 0
     Sidebar.Parent = Body
@@ -658,7 +661,7 @@ function VRSLib:CreateWindow(config)
     SettingsBtn.MouseButton1Click:Connect(function()
         VRSLib:Notify({
             Title = "VRS Artelier",
-            Description = "Framework: VRS Artelier v1.0.4 Pro\nToggle Key: RightControl",
+            Description = "Framework: VRS Artelier v1.0.5 Pro\nToggle Key: RightControl",
             Duration = 3,
             Icon = VRSLib.Icons.Wings
         })
@@ -673,16 +676,51 @@ function VRSLib:CreateWindow(config)
     ContentArea.Position = UDim2.new(0, 186, 0, 0)
     ContentArea.BackgroundTransparency = 1
     ContentArea.Parent = Body
+    self.ContentArea = ContentArea
 
-    -- Header / Sub-navbar inside Content Area (Breadcrumb + View Switchers)
+    -- Header / Sub-navbar inside Content Area (Sidebar Toggle + Breadcrumb + View Switchers)
     local ContentHeader = Instance.new("Frame")
     ContentHeader.Size = UDim2.new(1, 0, 0, 38)
     ContentHeader.BackgroundTransparency = 1
     ContentHeader.Parent = ContentArea
 
+    -- Sidebar Minimize / Expand Button [ ☰ ]
+    local SidebarToggleBtn = Instance.new("ImageButton")
+    SidebarToggleBtn.Name = "SidebarToggleBtn"
+    SidebarToggleBtn.Size = UDim2.fromOffset(22, 22)
+    SidebarToggleBtn.Position = UDim2.new(0, 12, 0.5, -11)
+    SidebarToggleBtn.BackgroundColor3 = VRSLib.Theme.Card
+    SidebarToggleBtn.BackgroundTransparency = 1
+    SidebarToggleBtn.BorderSizePixel = 0
+    SidebarToggleBtn.AutoButtonColor = false
+    SidebarToggleBtn.Image = VRSLib.Icons.Get("sidebar")
+    SidebarToggleBtn.ImageColor3 = VRSLib.Theme.TextMuted
+    SidebarToggleBtn.Parent = ContentHeader
+
+    local STBCorner = Instance.new("UICorner")
+    STBCorner.CornerRadius = UDim.new(0, 5)
+    STBCorner.Parent = SidebarToggleBtn
+
+    SidebarToggleBtn.MouseEnter:Connect(function()
+        TweenService:Create(SidebarToggleBtn, TweenInfo.new(0.15), {
+            BackgroundTransparency = 0.5,
+            ImageColor3 = VRSLib.Theme.Accent
+        }):Play()
+    end)
+    SidebarToggleBtn.MouseLeave:Connect(function()
+        TweenService:Create(SidebarToggleBtn, TweenInfo.new(0.15), {
+            BackgroundTransparency = 1,
+            ImageColor3 = (self.SidebarCollapsed and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted)
+        }):Play()
+    end)
+    SidebarToggleBtn.MouseButton1Click:Connect(function()
+        self:ToggleSidebar()
+    end)
+    self.SidebarToggleBtn = SidebarToggleBtn
+
     local BreadcrumbBox = Instance.new("Frame")
-    BreadcrumbBox.Size = UDim2.new(1, -130, 1, 0)
-    BreadcrumbBox.Position = UDim2.new(0, 16, 0, 0)
+    BreadcrumbBox.Size = UDim2.new(1, -150, 1, 0)
+    BreadcrumbBox.Position = UDim2.new(0, 42, 0, 0)
     BreadcrumbBox.BackgroundTransparency = 1
     BreadcrumbBox.Parent = ContentHeader
 
@@ -972,6 +1010,40 @@ end
 -- ==============================================================================
 -- DYNAMIC CARD GRID REFLOW (3 TO 6 COLUMNS LIKE 404HUB)
 -- ==============================================================================
+-- ==============================================================================
+-- SIDEBAR MINIMIZE / EXPAND SYSTEM
+-- ==============================================================================
+function Window:ToggleSidebar(collapsed)
+    if collapsed == nil then
+        collapsed = not self.SidebarCollapsed
+    end
+    self.SidebarCollapsed = collapsed
+
+    local targetSidebarW = collapsed and 0 or 185
+    local targetContentX = collapsed and 0 or 186
+    local targetContentW = collapsed and 0 or -186
+
+    TweenService:Create(self.Sidebar, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        Size = UDim2.new(0, targetSidebarW, 1, 0)
+    }):Play()
+
+    TweenService:Create(self.ContentArea, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        Position = UDim2.new(0, targetContentX, 0, 0),
+        Size = UDim2.new(1, targetContentW, 1, 0)
+    }):Play()
+
+    if self.SidebarToggleBtn then
+        TweenService:Create(self.SidebarToggleBtn, TweenInfo.new(0.2), {
+            ImageColor3 = collapsed and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted,
+            Rotation = collapsed and 180 or 0
+        }):Play()
+    end
+
+    task.delay(0.26, function()
+        self:ReflowGrid()
+    end)
+end
+
 function Window:ReflowGrid()
     if self.CurrentView ~= "Grid" then return end
     local scrollW = (self.CardsScroll and self.CardsScroll.AbsoluteSize.X > 50) and self.CardsScroll.AbsoluteSize.X or (self.MainFrame.AbsoluteSize.X - 186)
@@ -1173,8 +1245,204 @@ function Window:CreateSidebarTab(config)
     end)
 
     TabBtn.MouseButton1Click:Connect(function()
-        self:SelectTab(TabObj)
+        if TabObj.HasSubTabs then
+            TabObj.IsExpanded = not TabObj.IsExpanded
+            TabObj.SubContainer.Visible = TabObj.IsExpanded
+            TweenService:Create(TabObj.Chevron, TweenInfo.new(0.2), {
+                Rotation = TabObj.IsExpanded and 90 or 0,
+                ImageColor3 = TabObj.IsExpanded and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted
+            }):Play()
+
+            -- If expanding and no sub-tab is currently active, activate first subtab
+            if TabObj.IsExpanded and #TabObj.SubTabs > 0 then
+                local isChildActive = false
+                for _, sub in ipairs(TabObj.SubTabs) do
+                    if self.ActiveTab == sub then isChildActive = true break end
+                end
+                if not isChildActive then
+                    self:SelectTab(TabObj.SubTabs[1])
+                end
+            end
+        else
+            self:SelectTab(TabObj)
+        end
     end)
+
+    -- SubTab / Sub-Drop Factory (Accordion Dropdown Groups ala Obsidian)
+    function TabObj:AddSubTab(subConfig)
+        subConfig = subConfig or {}
+        local subName = subConfig.Name or "SubTab"
+        local subIcon = VRSLib.Icons.Get(subConfig.Icon or "folder")
+        self.HasSubTabs = true
+
+        -- Create Chevron on Parent Tab if not exists
+        if not self.Chevron then
+            local Chevron = Instance.new("ImageLabel")
+            Chevron.Name = "Chevron"
+            Chevron.Size = UDim2.fromOffset(12, 12)
+            Chevron.Position = UDim2.new(1, -20, 0.5, -6)
+            Chevron.BackgroundTransparency = 1
+            Chevron.Image = VRSLib.Icons.Get("chevron-right")
+            Chevron.ImageColor3 = VRSLib.Theme.TextMuted
+            Chevron.Rotation = 0
+            Chevron.Parent = self.Button
+            self.Chevron = Chevron
+
+            -- Reposition Badge slightly left to avoid overlapping Chevron
+            self.Badge.Position = UDim2.new(1, -36, 0.5, -7.5)
+            self.Label.Size = UDim2.new(1, -78, 1, 0)
+        end
+
+        -- Create SubTabs Container if not exists
+        if not self.SubContainer then
+            self.SubTabs = {}
+            self.IsExpanded = false
+
+            local SubContainer = Instance.new("Frame")
+            SubContainer.Name = "SubContainer_" .. self.Name
+            SubContainer.Size = UDim2.new(1, 0, 0, 0)
+            SubContainer.BackgroundTransparency = 1
+            SubContainer.BorderSizePixel = 0
+            SubContainer.ClipsDescendants = true
+            SubContainer.AutomaticSize = Enum.AutomaticSize.Y
+            SubContainer.LayoutOrder = self.Button.LayoutOrder + 1
+            SubContainer.Visible = false
+            SubContainer.Parent = self.Window.SidebarScroll
+
+            local SubList = Instance.new("UIListLayout")
+            SubList.SortOrder = Enum.SortOrder.LayoutOrder
+            SubList.Padding = UDim.new(0, 2)
+            SubList.Parent = SubContainer
+
+            local SubPadding = Instance.new("UIPadding")
+            SubPadding.PaddingLeft = UDim.new(0, 14)
+            SubPadding.PaddingRight = UDim.new(0, 2)
+            SubPadding.PaddingTop = UDim.new(0, 2)
+            SubPadding.PaddingBottom = UDim.new(0, 2)
+            SubPadding.Parent = SubContainer
+
+            -- Vertical tree connector line
+            local TreeLine = Instance.new("Frame")
+            TreeLine.Name = "TreeLine"
+            TreeLine.Size = UDim2.new(0, 1, 1, -4)
+            TreeLine.Position = UDim2.new(0, 6, 0, 2)
+            TreeLine.BackgroundColor3 = VRSLib.Theme.Outline
+            TreeLine.BorderSizePixel = 0
+            TreeLine.Parent = SubContainer
+
+            self.SubContainer = SubContainer
+        end
+
+        local subOrder = #self.SubTabs + 1
+        local SubBtn = Instance.new("TextButton")
+        SubBtn.Name = "SubTab_" .. subName
+        SubBtn.Size = UDim2.new(1, 0, 0, 26)
+        SubBtn.BackgroundTransparency = 1
+        SubBtn.BackgroundColor3 = VRSLib.Theme.Card
+        SubBtn.BorderSizePixel = 0
+        SubBtn.Text = ""
+        SubBtn.AutoButtonColor = false
+        SubBtn.LayoutOrder = subOrder
+        SubBtn.Parent = self.SubContainer
+
+        local SubCorner = Instance.new("UICorner")
+        SubCorner.CornerRadius = UDim.new(0, 5)
+        SubCorner.Parent = SubBtn
+
+        local SubIndicator = Instance.new("Frame")
+        SubIndicator.Size = UDim2.new(0, 2, 0, 14)
+        SubIndicator.Position = UDim2.new(0, 2, 0.5, -7)
+        SubIndicator.BackgroundColor3 = VRSLib.Theme.Accent
+        SubIndicator.BorderSizePixel = 0
+        SubIndicator.Visible = false
+        SubIndicator.Parent = SubBtn
+
+        local SubIndCorner = Instance.new("UICorner")
+        SubIndCorner.CornerRadius = UDim.new(1, 0)
+        SubIndCorner.Parent = SubIndicator
+
+        local SubIcon = Instance.new("ImageLabel")
+        SubIcon.Size = UDim2.fromOffset(12, 12)
+        SubIcon.Position = UDim2.new(0, 8, 0.5, -6)
+        SubIcon.BackgroundTransparency = 1
+        SubIcon.Image = subIcon
+        SubIcon.ImageColor3 = VRSLib.Theme.TextMuted
+        SubIcon.Parent = SubBtn
+
+        local SubLabel = Instance.new("TextLabel")
+        SubLabel.Size = UDim2.new(1, -50, 1, 0)
+        SubLabel.Position = UDim2.new(0, 24, 0, 0)
+        SubLabel.BackgroundTransparency = 1
+        SubLabel.Text = subName
+        SubLabel.Font = Enum.Font.GothamMedium
+        SubLabel.TextSize = 10.5
+        SubLabel.TextColor3 = VRSLib.Theme.TextMuted
+        SubLabel.TextXAlignment = Enum.TextXAlignment.Left
+        SubLabel.Parent = SubBtn
+        ProtectLocalization(SubLabel)
+
+        local SubBadge = Instance.new("Frame")
+        SubBadge.Size = UDim2.new(0, 20, 0, 13)
+        SubBadge.Position = UDim2.new(1, -22, 0.5, -6.5)
+        SubBadge.BackgroundColor3 = VRSLib.Theme.BadgeBackground
+        SubBadge.BorderSizePixel = 0
+        SubBadge.Parent = SubBtn
+
+        local SubBadgeCorner = Instance.new("UICorner")
+        SubBadgeCorner.CornerRadius = UDim.new(0, 6)
+        SubBadgeCorner.Parent = SubBadge
+
+        local SubBadgeText = Instance.new("TextLabel")
+        SubBadgeText.Size = UDim2.new(1, 0, 1, 0)
+        SubBadgeText.BackgroundTransparency = 1
+        SubBadgeText.Text = "0"
+        SubBadgeText.Font = Enum.Font.GothamBold
+        SubBadgeText.TextSize = 8.5
+        SubBadgeText.TextColor3 = VRSLib.Theme.BadgeText
+        SubBadgeText.Parent = SubBadge
+        ProtectLocalization(SubBadgeText)
+
+        local SubTabObj = {
+            Window       = self.Window,
+            ParentTab    = self,
+            Name         = subName,
+            Category     = self.Name,
+            FullCategory = self.Category,
+            Button       = SubBtn,
+            Icon         = SubIcon,
+            Label        = SubLabel,
+            Badge        = SubBadge,
+            BadgeText    = SubBadgeText,
+            Indicator    = SubIndicator,
+            Cards        = {},
+            IsSubTab     = true,
+        }
+
+        function SubTabObj:AddModule(modConfig)
+            return self.Window:AddModule(self, modConfig)
+        end
+
+        SubBtn.MouseEnter:Connect(function()
+            if self.Window.ActiveTab ~= SubTabObj then
+                TweenService:Create(SubBtn, TweenInfo.new(0.15), { BackgroundTransparency = 0.6, BackgroundColor3 = VRSLib.Theme.CardHover }):Play()
+                TweenService:Create(SubLabel, TweenInfo.new(0.15), { TextColor3 = VRSLib.Theme.TextPrimary }):Play()
+            end
+        end)
+        SubBtn.MouseLeave:Connect(function()
+            if self.Window.ActiveTab ~= SubTabObj then
+                TweenService:Create(SubBtn, TweenInfo.new(0.15), { BackgroundTransparency = 1 }):Play()
+                TweenService:Create(SubLabel, TweenInfo.new(0.15), { TextColor3 = VRSLib.Theme.TextMuted }):Play()
+            end
+        end)
+
+        SubBtn.MouseButton1Click:Connect(function()
+            self.Window:SelectTab(SubTabObj)
+        end)
+
+        table.insert(self.SubTabs, SubTabObj)
+        table.insert(self.Window.Tabs, SubTabObj)
+        return SubTabObj
+    end
 
     table.insert(self.Tabs, TabObj)
     return TabObj
@@ -1184,13 +1452,36 @@ function Window:AddTab(config)
     return self:CreateSidebarTab(config)
 end
 
+function Window:AddTabGroup(config)
+    return self:CreateSidebarTab(config)
+end
+
 function Window:SelectTab(tabObj)
     self.ActiveTab = tabObj
     self.CurrentCategory = tabObj.Category
 
-    self.BreadcrumbCategory.Text = string.upper(tabObj.Category) .. " / "
-    self.BreadcrumbTab.Text = tabObj.Name
-    self.BreadcrumbBadge.Text = tabObj.BadgeText.Text
+    if tabObj.IsSubTab then
+        self.BreadcrumbCategory.Text = string.upper(tabObj.ParentTab.Name) .. " / "
+        self.BreadcrumbTab.Text = tabObj.Name
+        self.BreadcrumbBadge.Text = tabObj.BadgeText.Text
+
+        -- Keep parent tab visually active & expanded
+        if tabObj.ParentTab then
+            TweenService:Create(tabObj.ParentTab.Button, TweenInfo.new(0.2), { BackgroundTransparency = 0.5, BackgroundColor3 = VRSLib.Theme.Card }):Play()
+            TweenService:Create(tabObj.ParentTab.Label, TweenInfo.new(0.2), { TextColor3 = VRSLib.Theme.TextPrimary }):Play()
+            if tabObj.ParentTab.Chevron then
+                TweenService:Create(tabObj.ParentTab.Chevron, TweenInfo.new(0.2), { Rotation = 90, ImageColor3 = VRSLib.Theme.Accent }):Play()
+            end
+            if tabObj.ParentTab.SubContainer then
+                tabObj.ParentTab.SubContainer.Visible = true
+                tabObj.ParentTab.IsExpanded = true
+            end
+        end
+    else
+        self.BreadcrumbCategory.Text = string.upper(tabObj.Category) .. " / "
+        self.BreadcrumbTab.Text = tabObj.Name
+        self.BreadcrumbBadge.Text = tabObj.BadgeText.Text
+    end
 
     for _, t in ipairs(self.Tabs) do
         if t == tabObj then
@@ -1199,10 +1490,13 @@ function Window:SelectTab(tabObj)
             TweenService:Create(t.Icon, TweenInfo.new(0.2), { ImageColor3 = VRSLib.Theme.Accent }):Play()
             t.Indicator.Visible = true
         else
-            TweenService:Create(t.Button, TweenInfo.new(0.2), { BackgroundTransparency = 1 }):Play()
-            TweenService:Create(t.Label, TweenInfo.new(0.2), { TextColor3 = VRSLib.Theme.TextMuted }):Play()
-            TweenService:Create(t.Icon, TweenInfo.new(0.2), { ImageColor3 = VRSLib.Theme.TextMuted }):Play()
-            t.Indicator.Visible = false
+            local isParentOfCurrent = (tabObj.IsSubTab and t == tabObj.ParentTab)
+            if not isParentOfCurrent then
+                TweenService:Create(t.Button, TweenInfo.new(0.2), { BackgroundTransparency = 1 }):Play()
+                TweenService:Create(t.Label, TweenInfo.new(0.2), { TextColor3 = VRSLib.Theme.TextMuted }):Play()
+                TweenService:Create(t.Icon, TweenInfo.new(0.2), { ImageColor3 = VRSLib.Theme.TextMuted }):Play()
+                t.Indicator.Visible = false
+            end
         end
     end
 
@@ -1225,7 +1519,16 @@ function Window:UpdateBadges()
 
     for _, tab in ipairs(self.Tabs) do
         if not tab.IsQuickTab then
-            tab.BadgeText.Text = tostring(#tab.Cards)
+            if tab.HasSubTabs then
+                local subTotal = 0
+                for _, sub in ipairs(tab.SubTabs) do
+                    sub.BadgeText.Text = tostring(#sub.Cards)
+                    subTotal = subTotal + #sub.Cards
+                end
+                tab.BadgeText.Text = tostring(subTotal)
+            else
+                tab.BadgeText.Text = tostring(#tab.Cards)
+            end
         end
     end
 

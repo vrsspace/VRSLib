@@ -15,7 +15,7 @@
 if _G.VRS_SCRIPT_UNLOAD then pcall(_G.VRS_SCRIPT_UNLOAD) end
 
 -- 1. Load UI Engine langsung dari Raw GitHub (Anti-Cache)
-local repo = "https://raw.githubusercontent.com/vrsspace/VRSLib/v1.0.4/"
+local repo = "https://raw.githubusercontent.com/vrsspace/VRSLib/v1.0.5/"
 local rawCode = game:HttpGet(repo .. "VRSLib.lua?v=" .. tick())
 local loadFunc, loadErr = loadstring(rawCode)
 if not loadFunc then
@@ -26,7 +26,7 @@ local VRSLib = loadFunc()
 -- 2. Buat Window VRS Artelier (Aksen Neon Magenta Pink & Wings Logo)
 local Window = VRSLib:CreateWindow({
     Title    = "VRS Artelier",
-    SubTitle = "v1.0.4",
+    SubTitle = "v1.0.5",
     Size     = UDim2.fromOffset(1020, 620), -- Ukuran lega (otomatis 5-6 kolom!)
     Accent   = Color3.fromRGB(255, 64, 140), -- VRS Signature Neon Magenta Pink (#FF408C)
     Keybind  = Enum.KeyCode.RightControl
@@ -512,10 +512,85 @@ Window:AddModule(TabSystem, {
     end
 })
 
+
+-- ------------------------------------------------------------------------------
+-- [ DUNGEON & RPG MODES — SUB-DROP / COLLAPSIBLE ACCORDION ALA OBSIDIAN ]
+-- ------------------------------------------------------------------------------
+Window:AddCategory("DUNGEON MODES", 30)
+
+local TabDungeon = Window:AddTabGroup({
+    Name = "Dungeon",
+    Category = "DUNGEON MODES",
+    Icon = "swords",
+    LayoutOrder = 31
+})
+
+local SubRaid   = TabDungeon:AddSubTab({ Name = "Raid",   Icon = "flame" })
+local SubEvent  = TabDungeon:AddSubTab({ Name = "Event",  Icon = "calendar" })
+local SubBosses = TabDungeon:AddSubTab({ Name = "Bosses", Icon = "skull" })
+
+-- [ Sub-Tab: Raid ]
+Window:AddModule(SubRaid, {
+    Title       = "Auto Raid",
+    Description = "Automatically clears raid dungeons, destroys mobs, and collects rewards",
+    Icon        = "swords",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Raid] Auto Raid:", v) end
+})
+
+Window:AddModule(SubRaid, {
+    Title       = "Raid Fast Clear",
+    Description = "Bypasses wave countdowns and cuts raid duration in half",
+    Icon        = "zap",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Raid] Fast Clear:", v) end
+})
+
+-- [ Sub-Tab: Event ]
+Window:AddModule(SubEvent, {
+    Title       = "Event Farm",
+    Description = "Automatically farms limited seasonal event tokens and currencies",
+    Icon        = "star",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Event] Farm:", v) end
+})
+
+Window:AddModule(SubEvent, {
+    Title       = "Mini-Game Solver",
+    Description = "Instantly clears event puzzle mini-games with 100% perfect score",
+    Icon        = "target",
+    Type        = "Action",
+    Callback    = function()
+        VRSLib:Notify({ Title = "Event", Description = "Solved mini-game with 100% score!", Duration = 2.5, Icon = "star" })
+    end
+})
+
+-- [ Sub-Tab: Bosses ]
+Window:AddModule(SubBosses, {
+    Title       = "Boss Hitbox Ext",
+    Description = "Extends world & raid boss hitboxes for safe long-distance melee hits",
+    Icon        = "crosshair",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Bosses] Hitbox Ext:", v) end
+})
+
+Window:AddModule(SubBosses, {
+    Title       = "Auto Dodge Attacks",
+    Description = "Automatically dodges boss red zone AoE attacks and dangerous projectiles",
+    Icon        = "shield",
+    Type        = "Toggle",
+    Default     = false,
+    Callback    = function(v) print("[Bosses] Auto Dodge:", v) end
+})
+
 -- Notifikasi Sukses Load
 VRSLib:Notify({
     Title       = "VRS Artelier",
-    Description = "Loaded 47 modules successfully!\nToggle with RightControl or floating Wings button.\nPress [X] to unload.",
+    Description = "Loaded 53 modules successfully with Sub-Drop Accordion!\nToggle with RightControl or floating Wings button.\nPress [X] to unload.",
     Duration    = 4,
     Icon        = "Wings"
 })
