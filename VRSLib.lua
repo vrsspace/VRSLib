@@ -1733,6 +1733,10 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
             end
         end)
 
+        local sliderCallbacks = {}
+        if ctrlConfig.Callback then table.insert(sliderCallbacks, ctrlConfig.Callback) end
+        if ctrlConfig.Func then table.insert(sliderCallbacks, ctrlConfig.Func) end
+
         sliderObj = {
             Value = curVal,
             Set = function(val)
@@ -1742,10 +1746,20 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                 Fill.Size = UDim2.new(frac, 0, 1, 0)
                 ValBadge.Text = tostring(curVal) .. (unit ~= "" and (" " .. unit) or "")
                 task.spawn(cb, curVal)
+                for _, fn in ipairs(sliderCallbacks) do
+                    task.spawn(fn, curVal)
+                end
             end,
             SetValue = function(selfOrVal, maybeVal)
                 local v = (maybeVal ~= nil and maybeVal) or selfOrVal
                 sliderObj.Set(v)
+            end,
+            OnChanged = function(selfOrFn, maybeFn)
+                local fn = maybeFn or selfOrFn
+                if type(fn) == "function" then
+                    table.insert(sliderCallbacks, fn)
+                end
+                return sliderObj
             end,
             Frame = SFrame
         }
