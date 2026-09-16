@@ -1454,6 +1454,9 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         local isVal = defVal
         local toggleObj
         local cardObj = nil
+        local toggleCallbacks = {}
+        if ctrlConfig.Callback then table.insert(toggleCallbacks, ctrlConfig.Callback) end
+        if ctrlConfig.Func then table.insert(toggleCallbacks, ctrlConfig.Func) end
 
         pcall(function()
             local targetTab = self.Tab or (self.Window and self.Window.ActiveTab) or (self.Window and self.Window.Tabs and self.Window.Tabs[1])
@@ -1486,7 +1489,9 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
             if cardObj and cardObj.Set and cardObj.Value ~= v then
                 cardObj.Set(v)
             end
-            task.spawn(cb, isVal)
+            for _, fn in ipairs(toggleCallbacks) do
+                task.spawn(fn, isVal)
+            end
         end
 
         Switch.MouseButton1Click:Connect(function() SetVal(not isVal) end)
@@ -1497,6 +1502,13 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
             SetValue = function(selfOrVal, maybeVal)
                 local v = (maybeVal ~= nil and maybeVal) or selfOrVal
                 SetVal(v)
+            end,
+            OnChanged = function(selfOrFn, maybeFn)
+                local fn = maybeFn or selfOrFn
+                if type(fn) == "function" then
+                    table.insert(toggleCallbacks, fn)
+                end
+                return toggleObj
             end,
             Card = cardObj,
             Frame = Row
@@ -1699,7 +1711,9 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
             if sliderObj then sliderObj.Value = curVal end
             Fill.Size = UDim2.new(frac, 0, 1, 0)
             ValBadge.Text = tostring(curVal) .. (unit ~= "" and (" " .. unit) or "")
-            task.spawn(cb, curVal)
+            for _, fn in ipairs(sliderCallbacks) do
+                task.spawn(fn, curVal)
+            end
         end
 
         BarFrame.InputBegan:Connect(function(input)
@@ -1855,6 +1869,9 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
 
         local optBtns = {}
         local dropObj
+        local dropCallbacks = {}
+        if ctrlConfig.Callback then table.insert(dropCallbacks, ctrlConfig.Callback) end
+        if ctrlConfig.Func then table.insert(dropCallbacks, ctrlConfig.Func) end
         for i, val in ipairs(values) do
             local OptBtn = Instance.new("TextButton")
             OptBtn.Size = UDim2.new(1, 0, 0, 24)
@@ -1883,7 +1900,9 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                     opt.TextColor3 = (opt.Text == tostring(val) and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted)
                 end
                 ToggleDrop(false)
-                task.spawn(cb, val)
+                for _, fn in ipairs(dropCallbacks) do
+                    task.spawn(fn, val)
+                end
             end)
         end
 
@@ -1902,11 +1921,62 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                 for _, opt in ipairs(optBtns) do
                     opt.TextColor3 = (opt.Text == tostring(val) and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted)
                 end
-                task.spawn(cb, val)
+                for _, fn in ipairs(dropCallbacks) do
+                    task.spawn(fn, val)
+                end
             end,
             SetValue = function(selfOrVal, maybeVal)
                 local v = (maybeVal ~= nil and maybeVal) or selfOrVal
                 dropObj.Set(v)
+            end,
+            SetValues = function(selfOrVals, maybeVals)
+                local newVals = maybeVals or selfOrVals
+                if type(newVals) == "table" then
+                    values = newVals
+                    for _, b in ipairs(optBtns) do pcall(function() b:Destroy() end) end
+                    optBtns = {}
+                    for i, val in ipairs(values) do
+                        local OptBtn = Instance.new("TextButton")
+                        OptBtn.Size = UDim2.new(1, 0, 0, 24)
+                        OptBtn.BackgroundTransparency = 1
+                        OptBtn.Text = tostring(val)
+                        OptBtn.Font = Enum.Font.Gotham
+                        OptBtn.TextSize = 10.5
+                        OptBtn.TextColor3 = (tostring(val) == tostring(curSel) and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted)
+                        OptBtn.ZIndex = 26
+                        OptBtn.Parent = DropList
+                        ProtectLocalization(OptBtn)
+                        table.insert(optBtns, OptBtn)
+
+                        OptBtn.MouseEnter:Connect(function()
+                            OptBtn.BackgroundTransparency = 0.8
+                            OptBtn.BackgroundColor3 = VRSLib.Theme.Accent
+                        end)
+                        OptBtn.MouseLeave:Connect(function()
+                            OptBtn.BackgroundTransparency = 1
+                        end)
+                        OptBtn.MouseButton1Click:Connect(function()
+                            curSel = val
+                            dropObj.Value = val
+                            SelText.Text = tostring(val)
+                            for _, opt in ipairs(optBtns) do
+                                opt.TextColor3 = (opt.Text == tostring(val) and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted)
+                            end
+                            ToggleDrop(false)
+                            for _, fn in ipairs(dropCallbacks) do
+                                task.spawn(fn, val)
+                            end
+                        end)
+                    end
+                    DropList.Size = UDim2.new(1, 0, 0, #values * 26 + 4)
+                end
+            end,
+            OnChanged = function(selfOrFn, maybeFn)
+                local fn = maybeFn or selfOrFn
+                if type(fn) == "function" then
+                    table.insert(dropCallbacks, fn)
+                end
+                return dropObj
             end,
             Frame = DFrame
         }
@@ -2113,7 +2183,141 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         end
 
         return QFrame
-    end    return BoxObj
+    end    -- 10. AddInput (Text Input Box - Obsidian / Linoria Compatible)
+    function BoxObj:AddInput(idOrConfig, optionalConfig)
+        local id, ctrlConfig
+        if type(idOrConfig) == "string" then
+            id = idOrConfig
+            ctrlConfig = optionalConfig or {}
+        else
+            ctrlConfig = idOrConfig or {}
+            id = ctrlConfig.Id or ctrlConfig.Title or ctrlConfig.Text or "Input"
+        end
+
+        local cTitle = ctrlConfig.Title or ctrlConfig.Text or tostring(id)
+        local defVal = ctrlConfig.Default or ""
+        local placeholder = ctrlConfig.Placeholder or "Type here..."
+        local isNumeric = (ctrlConfig.Numeric == true)
+        local isFinished = (ctrlConfig.Finished ~= false)
+        local clearFocus = (ctrlConfig.ClearTextOnFocus == true)
+
+        local IFrame = Instance.new("Frame")
+        IFrame.Size = UDim2.new(1, 0, 0, 48)
+        IFrame.BackgroundTransparency = 1
+        IFrame.Parent = Content
+
+        local Lbl = Instance.new("TextLabel")
+        Lbl.Size = UDim2.new(1, 0, 0, 16)
+        Lbl.BackgroundTransparency = 1
+        Lbl.Text = cTitle
+        Lbl.Font = Enum.Font.GothamMedium
+        Lbl.TextSize = 10.5
+        Lbl.TextColor3 = VRSLib.Theme.TextMuted
+        Lbl.TextXAlignment = Enum.TextXAlignment.Left
+        Lbl.Parent = IFrame
+        ProtectLocalization(Lbl)
+
+        local BoxFrame = Instance.new("Frame")
+        BoxFrame.Size = UDim2.new(1, 0, 0, 26)
+        BoxFrame.Position = UDim2.new(0, 0, 0, 18)
+        BoxFrame.BackgroundColor3 = VRSLib.Theme.InputBackground
+        BoxFrame.BorderSizePixel = 0
+        BoxFrame.Parent = IFrame
+
+        local BCorner = Instance.new("UICorner")
+        BCorner.CornerRadius = UDim.new(0, 5)
+        BCorner.Parent = BoxFrame
+
+        local BStroke = Instance.new("UIStroke")
+        BStroke.Color = VRSLib.Theme.CardStroke
+        BStroke.Thickness = 1
+        BStroke.Parent = BoxFrame
+
+        local TBox = Instance.new("TextBox")
+        TBox.Size = UDim2.new(1, -16, 1, 0)
+        TBox.Position = UDim2.new(0, 8, 0, 0)
+        TBox.BackgroundTransparency = 1
+        TBox.Text = tostring(defVal)
+        TBox.PlaceholderText = placeholder
+        TBox.Font = Enum.Font.Gotham
+        TBox.TextSize = 10.5
+        TBox.TextColor3 = VRSLib.Theme.TextPrimary
+        TBox.PlaceholderColor3 = Color3.fromRGB(100, 105, 125)
+        TBox.TextXAlignment = Enum.TextXAlignment.Left
+        TBox.ClearTextOnFocus = clearFocus
+        TBox.Parent = BoxFrame
+
+        TBox.Focused:Connect(function()
+            TweenService:Create(BStroke, TweenInfo.new(0.15), { Color = VRSLib.Theme.Accent }):Play()
+        end)
+        TBox.FocusLost:Connect(function()
+            TweenService:Create(BStroke, TweenInfo.new(0.15), { Color = VRSLib.Theme.CardStroke }):Play()
+        end)
+
+        local curVal = tostring(defVal)
+        local callbacks = {}
+        if ctrlConfig.Callback then table.insert(callbacks, ctrlConfig.Callback) end
+        if ctrlConfig.Func then table.insert(callbacks, ctrlConfig.Func) end
+
+        local inputObj
+        local function triggerFire(val)
+            curVal = tostring(val)
+            if inputObj then inputObj.Value = (isNumeric and tonumber(val) or val) end
+            for _, fn in ipairs(callbacks) do
+                task.spawn(fn, inputObj.Value)
+            end
+        end
+
+        if isFinished then
+            TBox.FocusLost:Connect(function(enterPressed)
+                if isNumeric then
+                    local num = tonumber(TBox.Text)
+                    if num then
+                        triggerFire(num)
+                    else
+                        TBox.Text = tostring(curVal)
+                    end
+                else
+                    triggerFire(TBox.Text)
+                end
+            end)
+        else
+            TBox:GetPropertyChangedSignal("Text"):Connect(function()
+                if isNumeric then
+                    local num = tonumber(TBox.Text)
+                    if num then triggerFire(num) end
+                else
+                    triggerFire(TBox.Text)
+                end
+            end)
+        end
+
+        inputObj = {
+            Value = isNumeric and (tonumber(defVal) or 0) or tostring(defVal),
+            SetValue = function(selfOrVal, maybeVal)
+                local v = (maybeVal ~= nil and maybeVal) or selfOrVal
+                TBox.Text = tostring(v)
+                triggerFire(v)
+            end,
+            OnChanged = function(selfOrFn, maybeFn)
+                local fn = maybeFn or selfOrFn
+                if type(fn) == "function" then
+                    table.insert(callbacks, fn)
+                end
+                return inputObj
+            end,
+            Frame = IFrame
+        }
+
+        if self.Window.Options then self.Window.Options[id] = inputObj end
+        if _G.Options then _G.Options[id] = inputObj end
+        if getgenv then getgenv().Options[id] = inputObj end
+        return inputObj
+    end
+
+    function BoxObj:Resize() end
+
+    return BoxObj
 end
 
 -- Method on TabObj to create dual columns
