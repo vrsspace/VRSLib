@@ -1501,7 +1501,8 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
             Value = isVal,
             Set = SetVal,
             SetValue = function(selfOrVal, maybeVal)
-                local v = (maybeVal ~= nil and maybeVal) or selfOrVal
+                local v = maybeVal
+                if v == nil then v = selfOrVal end
                 SetVal(v)
             end,
             OnChanged = function(selfOrFn, maybeFn)
@@ -2037,7 +2038,8 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                 end
             end,
             SetValue = function(selfOrVal, maybeVal)
-                local v = (maybeVal ~= nil and maybeVal) or selfOrVal
+                local v = maybeVal
+                if v == nil then v = selfOrVal end
                 dropObj.Set(v)
             end,
             SetValues = function(selfOrVals, maybeVals, shouldSelectAll)
@@ -2309,7 +2311,8 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                 keyObj = {
                     Value = keyName,
                     SetValue = function(selfOrVal, maybeVal)
-                        local v = (maybeVal ~= nil and maybeVal) or selfOrVal
+                        local v = maybeVal
+                        if v == nil then v = selfOrVal end
                         if type(v) == "table" then v = v[1] or v.key or "RightControl" end
                         setKey(tostring(v))
                     end,
@@ -2455,7 +2458,8 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         keyObj = {
             Value = keyName,
             SetValue = function(selfOrVal, maybeVal)
-                local v = (maybeVal ~= nil and maybeVal) or selfOrVal
+                local v = maybeVal
+                if v == nil then v = selfOrVal end
                 if type(v) == "table" then v = v[1] or v.key or "RightControl" end
                 setKey(tostring(v))
             end,
