@@ -26,7 +26,7 @@ local RunService       = cloneref(game:GetService("RunService"))
 local LocalPlayer      = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
 local VRSLib = {
-    Version = "1.2.3",
+    Version = "1.2.4",
     Theme = {
         Background      = Color3.fromRGB(13, 14, 19),
         Sidebar         = Color3.fromRGB(16, 17, 24),
@@ -1208,7 +1208,7 @@ end
 -- ==============================================================================
 -- DUAL-COLUMN SPLIT & GROUPBOX SYSTEM (OBSIDIAN-GRADE ARCHITECTURE)
 -- ==============================================================================
-function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon)
+function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optionalTab)
     local config
     if type(configOrTitle) == "string" then
         config = { Title = configOrTitle, Icon = optionalIcon }
@@ -1218,6 +1218,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon)
     local title = config.Title or config.Name or config.Text or "Groupbox"
     local iconId = VRSLib.Icons.Get(config.Icon or "folder")
     local collapsed = config.Collapsed or false
+    local tabRef = optionalTab or config.Tab
 
     local GroupCard = Instance.new("Frame")
     GroupCard.Name = "Groupbox_" .. title
@@ -1303,6 +1304,9 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon)
         Chevron = GChevron,
         Window = self,
         IsCollapsed = collapsed,
+        Title = title,
+        Icon = iconId,
+        Tab = tabRef,
     }
 
     TitleBar.MouseButton1Click:Connect(function()
@@ -1381,6 +1385,26 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon)
 
         local isVal = defVal
         local toggleObj
+        local cardObj = nil
+
+        pcall(function()
+            local targetTab = self.Tab or (self.Window and self.Window.ActiveTab) or (self.Window and self.Window.Tabs and self.Window.Tabs[1])
+            if targetTab and self.Window and self.Window.AddModule then
+                cardObj = self.Window:AddModule(targetTab, {
+                    Title = cTitle,
+                    Description = ctrlConfig.Tooltip or (title .. " • " .. (targetTab.Name or "Automation")),
+                    Icon = ctrlConfig.Icon or self.Icon or "sliders",
+                    Type = "Toggle",
+                    Default = defVal,
+                    Callback = function(v)
+                        if toggleObj and toggleObj.Value ~= v then
+                            toggleObj.Set(v)
+                        end
+                    end
+                })
+            end
+        end)
+
         local function SetVal(v)
             isVal = v
             if toggleObj then toggleObj.Value = v end
@@ -1391,6 +1415,9 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon)
                 Position = isVal and UDim2.new(1, -14, 0.5, -6) or UDim2.new(0, 2, 0.5, -6),
                 BackgroundColor3 = isVal and VRSLib.Theme.SwitchOnKnob or VRSLib.Theme.SwitchOffKnob
             }):Play()
+            if cardObj and cardObj.Set and cardObj.Value ~= v then
+                cardObj.Set(v)
+            end
             task.spawn(cb, isVal)
         end
 
@@ -1403,6 +1430,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon)
                 local v = (maybeVal ~= nil and maybeVal) or selfOrVal
                 SetVal(v)
             end,
+            Card = cardObj,
             Frame = Row
         }
 
@@ -1481,6 +1509,21 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon)
             TweenService:Create(Btn, TweenInfo.new(0.15), { BackgroundColor3 = VRSLib.Theme.InputBackground }):Play()
             TweenService:Create(BStroke, TweenInfo.new(0.15), { Color = VRSLib.Theme.CardStroke }):Play()
         end)
+        pcall(function()
+            local targetTab = self.Tab or (self.Window and self.Window.ActiveTab) or (self.Window and self.Window.Tabs and self.Window.Tabs[1])
+            if targetTab and self.Window and self.Window.AddModule then
+                self.Window:AddModule(targetTab, {
+                    Title = cTitle,
+                    Description = ctrlConfig.Tooltip or (title .. " • " .. (targetTab.Name or "Action")),
+                    Icon = ctrlConfig.Icon or self.Icon or "play",
+                    Type = "Action",
+                    Callback = function()
+                        task.spawn(cb)
+                    end
+                })
+            end
+        end)
+
         Btn.MouseButton1Click:Connect(function()
             task.spawn(cb)
         end)
@@ -2036,7 +2079,9 @@ function Window:SetupDualColumns(tabObj)
     local function MakeColHelper(colFrame)
         local h = { Frame = colFrame, Window = self, Tab = tabObj }
         function h:AddGroupbox(cfgOrTitle, optionalIcon)
-            return self.Window:CreateGroupbox(colFrame, cfgOrTitle, optionalIcon)
+            local box = self.Window:CreateGroupbox(colFrame, cfgOrTitle, optionalIcon, self.Tab)
+            box.Tab = self.Tab
+            return box
         end
         return h
     end
@@ -2818,7 +2863,7 @@ function Window:AddModule(tabOrConfig, optionalConfig)
     ModIcon.Parent = TopRow
 
     local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Size = UDim2.new(1, -54, 1, 0)
+    TitleLabel.Size = UDim2.new(1, (modType == "Toggle" and -76 or -58), 1, 0)
     TitleLabel.Position = UDim2.new(0, 20, 0, 0)
     TitleLabel.BackgroundTransparency = 1
     TitleLabel.Text = title
@@ -2829,6 +2874,26 @@ function Window:AddModule(tabOrConfig, optionalConfig)
     TitleLabel.TextTruncate = Enum.TextTruncate.AtEnd
     TitleLabel.Parent = TopRow
     ProtectLocalization(TitleLabel)
+
+    local PinBtn = Instance.new("ImageButton")
+    PinBtn.Name = "PinBtn"
+    PinBtn.Size = UDim2.fromOffset(13, 13)
+    PinBtn.Position = UDim2.new(1, (modType == "Toggle" and -50 or -38), 0.5, -6.5)
+    PinBtn.BackgroundTransparency = 1
+    PinBtn.Image = VRSLib.Icons.Get("star")
+    PinBtn.ImageColor3 = VRSLib.Theme.TextMuted
+    PinBtn.Parent = TopRow
+
+    PinBtn.MouseButton1Click:Connect(function()
+        CardObj.IsPinned = not CardObj.IsPinned
+        TweenService:Create(PinBtn, TweenInfo.new(0.15), {
+            ImageColor3 = CardObj.IsPinned and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted
+        }):Play()
+        self:UpdateBadges()
+        if self.ActiveTab == self.PinnedTab then
+            self:FilterModules(self.SearchQuery)
+        end
+    end)
 
     -- Description
     local DescLabel = Instance.new("TextLabel")
@@ -2943,6 +3008,9 @@ function Window:AddModule(tabOrConfig, optionalConfig)
     table.insert(tab.Cards, CardObj)
     table.insert(self.AllCards, CardObj)
     self:UpdateBadges()
+    if self.ActiveTab == self.AllModulesTab or self.ActiveTab == tab then
+        self:FilterModules(self.SearchQuery)
+    end
 
     return CardObj
 end
@@ -3081,9 +3149,15 @@ function Window:FilterModules(query)
         if visible then hasVisibleCards = true end
     end
 
-    -- Fixed: Only show EmptyState if a search was actually typed and 0 results found!
     if self.SearchQuery ~= "" then
+        self.EmptyState.Text = "No matching modules found"
         self.EmptyState.Visible = not hasVisibleCards
+    elseif isPinnedTab and not hasVisibleCards then
+        self.EmptyState.Text = "No pinned modules yet — click ⭐ on any card to pin!"
+        self.EmptyState.Visible = true
+    elseif isActiveTab and not hasVisibleCards then
+        self.EmptyState.Text = "No active modules right now — turn on any toggle to see it here!"
+        self.EmptyState.Visible = true
     else
         self.EmptyState.Visible = false
     end
