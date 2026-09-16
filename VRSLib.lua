@@ -26,7 +26,7 @@ local RunService       = cloneref(game:GetService("RunService"))
 local LocalPlayer      = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
 local VRSLib = {
-    Version = "1.2.1",
+    Version = "1.2.2",
     Theme = {
         Background      = Color3.fromRGB(13, 14, 19),
         Sidebar         = Color3.fromRGB(16, 17, 24),
@@ -739,15 +739,11 @@ function VRSLib:CreateWindow(config)
     ProtectLocalization(BreadcrumbTab)
 
     local BreadcrumbBadge = Instance.new("TextLabel")
-    BreadcrumbBadge.Size = UDim2.new(0, 0, 1, 0)
-    BreadcrumbBadge.AutomaticSize = Enum.AutomaticSize.X
+    BreadcrumbBadge.Size = UDim2.new(0, 0, 0, 0)
     BreadcrumbBadge.Position = UDim2.new(1, 6, 0, 0)
     BreadcrumbBadge.BackgroundTransparency = 1
-    BreadcrumbBadge.Text = "0"
-    BreadcrumbBadge.Font = Enum.Font.Gotham
-    BreadcrumbBadge.TextSize = 11
-    BreadcrumbBadge.TextColor3 = VRSLib.Theme.TextMuted
-    BreadcrumbBadge.TextXAlignment = Enum.TextXAlignment.Left
+    BreadcrumbBadge.Visible = false
+    BreadcrumbBadge.Text = ""
     BreadcrumbBadge.Parent = BreadcrumbTab
     ProtectLocalization(BreadcrumbBadge)
 
@@ -2232,7 +2228,7 @@ function Window:CreateSidebarTab(config)
     TabIcon.Parent = TabBtn
 
     local TabLabel = Instance.new("TextLabel")
-    TabLabel.Size = UDim2.new(1, -65, 1, 0)
+    TabLabel.Size = UDim2.new(1, -38, 1, 0)
     TabLabel.Position = UDim2.new(0, 30, 0, 0)
     TabLabel.BackgroundTransparency = 1
     TabLabel.Text = tabName
@@ -2244,10 +2240,9 @@ function Window:CreateSidebarTab(config)
     ProtectLocalization(TabLabel)
 
     local Badge = Instance.new("Frame")
-    Badge.Size = UDim2.new(0, 24, 0, 15)
-    Badge.Position = UDim2.new(1, -26, 0.5, -7.5)
-    Badge.BackgroundColor3 = VRSLib.Theme.BadgeBackground
-    Badge.BorderSizePixel = 0
+    Badge.Size = UDim2.new(0, 0, 0, 0)
+    Badge.BackgroundTransparency = 1
+    Badge.Visible = false
     Badge.Parent = TabBtn
 
     local BadgeCorner = Instance.new("UICorner")
@@ -2255,12 +2250,10 @@ function Window:CreateSidebarTab(config)
     BadgeCorner.Parent = Badge
 
     local BadgeText = Instance.new("TextLabel")
-    BadgeText.Size = UDim2.new(1, 0, 1, 0)
+    BadgeText.Size = UDim2.new(0, 0, 0, 0)
     BadgeText.BackgroundTransparency = 1
-    BadgeText.Text = "0"
-    BadgeText.Font = Enum.Font.GothamBold
-    BadgeText.TextSize = 9.5
-    BadgeText.TextColor3 = VRSLib.Theme.BadgeText
+    BadgeText.Visible = false
+    BadgeText.Text = ""
     BadgeText.Parent = Badge
     ProtectLocalization(BadgeText)
 
@@ -2354,9 +2347,9 @@ function Window:CreateSidebarTab(config)
             Chevron.Parent = self.Button
             self.Chevron = Chevron
 
-            -- Generous spacing: Badge at -46px, Chevron at -16px (16px clean gap, NO overlap!)
-            self.Badge.Position = UDim2.new(1, -46, 0.5, -7.5)
-            self.Label.Size = UDim2.new(1, -85, 1, 0)
+            -- Generous spacing: Chevron at -16px with clean padding
+            self.Badge.Visible = false
+            self.Label.Size = UDim2.new(1, -38, 1, 0)
         end
 
         -- Create SubTabs Container if not exists
@@ -2439,10 +2432,9 @@ function Window:CreateSidebarTab(config)
         ProtectLocalization(SubLabel)
 
         local SubBadge = Instance.new("Frame")
-        SubBadge.Size = UDim2.new(0, 22, 0, 15)
-        SubBadge.Position = UDim2.new(1, -26, 0.5, -7.5)
-        SubBadge.BackgroundColor3 = VRSLib.Theme.BadgeBackground
-        SubBadge.BorderSizePixel = 0
+        SubBadge.Size = UDim2.new(0, 0, 0, 0)
+        SubBadge.BackgroundTransparency = 1
+        SubBadge.Visible = false
         SubBadge.Parent = SubBtn
 
         local SubBadgeCorner = Instance.new("UICorner")
@@ -2450,12 +2442,10 @@ function Window:CreateSidebarTab(config)
         SubBadgeCorner.Parent = SubBadge
 
         local SubBadgeText = Instance.new("TextLabel")
-        SubBadgeText.Size = UDim2.new(1, 0, 1, 0)
+        SubBadgeText.Size = UDim2.new(0, 0, 0, 0)
         SubBadgeText.BackgroundTransparency = 1
-        SubBadgeText.Text = "0"
-        SubBadgeText.Font = Enum.Font.GothamBold
-        SubBadgeText.TextSize = 8.5
-        SubBadgeText.TextColor3 = VRSLib.Theme.BadgeText
+        SubBadgeText.Visible = false
+        SubBadgeText.Text = ""
         SubBadgeText.Parent = SubBadge
         ProtectLocalization(SubBadgeText)
 
@@ -2665,7 +2655,7 @@ function Window:SelectTab(tabObj)
     if tabObj.IsSubTab then
         self.BreadcrumbCategory.Text = string.upper(tabObj.ParentTab.Name) .. " / "
         self.BreadcrumbTab.Text = tabObj.Name
-        self.BreadcrumbBadge.Text = tabObj.BadgeText.Text
+        self.BreadcrumbBadge.Visible = false
 
         if tabObj.ParentTab then
             TweenService:Create(tabObj.ParentTab.Button, TweenInfo.new(0.2), { BackgroundTransparency = 0.5, BackgroundColor3 = VRSLib.Theme.Card }):Play()
@@ -2681,7 +2671,7 @@ function Window:SelectTab(tabObj)
     else
         self.BreadcrumbCategory.Text = string.upper(tabObj.Category) .. " / "
         self.BreadcrumbTab.Text = tabObj.Name
-        self.BreadcrumbBadge.Text = tabObj.BadgeText.Text
+        self.BreadcrumbBadge.Visible = false
     end
 
     for _, t in ipairs(self.Tabs) do
@@ -2713,36 +2703,10 @@ function Window:SelectTab(tabObj)
 end
 
 function Window:UpdateBadges()
-    local totalCount = #self.AllCards
-    local pinnedCount = 0
-    local activeCount = 0
-
-    for _, card in ipairs(self.AllCards) do
-        if card.IsPinned then pinnedCount = pinnedCount + 1 end
-        if card.Value then activeCount = activeCount + 1 end
-    end
-
-    if self.AllModulesTab then self.AllModulesTab.BadgeText.Text = tostring(totalCount) end
-    if self.PinnedTab then self.PinnedTab.BadgeText.Text = tostring(pinnedCount) end
-    if self.ActiveTabBtn then self.ActiveTabBtn.BadgeText.Text = tostring(activeCount) end
-
-    for _, tab in ipairs(self.Tabs) do
-        if not tab.IsQuickTab then
-            if tab.HasSubTabs then
-                local subTotal = 0
-                for _, sub in ipairs(tab.SubTabs) do
-                    sub.BadgeText.Text = tostring(#sub.Cards)
-                    subTotal = subTotal + #sub.Cards
-                end
-                tab.BadgeText.Text = tostring(subTotal)
-            else
-                tab.BadgeText.Text = tostring(#tab.Cards)
-            end
-        end
-    end
-
-    if self.ActiveTab then
-        self.BreadcrumbBadge.Text = self.ActiveTab.BadgeText.Text
+    -- Numbers/badges hidden for clean, uncluttered modern sidebar
+    if self.BreadcrumbBadge then
+        self.BreadcrumbBadge.Visible = false
+        self.BreadcrumbBadge.Text = ""
     end
 end
 

@@ -15,7 +15,7 @@
 if _G.VRS_SCRIPT_UNLOAD then pcall(_G.VRS_SCRIPT_UNLOAD) end
 
 -- 1. Load UI Engine langsung dari Raw GitHub (Anti-Cache)
-local repo = "https://raw.githubusercontent.com/vrsspace/VRSLib/v1.2.1/"
+local repo = "https://raw.githubusercontent.com/vrsspace/VRSLib/v1.2.2/"
 local rawCode = game:HttpGet(repo .. "VRSLib.lua?v=" .. tick())
 local loadFunc, loadErr = loadstring(rawCode)
 if not loadFunc then
@@ -26,7 +26,7 @@ local VRSLib = loadFunc()
 -- 2. Buat Window VRS Artelier (Aksen Neon Magenta Pink & Wings Logo)
 local Window = VRSLib:CreateWindow({
     Title    = "VRS Artelier",
-    SubTitle = "v1.2.1",
+    SubTitle = "v1.2.2",
     -- GameName dibiarkan kosong agar otomatis mendeteksi nama game dari game.PlaceId
     Size     = UDim2.fromOffset(1020, 620), -- Ukuran lega (otomatis 5-6 kolom!)
     Accent   = Color3.fromRGB(255, 64, 140), -- VRS Signature Neon Magenta Pink (#FF408C)
