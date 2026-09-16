@@ -26,7 +26,7 @@ local RunService       = cloneref(game:GetService("RunService"))
 local LocalPlayer      = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
 local VRSLib = {
-    Version = "1.2.2",
+    Version = "1.2.3",
     Theme = {
         Background      = Color3.fromRGB(13, 14, 19),
         Sidebar         = Color3.fromRGB(16, 17, 24),
@@ -222,11 +222,44 @@ local function EnsureNotifyContainer()
     return NotifyContainer
 end
 
-function VRSLib:Notify(config)
-    local title  = config.Title or "VRS Artelier"
-    local desc   = config.Description or config.Content or ""
-    local dur    = config.Duration or 3.5
-    local iconId = VRSLib.Icons.Get(config.Icon or "Wings")
+function VRSLib:Notify(a1, a2, a3, a4)
+    local cfg = {}
+    local arg1, arg2, arg3, arg4 = a1, a2, a3, a4
+
+    if self ~= VRSLib and (type(self) ~= "table" or not self.CreateWindow) then
+        arg4 = arg3
+        arg3 = arg2
+        arg2 = arg1
+        arg1 = self
+    end
+
+    if type(arg1) == "table" then
+        cfg = arg1
+    elseif type(arg1) == "string" then
+        if type(arg2) == "number" then
+            cfg = { Title = "VRS Artelier", Description = arg1, Duration = arg2, Icon = arg3 }
+        elseif type(arg2) == "string" then
+            cfg = { Title = arg1, Description = arg2, Duration = tonumber(arg3) or 3.5, Icon = arg4 }
+        else
+            cfg = { Title = "VRS Artelier", Description = arg1, Duration = 3.5, Icon = arg2 }
+        end
+    else
+        cfg = { Title = "VRS Artelier", Description = tostring(arg1 or ""), Duration = 3.5 }
+    end
+
+    local title  = tostring(cfg.Title or "VRS Artelier")
+    local desc   = tostring(cfg.Description or cfg.Content or "")
+    local dur    = tonumber(cfg.Duration) or 3.5
+    local iconId = "Wings"
+    if cfg.Icon then
+        if VRSLib.Icons and type(VRSLib.Icons.Get) == "function" then
+            iconId = VRSLib.Icons.Get(cfg.Icon)
+        else
+            iconId = cfg.Icon
+        end
+    elseif VRSLib.Icons and VRSLib.Icons.Wings then
+        iconId = VRSLib.Icons.Wings
+    end
     local container = EnsureNotifyContainer()
 
     local toast = Instance.new("Frame")
@@ -310,6 +343,10 @@ end
 -- ==============================================================================
 local Window = {}
 Window.__index = Window
+
+function Window:Notify(...)
+    return VRSLib:Notify(...)
+end
 
 function VRSLib:CreateWindow(config)
     config = config or {}
