@@ -2794,7 +2794,7 @@ function Window:AddCategory(categoryName, layoutOrder)
         return self.CategoryObjects[upperName]
     end
 
-    local order = layoutOrder and ((layoutOrder < 100 and layoutOrder * 100) or layoutOrder) or (#self.Categories * 100 + 100)
+    local order = layoutOrder or (#self.Categories * 100 + 100)
 
     local CategoryObj = {
         Window    = self,
@@ -2816,7 +2816,7 @@ function Window:AddCategory(categoryName, layoutOrder)
 
     local HeaderBtn = Instance.new("TextButton")
     HeaderBtn.Name = "CategoryHeader_" .. upperName
-    HeaderBtn.Size = UDim2.new(1, 0, 0, 26)
+    HeaderBtn.Size = UDim2.new(1, 0, 0, 24)
     HeaderBtn.BackgroundTransparency = 1
     HeaderBtn.Text = ""
     HeaderBtn.AutoButtonColor = false
@@ -2825,13 +2825,13 @@ function Window:AddCategory(categoryName, layoutOrder)
     CategoryObj.Header = HeaderBtn
 
     local HeaderText = Instance.new("TextLabel")
-    HeaderText.Size = UDim2.new(1, -30, 1, 0)
-    HeaderText.Position = UDim2.new(0, 6, 0, 0)
+    HeaderText.Size = UDim2.new(1, -34, 1, 0)
+    HeaderText.Position = UDim2.new(0, 10, 0, 0)
     HeaderText.BackgroundTransparency = 1
     HeaderText.Text = upperName
     HeaderText.Font = Enum.Font.GothamBold
     HeaderText.TextSize = 10
-    HeaderText.TextColor3 = Color3.fromRGB(225, 230, 245)
+    HeaderText.TextColor3 = Color3.fromRGB(155, 165, 185)
     HeaderText.TextXAlignment = Enum.TextXAlignment.Left
     HeaderText.Parent = HeaderBtn
     ProtectLocalization(HeaderText)
@@ -2843,7 +2843,7 @@ function Window:AddCategory(categoryName, layoutOrder)
     Chevron.Position = UDim2.new(1, -16, 0.5, -6)
     Chevron.BackgroundTransparency = 1
     Chevron.Image = VRSLib.Icons.Get("chevron-down")
-    Chevron.ImageColor3 = Color3.fromRGB(225, 230, 245)
+    Chevron.ImageColor3 = Color3.fromRGB(155, 165, 185)
     Chevron.Rotation = 0
     Chevron.Parent = HeaderBtn
     CategoryObj.Chevron = Chevron
@@ -2854,7 +2854,7 @@ function Window:AddCategory(categoryName, layoutOrder)
 
         TweenService:Create(Chevron, TweenInfo.new(0.2), {
             Rotation = self.Expanded and 0 or -90,
-            ImageColor3 = self.Expanded and VRSLib.Theme.Accent or Color3.fromRGB(225, 230, 245)
+            ImageColor3 = self.Expanded and VRSLib.Theme.Accent or Color3.fromRGB(155, 165, 185)
         }):Play()
 
         for _, tab in ipairs(self.Tabs) do
@@ -2870,8 +2870,8 @@ function Window:AddCategory(categoryName, layoutOrder)
         TweenService:Create(Chevron, TweenInfo.new(0.15), { ImageColor3 = VRSLib.Theme.TextPrimary }):Play()
     end)
     HeaderBtn.MouseLeave:Connect(function()
-        TweenService:Create(HeaderText, TweenInfo.new(0.15), { TextColor3 = Color3.fromRGB(225, 230, 245) }):Play()
-        TweenService:Create(Chevron, TweenInfo.new(0.15), { ImageColor3 = self.Expanded and VRSLib.Theme.Accent or Color3.fromRGB(225, 230, 245) }):Play()
+        TweenService:Create(HeaderText, TweenInfo.new(0.15), { TextColor3 = Color3.fromRGB(155, 165, 185) }):Play()
+        TweenService:Create(Chevron, TweenInfo.new(0.15), { ImageColor3 = self.Expanded and VRSLib.Theme.Accent or Color3.fromRGB(155, 165, 185) }):Play()
     end)
     HeaderBtn.MouseButton1Click:Connect(function()
         CategoryObj:Toggle()
@@ -2930,7 +2930,7 @@ function Window:CreateSidebarTab(config)
         catObj = self:AddCategory(category)
     end
 
-    local baseCatOrder = (catObj.Order < 100 and catObj.Order * 100) or catObj.Order
+    local baseCatOrder = catObj.Order
     local layoutOrder = config.LayoutOrder or (baseCatOrder + (#catObj.Tabs + 1) * 10)
 
     local TabBtn = Instance.new("TextButton")
