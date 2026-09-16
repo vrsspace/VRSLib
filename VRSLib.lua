@@ -1630,6 +1630,45 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         local unit = ctrlConfig.Unit or ctrlConfig.Suffix or ""
         local cb = ctrlConfig.Callback or ctrlConfig.Func or function() end
 
+        local rounding = ctrlConfig.Rounding or ctrlConfig.Precision or ctrlConfig.Decimals
+        if rounding == nil then
+            if (min % 1 ~= 0) or (max % 1 ~= 0) or (def % 1 ~= 0) then
+                rounding = 2
+            else
+                rounding = 0
+            end
+        end
+
+        local function roundVal(v)
+            if rounding > 0 then
+                local mult = 10 ^ rounding
+                return math.floor(v * mult + 0.5) / mult
+            else
+                return math.floor(v + 0.5)
+            end
+        end
+
+        local function formatVal(v)
+            local rv = roundVal(v)
+            local s
+            if rounding > 0 then
+                s = string.format("%." .. tostring(rounding) .. "f", rv)
+            else
+                s = tostring(math.floor(rv + 0.5))
+            end
+            if unit ~= "" then
+                if unit == "%" or unit == "s" or unit == "ms" then
+                    return s .. unit
+                else
+                    return s .. " " .. unit
+                end
+            end
+            return s
+        end
+
+        local span = (max > min) and (max - min) or 1
+        local curVal = roundVal(def)
+
         local SFrame = Instance.new("Frame")
         SFrame.Size = UDim2.new(1, 0, 0, 42)
         SFrame.BackgroundTransparency = 1
@@ -1655,7 +1694,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         ValBadge.Size = UDim2.new(0, 65, 1, 0)
         ValBadge.Position = UDim2.new(1, -65, 0, 0)
         ValBadge.BackgroundTransparency = 1
-        ValBadge.Text = tostring(def) .. (unit ~= "" and (" " .. unit) or "")
+        ValBadge.Text = formatVal(curVal)
         ValBadge.Font = Enum.Font.GothamBold
         ValBadge.TextSize = 10.5
         ValBadge.TextColor3 = VRSLib.Theme.Accent
@@ -1683,7 +1722,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         TCorner.Parent = Track
 
         local Fill = Instance.new("Frame")
-        Fill.Size = UDim2.new(math.clamp((def - min) / (max - min), 0, 1), 0, 1, 0)
+        Fill.Size = UDim2.new(math.clamp((curVal - min) / span, 0, 1), 0, 1, 0)
         Fill.BackgroundColor3 = VRSLib.Theme.Accent
         Fill.BorderSizePixel = 0
         Fill.Parent = Track
@@ -1704,7 +1743,6 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         KCorner.Parent = Knob
 
         local dragging = false
-        local curVal = def
         local sliderObj
         local sliderCallbacks = {}
         if ctrlConfig.Callback then table.insert(sliderCallbacks, ctrlConfig.Callback) end
@@ -1712,10 +1750,10 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
 
         local function UpdateSlider(input)
             local frac = math.clamp((input.Position.X - Track.AbsolutePosition.X) / Track.AbsoluteSize.X, 0, 1)
-            curVal = math.floor(min + (max - min) * frac + 0.5)
+            curVal = roundVal(min + span * frac)
             if sliderObj then sliderObj.Value = curVal end
-            Fill.Size = UDim2.new(frac, 0, 1, 0)
-            ValBadge.Text = tostring(curVal) .. (unit ~= "" and (" " .. unit) or "")
+            Fill.Size = UDim2.new(math.clamp((curVal - min) / span, 0, 1), 0, 1, 0)
+            ValBadge.Text = formatVal(curVal)
             for _, fn in ipairs(sliderCallbacks) do
                 task.spawn(fn, curVal)
             end
@@ -1741,11 +1779,11 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         sliderObj = {
             Value = curVal,
             Set = function(val)
-                local frac = math.clamp((val - min) / (max - min), 0, 1)
-                curVal = val
-                sliderObj.Value = val
-                Fill.Size = UDim2.new(frac, 0, 1, 0)
-                ValBadge.Text = tostring(curVal) .. (unit ~= "" and (" " .. unit) or "")
+                local num = tonumber(val) or min
+                curVal = roundVal(math.clamp(num, min, max))
+                sliderObj.Value = curVal
+                Fill.Size = UDim2.new(math.clamp((curVal - min) / span, 0, 1), 0, 1, 0)
+                ValBadge.Text = formatVal(curVal)
                 task.spawn(cb, curVal)
                 for _, fn in ipairs(sliderCallbacks) do
                     task.spawn(fn, curVal)
@@ -3686,6 +3724,46 @@ function ModuleCard:AddSlider(config)
     local def      = config.Default or min
     local callback = config.Callback or function() end
 
+    local unit     = config.Unit or config.Suffix or ""
+    local rounding = config.Rounding or config.Precision or config.Decimals
+    if rounding == nil then
+        if (min % 1 ~= 0) or (max % 1 ~= 0) or (def % 1 ~= 0) then
+            rounding = 2
+        else
+            rounding = 0
+        end
+    end
+
+    local function roundVal(v)
+        if rounding > 0 then
+            local mult = 10 ^ rounding
+            return math.floor(v * mult + 0.5) / mult
+        else
+            return math.floor(v + 0.5)
+        end
+    end
+
+    local function formatVal(v)
+        local rv = roundVal(v)
+        local s
+        if rounding > 0 then
+            s = string.format("%." .. tostring(rounding) .. "f", rv)
+        else
+            s = tostring(math.floor(rv + 0.5))
+        end
+        if unit ~= "" then
+            if unit == "%" or unit == "s" or unit == "ms" then
+                return s .. unit
+            else
+                return s .. " " .. unit
+            end
+        end
+        return s
+    end
+
+    local span = (max > min) and (max - min) or 1
+    local curVal = roundVal(def)
+
     self.Frame.Size = UDim2.fromOffset(self.Frame.Size.X.Offset, 108)
 
     local SliderFrame = Instance.new("Frame")
@@ -3714,7 +3792,7 @@ function ModuleCard:AddSlider(config)
     SVal.Size = UDim2.new(0, 45, 0, 12)
     SVal.Position = UDim2.new(1, -50, 0, 2)
     SVal.BackgroundTransparency = 1
-    SVal.Text = tostring(def)
+    SVal.Text = formatVal(curVal)
     SVal.Font = Enum.Font.GothamBold
     SVal.TextSize = 9.5
     SVal.TextColor3 = VRSLib.Theme.Accent
@@ -3733,7 +3811,7 @@ function ModuleCard:AddSlider(config)
     BarCorner.Parent = Bar
 
     local Fill = Instance.new("Frame")
-    local initRatio = math.clamp((def - min) / (max - min), 0, 1)
+    local initRatio = math.clamp((curVal - min) / span, 0, 1)
     Fill.Size = UDim2.new(initRatio, 0, 1, 0)
     Fill.BackgroundColor3 = VRSLib.Theme.Accent
     Fill.BorderSizePixel = 0
@@ -3747,10 +3825,10 @@ function ModuleCard:AddSlider(config)
     local function Update(input)
         local posX = math.clamp(input.Position.X - Bar.AbsolutePosition.X, 0, Bar.AbsoluteSize.X)
         local ratio = posX / Bar.AbsoluteSize.X
-        local val = math.floor(min + (max - min) * ratio)
-        Fill.Size = UDim2.new(ratio, 0, 1, 0)
-        SVal.Text = tostring(val)
-        task.spawn(callback, val)
+        curVal = roundVal(min + span * ratio)
+        Fill.Size = UDim2.new(math.clamp((curVal - min) / span, 0, 1), 0, 1, 0)
+        SVal.Text = formatVal(curVal)
+        task.spawn(callback, curVal)
     end
 
     Bar.InputBegan:Connect(function(input)
