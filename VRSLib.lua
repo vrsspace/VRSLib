@@ -26,7 +26,7 @@ local RunService       = cloneref(game:GetService("RunService"))
 local LocalPlayer      = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
 local VRSLib = {
-    Version = "1.2.4",
+    Version = "1.2.5",
     Theme = {
         Background      = Color3.fromRGB(13, 14, 19),
         Sidebar         = Color3.fromRGB(16, 17, 24),
@@ -469,15 +469,16 @@ function VRSLib:CreateWindow(config)
         TweenService:Create(WingsLogo, TweenInfo.new(0.2), { Size = UDim2.fromOffset(54, 40) }):Play()
     end)
 
-    -- Live Search Input Box: [ 🔍 Search modules... ] (Pusat / Centered)
+    -- Live Search Input Box: Left-aligned in Content Area (Position 236px, perfectly anchored)
     local SearchFrame = Instance.new("Frame")
     SearchFrame.Name = "SearchBox"
-    SearchFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-    SearchFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-    SearchFrame.Size = UDim2.new(0, 260, 0, 28)
+    SearchFrame.AnchorPoint = Vector2.new(0, 0.5)
+    SearchFrame.Position = UDim2.new(0, 236, 0.5, 0)
+    SearchFrame.Size = UDim2.new(0, 285, 0, 30)
     SearchFrame.BackgroundColor3 = VRSLib.Theme.InputBackground
     SearchFrame.BorderSizePixel = 0
     SearchFrame.Parent = Topbar
+    self.SearchFrame = SearchFrame
 
     local SearchCorner = Instance.new("UICorner")
     SearchCorner.CornerRadius = UDim.new(0, 6)
@@ -490,17 +491,17 @@ function VRSLib:CreateWindow(config)
 
     local SearchIcon = Instance.new("ImageLabel")
     SearchIcon.Size = UDim2.fromOffset(13, 13)
-    SearchIcon.Position = UDim2.new(0, 8, 0.5, -6.5)
+    SearchIcon.Position = UDim2.new(0, 10, 0.5, -6.5)
     SearchIcon.BackgroundTransparency = 1
     SearchIcon.Image = VRSLib.Icons.Get("search")
     SearchIcon.ImageColor3 = VRSLib.Theme.TextMuted
     SearchIcon.Parent = SearchFrame
 
     local SearchInput = Instance.new("TextBox")
-    SearchInput.Size = UDim2.new(1, -30, 1, 0)
-    SearchInput.Position = UDim2.new(0, 26, 0, 0)
+    SearchInput.Size = UDim2.new(1, -62, 1, 0)
+    SearchInput.Position = UDim2.new(0, 30, 0, 0)
     SearchInput.BackgroundTransparency = 1
-    SearchInput.Font = Enum.Font.Gotham
+    SearchInput.Font = Enum.Font.GothamMedium
     SearchInput.PlaceholderText = "Search modules..."
     SearchInput.PlaceholderColor3 = VRSLib.Theme.TextMuted
     SearchInput.Text = ""
@@ -511,8 +512,68 @@ function VRSLib:CreateWindow(config)
     SearchInput.Parent = SearchFrame
     ProtectLocalization(SearchInput)
 
+    local ClearBtn = Instance.new("ImageButton")
+    ClearBtn.Name = "ClearSearch"
+    ClearBtn.Size = UDim2.fromOffset(14, 14)
+    ClearBtn.Position = UDim2.new(1, -24, 0.5, -7)
+    ClearBtn.BackgroundTransparency = 1
+    ClearBtn.Image = VRSLib.Icons.Get("close")
+    ClearBtn.ImageColor3 = VRSLib.Theme.TextMuted
+    ClearBtn.Visible = false
+    ClearBtn.Parent = SearchFrame
+
+    ClearBtn.MouseButton1Click:Connect(function()
+        SearchInput.Text = ""
+        self:FilterModules("")
+    end)
+
+    local ShortcutPill = Instance.new("Frame")
+    ShortcutPill.Name = "ShortcutPill"
+    ShortcutPill.Size = UDim2.fromOffset(18, 18)
+    ShortcutPill.Position = UDim2.new(1, -26, 0.5, -9)
+    ShortcutPill.BackgroundColor3 = VRSLib.Theme.Card
+    ShortcutPill.BorderSizePixel = 0
+    ShortcutPill.Parent = SearchFrame
+
+    local SPCorner = Instance.new("UICorner")
+    SPCorner.CornerRadius = UDim.new(0, 4)
+    SPCorner.Parent = ShortcutPill
+
+    local SPText = Instance.new("TextLabel")
+    SPText.Size = UDim2.new(1, 0, 1, 0)
+    SPText.BackgroundTransparency = 1
+    SPText.Text = "/"
+    SPText.Font = Enum.Font.GothamBold
+    SPText.TextSize = 10
+    SPText.TextColor3 = VRSLib.Theme.TextMuted
+    SPText.Parent = ShortcutPill
+    ProtectLocalization(SPText)
+
+    SearchInput.Focused:Connect(function()
+        TweenService:Create(SearchStroke, TweenInfo.new(0.15), { Color = VRSLib.Theme.Accent }):Play()
+        TweenService:Create(SearchIcon, TweenInfo.new(0.15), { ImageColor3 = VRSLib.Theme.Accent }):Play()
+    end)
+    SearchInput.FocusLost:Connect(function()
+        TweenService:Create(SearchStroke, TweenInfo.new(0.15), { Color = VRSLib.Theme.InputStroke }):Play()
+        TweenService:Create(SearchIcon, TweenInfo.new(0.15), { ImageColor3 = VRSLib.Theme.TextMuted }):Play()
+    end)
+
     SearchInput:GetPropertyChangedSignal("Text"):Connect(function()
-        self:FilterModules(SearchInput.Text)
+        local txt = SearchInput.Text
+        local hasText = txt ~= ""
+        ClearBtn.Visible = hasText
+        ShortcutPill.Visible = not hasText
+        self:FilterModules(txt)
+    end)
+
+    UserInputService.InputBegan:Connect(function(input, processed)
+        if not processed and input.KeyCode == Enum.KeyCode.Slash then
+            task.defer(function()
+                if SearchInput and SearchInput.Parent then
+                    SearchInput:CaptureFocus()
+                end
+            end)
+        end
     end)
 
     -- Window Controls (-, ⛶, ✕)
@@ -1192,6 +1253,13 @@ function Window:ToggleSidebar(collapsed)
         Position = UDim2.new(0, targetContentX, 0, 0),
         Size = UDim2.new(1, targetContentW, 1, 0)
     }):Play()
+
+    if self.SearchFrame then
+        local targetSearchX = collapsed and 16 or 236
+        TweenService:Create(self.SearchFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+            Position = UDim2.new(0, targetSearchX, 0.5, 0)
+        }):Play()
+    end
 
     if self.SidebarToggleBtn then
         TweenService:Create(self.SidebarToggleBtn, TweenInfo.new(0.2), {

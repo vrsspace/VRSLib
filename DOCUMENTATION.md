@@ -1,6 +1,6 @@
 # 🌸 VRS Artelier UI Library — Developer Documentation
 
-Welcome to the official developer guide for **VRSLib (v1.2.4)**. VRSLib is a high-performance, modular Roblox UI library designed with the **Obsidian/404hub desktop architecture**, featuring a sleek Cyber-Dark aesthetic, 100% Signature Neon Magenta Pink (`#FF408C`), dynamic 3–6 column reflow, free corner drag-resizing, and zero-compromise execution safety.
+Welcome to the official developer guide for **VRSLib (v1.2.5)**. VRSLib is a high-performance, modular Roblox UI library designed with the **Obsidian/404hub desktop architecture**, featuring a sleek Cyber-Dark aesthetic, 100% Signature Neon Magenta Pink (`#FF408C`), dynamic 3–6 column reflow, free corner drag-resizing, and zero-compromise execution safety.
 
 ---
 
@@ -39,13 +39,13 @@ Welcome to the official developer guide for **VRSLib (v1.2.4)**. VRSLib is a hig
 Untuk memuat VRSLib langsung ke executor Anda:
 
 ```lua
-local repo = "https://raw.githubusercontent.com/vrsspace/VRSLib/v1.2.4/"
+local repo = "https://raw.githubusercontent.com/vrsspace/VRSLib/v1.2.5/"
 local VRSLib = loadstring(game:HttpGet(repo .. "VRSLib.lua?v=" .. tick()))()
 
 -- Buat Window
 local Window = VRSLib:CreateWindow({
     Title    = "VRS Artelier",
-    SubTitle = "v1.2.4",
+    SubTitle = "v1.2.5",
     Size     = UDim2.fromOffset(1020, 620),
     Accent   = Color3.fromRGB(255, 64, 140),
     Keybind  = Enum.KeyCode.RightControl
