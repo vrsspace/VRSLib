@@ -41,10 +41,10 @@ local VRSLib = {
         AccentHover     = Color3.fromRGB(255, 96, 160),
         AccentGlow      = Color3.fromRGB(255, 64, 140),
         Outline         = Color3.fromRGB(28, 30, 44),
-        TextPrimary     = Color3.fromRGB(242, 244, 252),
-        TextMuted       = Color3.fromRGB(120, 125, 150),
+        TextPrimary     = Color3.fromRGB(255, 255, 255),
+        TextMuted       = Color3.fromRGB(222, 228, 242),
         BadgeBackground = Color3.fromRGB(24, 25, 38),
-        BadgeText       = Color3.fromRGB(165, 170, 195),
+        BadgeText       = Color3.fromRGB(255, 255, 255),
         SwitchOff       = Color3.fromRGB(34, 36, 50),
         SwitchOffKnob   = Color3.fromRGB(115, 120, 140),
         SwitchOnKnob    = Color3.fromRGB(255, 255, 255),
@@ -313,7 +313,7 @@ function VRSLib:Notify(a1, a2, a3, a4)
     dLbl.Position = UDim2.new(0, 42, 0, 28)
     dLbl.BackgroundTransparency = 1
     dLbl.Text = desc
-    dLbl.Font = Enum.Font.Gotham
+    dLbl.Font = Enum.Font.GothamMedium
     dLbl.TextSize = 11
     dLbl.TextColor3 = VRSLib.Theme.TextMuted
     dLbl.TextXAlignment = Enum.TextXAlignment.Left
@@ -816,7 +816,7 @@ function VRSLib:CreateWindow(config)
     BreadcrumbCategory.AutomaticSize = Enum.AutomaticSize.X
     BreadcrumbCategory.BackgroundTransparency = 1
     BreadcrumbCategory.Text = "QUICK / "
-    BreadcrumbCategory.Font = Enum.Font.Gotham
+    BreadcrumbCategory.Font = Enum.Font.GothamMedium
     BreadcrumbCategory.TextSize = 11.5
     BreadcrumbCategory.TextColor3 = VRSLib.Theme.TextMuted
     BreadcrumbCategory.TextXAlignment = Enum.TextXAlignment.Left
@@ -994,7 +994,7 @@ function VRSLib:CreateWindow(config)
     EmptyState.Position = UDim2.new(0, 16, 0, 60)
     EmptyState.BackgroundTransparency = 1
     EmptyState.Text = "No matching modules found"
-    EmptyState.Font = Enum.Font.Gotham
+    EmptyState.Font = Enum.Font.GothamMedium
     EmptyState.TextSize = 12
     EmptyState.TextColor3 = VRSLib.Theme.TextMuted
     EmptyState.Visible = false
@@ -1863,7 +1863,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         SelText.Position = UDim2.new(0, 8, 0, 0)
         SelText.BackgroundTransparency = 1
         SelText.Text = getSummary()
-        SelText.Font = Enum.Font.Gotham
+        SelText.Font = Enum.Font.GothamMedium
         SelText.TextSize = 10.5
         SelText.TextColor3 = VRSLib.Theme.TextPrimary
         SelText.TextXAlignment = Enum.TextXAlignment.Left
@@ -1978,7 +1978,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
             OptBtn.Size = UDim2.new(1, 0, 0, 24)
             OptBtn.BackgroundTransparency = 1
             OptBtn.Text = (isMulti and (curSel[val] and "[x] " or "[ ] ") or "") .. tostring(val)
-            OptBtn.Font = Enum.Font.Gotham
+            OptBtn.Font = Enum.Font.GothamMedium
             OptBtn.TextSize = 10.5
             local isSelected = isMulti and (curSel[val] == true) or (tostring(val) == tostring(curSel))
             OptBtn.TextColor3 = (isSelected and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted)
@@ -2065,7 +2065,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                         OptBtn.Size = UDim2.new(1, 0, 0, 24)
                         OptBtn.BackgroundTransparency = 1
                         OptBtn.Text = (isMulti and (curSel[val] and "[x] " or "[ ] ") or "") .. tostring(val)
-                        OptBtn.Font = Enum.Font.Gotham
+                        OptBtn.Font = Enum.Font.GothamMedium
                         OptBtn.TextSize = 10.5
                         local isSelected = isMulti and (curSel[val] == true) or (tostring(val) == tostring(curSel))
                         OptBtn.TextColor3 = (isSelected and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted)
@@ -2166,20 +2166,20 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         }
     end
 
-    -- 6. AddLabel (Text line - Supports Chained AddKeyPicker)
+    -- 6. AddLabel (Text line - Supports Chained Interactive AddKeyPicker)
     function BoxObj:AddLabel(ctrlConfig, optionalColor)
         local cText = (type(ctrlConfig) == "string" and ctrlConfig) or (ctrlConfig and (ctrlConfig.Text or ctrlConfig.Title)) or "Label"
         local cColor = (type(ctrlConfig) == "table" and ctrlConfig.Color) or (typeof(optionalColor) == "Color3" and optionalColor) or VRSLib.Theme.TextMuted
 
         local Lbl = Instance.new("TextLabel")
         local isMulti = tostring(cText):find("\n") ~= nil or optionalColor == true
-        Lbl.Size = isMulti and UDim2.new(1, 0, 0, 0) or UDim2.new(1, 0, 0, 18)
+        Lbl.Size = isMulti and UDim2.new(1, 0, 0, 0) or UDim2.new(1, 0, 0, 22)
         Lbl.AutomaticSize = isMulti and Enum.AutomaticSize.Y or Enum.AutomaticSize.None
         Lbl.TextWrapped = isMulti
         Lbl.BackgroundTransparency = 1
         Lbl.Text = cText
-        Lbl.Font = Enum.Font.Gotham
-        Lbl.TextSize = 10.5
+        Lbl.Font = Enum.Font.GothamMedium
+        Lbl.TextSize = 11
         Lbl.TextColor3 = (typeof(optionalColor) == "Color3" and optionalColor) or cColor
         Lbl.TextXAlignment = Enum.TextXAlignment.Left
         Lbl.TextTruncate = isMulti and Enum.TextTruncate.None or Enum.TextTruncate.AtEnd
@@ -2211,18 +2211,107 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                 local id = (type(selfOrId) == "string" and selfOrId) or (type(idOrCfg) == "string" and idOrCfg) or "Keybind"
                 local cfg = (type(idOrCfg) == "table" and idOrCfg) or optionalCfg or {}
                 local keyName = cfg.Default or "RightControl"
-                local keyObj = {
-                    Value = keyName,
-                    SetValue = function(self, v)
-                        if type(v) == "table" then v = v[1] end
-                        self.Value = tostring(v)
+                if type(keyName) == "table" then keyName = keyName[1] or "RightControl" end
+                keyName = tostring(keyName)
+
+                local win = BoxObj.Window or (self and self.Window) or (VRSLib.Windows and VRSLib.Windows[1])
+
+                local KeyBtn = Instance.new("TextButton")
+                KeyBtn.Name = "KeyPicker_" .. tostring(id)
+                KeyBtn.Size = UDim2.new(0, 90, 0, 20)
+                KeyBtn.Position = UDim2.new(1, -90, 0.5, -10)
+                KeyBtn.BackgroundColor3 = VRSLib.Theme.InputBackground
+                KeyBtn.BorderSizePixel = 0
+                KeyBtn.Font = Enum.Font.GothamMedium
+                KeyBtn.Text = "[" .. tostring(keyName) .. "]"
+                KeyBtn.TextColor3 = VRSLib.Theme.TextPrimary
+                KeyBtn.TextSize = 11
+                KeyBtn.AutoButtonColor = false
+                KeyBtn.ZIndex = 5
+                KeyBtn.Parent = Lbl
+
+                local KBCorner = Instance.new("UICorner")
+                KBCorner.CornerRadius = UDim.new(0, 4)
+                KBCorner.Parent = KeyBtn
+
+                local KBStroke = Instance.new("UIStroke")
+                KBStroke.Color = VRSLib.Theme.InputStroke
+                KBStroke.Thickness = 1
+                KBStroke.Parent = KeyBtn
+
+                local keyObj
+                local callbacks = {}
+                if cfg.Callback then table.insert(callbacks, cfg.Callback) end
+                if cfg.Func then table.insert(callbacks, cfg.Func) end
+
+                local listening = false
+                local conn = nil
+
+                local function setKey(newKeyName)
+                    keyName = tostring(newKeyName)
+                    keyObj.Value = keyName
+                    KeyBtn.Text = "[" .. keyName .. "]"
+                    KeyBtn.TextColor3 = VRSLib.Theme.TextPrimary
+                    KBStroke.Color = VRSLib.Theme.InputStroke
+
+                    if id == "MenuKeybind" or id == "ToggleKeybind" or cfg.SyncToggle then
+                        local kc = Enum.KeyCode[keyName]
+                        if kc and win then
+                            win.Keybind = kc
+                        end
                     end
+
+                    for _, fn in ipairs(callbacks) do
+                        task.spawn(fn, keyName)
+                    end
+                    for _, fn in ipairs(keyObj._vrsListeners or {}) do
+                        task.spawn(fn, keyName)
+                    end
+                    local autoSave = (getgenv and getgenv().requestAutoSave) or _G.requestAutoSave
+                    if autoSave then autoSave() end
+                end
+
+                KeyBtn.MouseButton1Click:Connect(function()
+                    if listening then return end
+                    listening = true
+                    KeyBtn.Text = "[...]"
+                    KeyBtn.TextColor3 = VRSLib.Theme.Accent
+                    KBStroke.Color = VRSLib.Theme.Accent
+
+                    conn = UserInputService.InputBegan:Connect(function(input, gpe)
+                        if input.UserInputType == Enum.UserInputType.Keyboard then
+                            if input.KeyCode == Enum.KeyCode.Escape then
+                                listening = false
+                                if conn then conn:Disconnect() conn = nil end
+                                setKey("None")
+                            else
+                                listening = false
+                                if conn then conn:Disconnect() conn = nil end
+                                setKey(input.KeyCode.Name)
+                            end
+                        end
+                    end)
+                end)
+
+                keyObj = {
+                    Value = keyName,
+                    SetValue = function(selfOrVal, maybeVal)
+                        local v = (maybeVal ~= nil and maybeVal) or selfOrVal
+                        if type(v) == "table" then v = v[1] or v.key or "RightControl" end
+                        setKey(tostring(v))
+                    end,
+                    OnChanged = function(selfOrFn, maybeFn)
+                        local fn = maybeFn or selfOrFn
+                        if type(fn) == "function" then table.insert(callbacks, fn) end
+                        return keyObj
+                    end,
+                    Button = KeyBtn
                 }
-                local win = BoxObj.Window or (self and self.Window)
+
                 if win and win.Options then win.Options[id] = keyObj end
                 if VRSLib and VRSLib.Options then VRSLib.Options[id] = keyObj end
                 if _G.Options then _G.Options[id] = keyObj end
-                if getgenv then getgenv().Options[id] = keyObj end
+                if getgenv and getgenv().Options then getgenv().Options[id] = keyObj end
                 return keyObj
             end,
             Frame = Lbl
@@ -2230,21 +2319,135 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         return labelObj
     end
 
-    -- 7. AddKeyPicker
+    -- 7. AddKeyPicker (Direct interactive row)
     function BoxObj:AddKeyPicker(idOrConfig, optionalConfig)
-        local id = (type(idOrConfig) == "string" and idOrConfig) or (idOrConfig and idOrConfig.Id) or "Keybind"
-        local cfg = (type(idOrConfig) == "table" and idOrConfig) or optionalConfig or {}
+        local id, cfg
+        if type(idOrConfig) == "string" then
+            id = idOrConfig
+            cfg = optionalConfig or {}
+        else
+            cfg = idOrConfig or {}
+            id = cfg.Id or cfg.Title or cfg.Text or "Keybind"
+        end
+
+        local cTitle = cfg.Title or cfg.Text or tostring(id)
         local keyName = cfg.Default or "RightControl"
-        local keyObj = {
-            Value = keyName,
-            SetValue = function(self, v)
-                if type(v) == "table" then v = v[1] end
-                self.Value = tostring(v)
+        if type(keyName) == "table" then keyName = keyName[1] or "RightControl" end
+        keyName = tostring(keyName)
+
+        local Row = Instance.new("Frame")
+        Row.Size = UDim2.new(1, 0, 0, 26)
+        Row.BackgroundTransparency = 1
+        Row.Parent = Content
+
+        local Lbl = Instance.new("TextLabel")
+        Lbl.Size = UDim2.new(1, -95, 1, 0)
+        Lbl.BackgroundTransparency = 1
+        Lbl.Text = cTitle
+        Lbl.Font = Enum.Font.GothamMedium
+        Lbl.TextSize = 11
+        Lbl.TextColor3 = VRSLib.Theme.TextPrimary
+        Lbl.TextXAlignment = Enum.TextXAlignment.Left
+        Lbl.Parent = Row
+        ProtectLocalization(Lbl)
+
+        local KeyBtn = Instance.new("TextButton")
+        KeyBtn.Name = "KeyPicker_" .. tostring(id)
+        KeyBtn.Size = UDim2.new(0, 90, 0, 20)
+        KeyBtn.Position = UDim2.new(1, -90, 0.5, -10)
+        KeyBtn.BackgroundColor3 = VRSLib.Theme.InputBackground
+        KeyBtn.BorderSizePixel = 0
+        KeyBtn.Font = Enum.Font.GothamMedium
+        KeyBtn.Text = "[" .. tostring(keyName) .. "]"
+        KeyBtn.TextColor3 = VRSLib.Theme.TextPrimary
+        KeyBtn.TextSize = 11
+        KeyBtn.AutoButtonColor = false
+        KeyBtn.Parent = Row
+
+        local KBCorner = Instance.new("UICorner")
+        KBCorner.CornerRadius = UDim.new(0, 4)
+        KBCorner.Parent = KeyBtn
+
+        local KBStroke = Instance.new("UIStroke")
+        KBStroke.Color = VRSLib.Theme.InputStroke
+        KBStroke.Thickness = 1
+        KBStroke.Parent = KeyBtn
+
+        local win = self.Window
+        local keyObj
+        local callbacks = {}
+        if cfg.Callback then table.insert(callbacks, cfg.Callback) end
+        if cfg.Func then table.insert(callbacks, cfg.Func) end
+
+        local listening = false
+        local conn = nil
+
+        local function setKey(newKeyName)
+            keyName = tostring(newKeyName)
+            keyObj.Value = keyName
+            KeyBtn.Text = "[" .. keyName .. "]"
+            KeyBtn.TextColor3 = VRSLib.Theme.TextPrimary
+            KBStroke.Color = VRSLib.Theme.InputStroke
+
+            if id == "MenuKeybind" or id == "ToggleKeybind" or cfg.SyncToggle then
+                local kc = Enum.KeyCode[keyName]
+                if kc and win then
+                    win.Keybind = kc
+                end
             end
+
+            for _, fn in ipairs(callbacks) do
+                task.spawn(fn, keyName)
+            end
+            for _, fn in ipairs(keyObj._vrsListeners or {}) do
+                task.spawn(fn, keyName)
+            end
+            local autoSave = (getgenv and getgenv().requestAutoSave) or _G.requestAutoSave
+            if autoSave then autoSave() end
+        end
+
+        KeyBtn.MouseButton1Click:Connect(function()
+            if listening then return end
+            listening = true
+            KeyBtn.Text = "[...]"
+            KeyBtn.TextColor3 = VRSLib.Theme.Accent
+            KBStroke.Color = VRSLib.Theme.Accent
+
+            conn = UserInputService.InputBegan:Connect(function(input, gpe)
+                if input.UserInputType == Enum.UserInputType.Keyboard then
+                    if input.KeyCode == Enum.KeyCode.Escape then
+                        listening = false
+                        if conn then conn:Disconnect() conn = nil end
+                        setKey("None")
+                    else
+                        listening = false
+                        if conn then conn:Disconnect() conn = nil end
+                        setKey(input.KeyCode.Name)
+                    end
+                end
+            end)
+        end)
+
+        keyObj = {
+            Value = keyName,
+            SetValue = function(selfOrVal, maybeVal)
+                local v = (maybeVal ~= nil and maybeVal) or selfOrVal
+                if type(v) == "table" then v = v[1] or v.key or "RightControl" end
+                setKey(tostring(v))
+            end,
+            OnChanged = function(selfOrFn, maybeFn)
+                local fn = maybeFn or selfOrFn
+                if type(fn) == "function" then table.insert(callbacks, fn) end
+                return keyObj
+            end,
+            Frame = Row,
+            Button = KeyBtn
         }
+
         if self.Window.Options then self.Window.Options[id] = keyObj end
+        if VRSLib.Options then VRSLib.Options[id] = keyObj end
         if _G.Options then _G.Options[id] = keyObj end
-        if getgenv then getgenv().Options[id] = keyObj end
+        if getgenv and getgenv().Options then getgenv().Options[id] = keyObj end
         return keyObj
     end
 
@@ -2376,7 +2579,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         TBox.BackgroundTransparency = 1
         TBox.Text = tostring(defVal)
         TBox.PlaceholderText = placeholder
-        TBox.Font = Enum.Font.Gotham
+        TBox.Font = Enum.Font.GothamMedium
         TBox.TextSize = 10.5
         TBox.TextColor3 = VRSLib.Theme.TextPrimary
         TBox.PlaceholderColor3 = Color3.fromRGB(100, 105, 125)
@@ -3329,7 +3532,7 @@ function Window:AddModule(tabOrConfig, optionalConfig)
     DescLabel.Position = UDim2.new(0, 8, 0, 33)
     DescLabel.BackgroundTransparency = 1
     DescLabel.Text = desc
-    DescLabel.Font = Enum.Font.Gotham
+    DescLabel.Font = Enum.Font.GothamMedium
     DescLabel.TextSize = 9.5
     DescLabel.TextColor3 = VRSLib.Theme.TextMuted
     DescLabel.TextXAlignment = Enum.TextXAlignment.Left
