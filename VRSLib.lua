@@ -1929,9 +1929,9 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         local function refreshBtnColors()
             for _, btn in ipairs(optBtns) do
                 local val = btn:GetAttribute("Val")
-                local active = isMulti and (curSel[val] == true) or (tostring(val) == tostring(curSel))
-                btn.TextColor3 = active and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted
-                btn.Text = (isMulti and (active and "✓ " or "  ") or "") .. tostring(val)
+                local isSelected = isMulti and (curSel[val] == true) or (tostring(val) == tostring(curSel))
+                btn.TextColor3 = isSelected and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted
+                btn.Text = (isMulti and (isSelected and "[x] " or "[ ] ") or "") .. tostring(val)
             end
         end
 
@@ -1976,7 +1976,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
             local OptBtn = Instance.new("TextButton")
             OptBtn.Size = UDim2.new(1, 0, 0, 24)
             OptBtn.BackgroundTransparency = 1
-            OptBtn.Text = (isMulti and (curSel[val] and "✓ " or "  ") or "") .. tostring(val)
+            OptBtn.Text = (isMulti and (curSel[val] and "[x] " or "[ ] ") or "") .. tostring(val)
             OptBtn.Font = Enum.Font.Gotham
             OptBtn.TextSize = 10.5
             local isSelected = isMulti and (curSel[val] == true) or (tostring(val) == tostring(curSel))
@@ -2063,7 +2063,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                         local OptBtn = Instance.new("TextButton")
                         OptBtn.Size = UDim2.new(1, 0, 0, 24)
                         OptBtn.BackgroundTransparency = 1
-                        OptBtn.Text = (isMulti and (curSel[val] and "✓ " or "  ") or "") .. tostring(val)
+                        OptBtn.Text = (isMulti and (curSel[val] and "[x] " or "[ ] ") or "") .. tostring(val)
                         OptBtn.Font = Enum.Font.Gotham
                         OptBtn.TextSize = 10.5
                         local isSelected = isMulti and (curSel[val] == true) or (tostring(val) == tostring(curSel))
@@ -3579,10 +3579,10 @@ function Window:FilterModules(query)
         self.EmptyState.Text = "No matching modules found"
         self.EmptyState.Visible = not hasVisibleCards
     elseif isPinnedTab and not hasVisibleCards then
-        self.EmptyState.Text = "No pinned modules yet — click ⭐ on any card to pin!"
+        self.EmptyState.Text = "No pinned modules yet — pin cards using card actions!"
         self.EmptyState.Visible = true
     elseif isActiveTab and not hasVisibleCards then
-        self.EmptyState.Text = "No active modules right now — turn on any toggle to see it here!"
+        self.EmptyState.Text = "No active modules right now — turn on any toggle to see cards here."
         self.EmptyState.Visible = true
     else
         self.EmptyState.Visible = false
