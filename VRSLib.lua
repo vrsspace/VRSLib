@@ -26,7 +26,7 @@ local RunService       = cloneref(game:GetService("RunService"))
 local LocalPlayer      = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
 local VRSLib = {
-    Version = "1.2.6",
+    Version = "1.3.0",
     Theme = {
         Background      = Color3.fromRGB(13, 14, 19),
         Sidebar         = Color3.fromRGB(16, 17, 24),
@@ -42,7 +42,7 @@ local VRSLib = {
         AccentGlow      = Color3.fromRGB(255, 64, 140),
         Outline         = Color3.fromRGB(28, 30, 44),
         TextPrimary     = Color3.fromRGB(255, 255, 255),
-        TextMuted       = Color3.fromRGB(222, 228, 242),
+        TextMuted       = Color3.fromRGB(228, 234, 248),
         BadgeBackground = Color3.fromRGB(24, 25, 38),
         BadgeText       = Color3.fromRGB(255, 255, 255),
         SwitchOff       = Color3.fromRGB(34, 36, 50),
@@ -818,7 +818,7 @@ function VRSLib:CreateWindow(config)
     BreadcrumbCategory.Text = "QUICK / "
     BreadcrumbCategory.Font = Enum.Font.GothamMedium
     BreadcrumbCategory.TextSize = 11.5
-    BreadcrumbCategory.TextColor3 = VRSLib.Theme.TextMuted
+    BreadcrumbCategory.TextColor3 = Color3.fromRGB(225, 230, 245)
     BreadcrumbCategory.TextXAlignment = Enum.TextXAlignment.Left
     BreadcrumbCategory.Parent = BreadcrumbBox
     ProtectLocalization(BreadcrumbCategory)
@@ -1040,7 +1040,7 @@ function VRSLib:CreateWindow(config)
     FooterLabel.Text = "Copyright © VRS Artelier | " .. initialGame
     FooterLabel.Font = Enum.Font.GothamMedium
     FooterLabel.TextSize = 10.5
-    FooterLabel.TextColor3 = Color3.fromRGB(170, 175, 195)
+    FooterLabel.TextColor3 = Color3.fromRGB(225, 230, 245)
     FooterLabel.TextXAlignment = Enum.TextXAlignment.Center
     FooterLabel.TextTruncate = Enum.TextTruncate.AtEnd
     FooterLabel.ZIndex = 30
@@ -1051,7 +1051,7 @@ function VRSLib:CreateWindow(config)
         TweenService:Create(FooterLabel, TweenInfo.new(0.15), { TextColor3 = VRSLib.Theme.Accent }):Play()
     end)
     FooterLabel.MouseLeave:Connect(function()
-        TweenService:Create(FooterLabel, TweenInfo.new(0.15), { TextColor3 = Color3.fromRGB(170, 175, 195) }):Play()
+        TweenService:Create(FooterLabel, TweenInfo.new(0.15), { TextColor3 = Color3.fromRGB(225, 230, 245) }):Play()
     end)
 
     -- Auto-Detect Live Game Title from game.PlaceId via MarketplaceService
@@ -1423,8 +1423,8 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         Lbl.BackgroundTransparency = 1
         Lbl.Text = cTitle
         Lbl.Font = Enum.Font.GothamMedium
-        Lbl.TextSize = 11
-        Lbl.TextColor3 = VRSLib.Theme.TextMuted
+        Lbl.TextSize = 11.5
+        Lbl.TextColor3 = VRSLib.Theme.TextPrimary
         Lbl.TextXAlignment = Enum.TextXAlignment.Left
         Lbl.Parent = Row
         ProtectLocalization(Lbl)
@@ -1644,8 +1644,8 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         TitleLbl.BackgroundTransparency = 1
         TitleLbl.Text = cTitle
         TitleLbl.Font = Enum.Font.GothamMedium
-        TitleLbl.TextSize = 11
-        TitleLbl.TextColor3 = VRSLib.Theme.TextMuted
+        TitleLbl.TextSize = 11.5
+        TitleLbl.TextColor3 = VRSLib.Theme.TextPrimary
         TitleLbl.TextXAlignment = Enum.TextXAlignment.Left
         TitleLbl.Parent = TopRow
         ProtectLocalization(TitleLbl)
@@ -1821,8 +1821,8 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         Lbl.BackgroundTransparency = 1
         Lbl.Text = cTitle
         Lbl.Font = Enum.Font.GothamMedium
-        Lbl.TextSize = 10.5
-        Lbl.TextColor3 = VRSLib.Theme.TextMuted
+        Lbl.TextSize = 11.5
+        Lbl.TextColor3 = VRSLib.Theme.TextPrimary
         Lbl.TextXAlignment = Enum.TextXAlignment.Left
         Lbl.Parent = DFrame
         ProtectLocalization(Lbl)
@@ -1981,7 +1981,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
             OptBtn.Font = Enum.Font.GothamMedium
             OptBtn.TextSize = 10.5
             local isSelected = isMulti and (curSel[val] == true) or (tostring(val) == tostring(curSel))
-            OptBtn.TextColor3 = (isSelected and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted)
+            OptBtn.TextColor3 = (isSelected and VRSLib.Theme.Accent or VRSLib.Theme.TextPrimary)
             if isMulti then OptBtn.TextXAlignment = Enum.TextXAlignment.Left end
             OptBtn.ZIndex = 26
             OptBtn:SetAttribute("Val", val)
@@ -2068,7 +2068,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                         OptBtn.Font = Enum.Font.GothamMedium
                         OptBtn.TextSize = 10.5
                         local isSelected = isMulti and (curSel[val] == true) or (tostring(val) == tostring(curSel))
-                        OptBtn.TextColor3 = (isSelected and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted)
+                        OptBtn.TextColor3 = (isSelected and VRSLib.Theme.Accent or VRSLib.Theme.TextPrimary)
                         if isMulti then OptBtn.TextXAlignment = Enum.TextXAlignment.Left end
                         OptBtn.ZIndex = 26
                         OptBtn:SetAttribute("Val", val)
@@ -2169,7 +2169,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
     -- 6. AddLabel (Text line - Supports Chained Interactive AddKeyPicker)
     function BoxObj:AddLabel(ctrlConfig, optionalColor)
         local cText = (type(ctrlConfig) == "string" and ctrlConfig) or (ctrlConfig and (ctrlConfig.Text or ctrlConfig.Title)) or "Label"
-        local cColor = (type(ctrlConfig) == "table" and ctrlConfig.Color) or (typeof(optionalColor) == "Color3" and optionalColor) or VRSLib.Theme.TextMuted
+        local cColor = (type(ctrlConfig) == "table" and ctrlConfig.Color) or (typeof(optionalColor) == "Color3" and optionalColor) or VRSLib.Theme.TextPrimary
 
         local Lbl = Instance.new("TextLabel")
         local isMulti = tostring(cText):find("\n") ~= nil or optionalColor == true
@@ -2179,8 +2179,8 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         Lbl.BackgroundTransparency = 1
         Lbl.Text = cText
         Lbl.Font = Enum.Font.GothamMedium
-        Lbl.TextSize = 11
-        Lbl.TextColor3 = (typeof(optionalColor) == "Color3" and optionalColor) or cColor
+        Lbl.TextSize = 11.5
+        Lbl.TextColor3 = (typeof(optionalColor) == "Color3" and optionalColor) or cColor or VRSLib.Theme.TextPrimary
         Lbl.TextXAlignment = Enum.TextXAlignment.Left
         Lbl.TextTruncate = isMulti and Enum.TextTruncate.None or Enum.TextTruncate.AtEnd
         Lbl.Parent = Content
@@ -2216,13 +2216,15 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
 
                 local win = BoxObj.Window or (self and self.Window) or (VRSLib.Windows and VRSLib.Windows[1])
 
+                Lbl.Size = UDim2.new(1, 0, 0, 26)
+
                 local KeyBtn = Instance.new("TextButton")
                 KeyBtn.Name = "KeyPicker_" .. tostring(id)
-                KeyBtn.Size = UDim2.new(0, 90, 0, 20)
-                KeyBtn.Position = UDim2.new(1, -90, 0.5, -10)
+                KeyBtn.Size = UDim2.new(0, 96, 0, 22)
+                KeyBtn.Position = UDim2.new(1, -96, 0.5, -11)
                 KeyBtn.BackgroundColor3 = VRSLib.Theme.InputBackground
                 KeyBtn.BorderSizePixel = 0
-                KeyBtn.Font = Enum.Font.GothamMedium
+                KeyBtn.Font = Enum.Font.GothamBold
                 KeyBtn.Text = "[" .. tostring(keyName) .. "]"
                 KeyBtn.TextColor3 = VRSLib.Theme.TextPrimary
                 KeyBtn.TextSize = 11
@@ -2231,7 +2233,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                 KeyBtn.Parent = Lbl
 
                 local KBCorner = Instance.new("UICorner")
-                KBCorner.CornerRadius = UDim.new(0, 4)
+                KBCorner.CornerRadius = UDim.new(0, 5)
                 KBCorner.Parent = KeyBtn
 
                 local KBStroke = Instance.new("UIStroke")
@@ -2246,6 +2248,17 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
 
                 local listening = false
                 local conn = nil
+
+                KeyBtn.MouseEnter:Connect(function()
+                    if not listening then
+                        TweenService:Create(KBStroke, TweenInfo.new(0.15), { Color = VRSLib.Theme.Accent }):Play()
+                    end
+                end)
+                KeyBtn.MouseLeave:Connect(function()
+                    if not listening then
+                        TweenService:Create(KBStroke, TweenInfo.new(0.15), { Color = VRSLib.Theme.InputStroke }):Play()
+                    end
+                end)
 
                 local function setKey(newKeyName)
                     keyName = tostring(newKeyName)
@@ -2341,11 +2354,11 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         Row.Parent = Content
 
         local Lbl = Instance.new("TextLabel")
-        Lbl.Size = UDim2.new(1, -95, 1, 0)
+        Lbl.Size = UDim2.new(1, -102, 1, 0)
         Lbl.BackgroundTransparency = 1
         Lbl.Text = cTitle
         Lbl.Font = Enum.Font.GothamMedium
-        Lbl.TextSize = 11
+        Lbl.TextSize = 11.5
         Lbl.TextColor3 = VRSLib.Theme.TextPrimary
         Lbl.TextXAlignment = Enum.TextXAlignment.Left
         Lbl.Parent = Row
@@ -2353,11 +2366,11 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
 
         local KeyBtn = Instance.new("TextButton")
         KeyBtn.Name = "KeyPicker_" .. tostring(id)
-        KeyBtn.Size = UDim2.new(0, 90, 0, 20)
-        KeyBtn.Position = UDim2.new(1, -90, 0.5, -10)
+        KeyBtn.Size = UDim2.new(0, 96, 0, 22)
+        KeyBtn.Position = UDim2.new(1, -96, 0.5, -11)
         KeyBtn.BackgroundColor3 = VRSLib.Theme.InputBackground
         KeyBtn.BorderSizePixel = 0
-        KeyBtn.Font = Enum.Font.GothamMedium
+        KeyBtn.Font = Enum.Font.GothamBold
         KeyBtn.Text = "[" .. tostring(keyName) .. "]"
         KeyBtn.TextColor3 = VRSLib.Theme.TextPrimary
         KeyBtn.TextSize = 11
@@ -2365,7 +2378,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         KeyBtn.Parent = Row
 
         local KBCorner = Instance.new("UICorner")
-        KBCorner.CornerRadius = UDim.new(0, 4)
+        KBCorner.CornerRadius = UDim.new(0, 5)
         KBCorner.Parent = KeyBtn
 
         local KBStroke = Instance.new("UIStroke")
@@ -2373,7 +2386,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         KBStroke.Thickness = 1
         KBStroke.Parent = KeyBtn
 
-        local win = self.Window
+        local win = self.Window or (VRSLib.Windows and VRSLib.Windows[1])
         local keyObj
         local callbacks = {}
         if cfg.Callback then table.insert(callbacks, cfg.Callback) end
@@ -2381,6 +2394,17 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
 
         local listening = false
         local conn = nil
+
+        KeyBtn.MouseEnter:Connect(function()
+            if not listening then
+                TweenService:Create(KBStroke, TweenInfo.new(0.15), { Color = VRSLib.Theme.Accent }):Play()
+            end
+        end)
+        KeyBtn.MouseLeave:Connect(function()
+            if not listening then
+                TweenService:Create(KBStroke, TweenInfo.new(0.15), { Color = VRSLib.Theme.InputStroke }):Play()
+            end
+        end)
 
         local function setKey(newKeyName)
             keyName = tostring(newKeyName)
@@ -2444,7 +2468,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
             Button = KeyBtn
         }
 
-        if self.Window.Options then self.Window.Options[id] = keyObj end
+        if win and win.Options then win.Options[id] = keyObj end
         if VRSLib.Options then VRSLib.Options[id] = keyObj end
         if _G.Options then _G.Options[id] = keyObj end
         if getgenv and getgenv().Options then getgenv().Options[id] = keyObj end
@@ -2551,8 +2575,8 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         Lbl.BackgroundTransparency = 1
         Lbl.Text = cTitle
         Lbl.Font = Enum.Font.GothamMedium
-        Lbl.TextSize = 10.5
-        Lbl.TextColor3 = VRSLib.Theme.TextMuted
+        Lbl.TextSize = 11.5
+        Lbl.TextColor3 = VRSLib.Theme.TextPrimary
         Lbl.TextXAlignment = Enum.TextXAlignment.Left
         Lbl.Parent = IFrame
         ProtectLocalization(Lbl)
@@ -2803,7 +2827,7 @@ function Window:AddCategory(categoryName, layoutOrder)
     HeaderText.Text = upperName
     HeaderText.Font = Enum.Font.GothamBold
     HeaderText.TextSize = 10
-    HeaderText.TextColor3 = VRSLib.Theme.TextMuted
+    HeaderText.TextColor3 = Color3.fromRGB(225, 230, 245)
     HeaderText.TextXAlignment = Enum.TextXAlignment.Left
     HeaderText.Parent = HeaderBtn
     ProtectLocalization(HeaderText)
@@ -2815,7 +2839,7 @@ function Window:AddCategory(categoryName, layoutOrder)
     Chevron.Position = UDim2.new(1, -16, 0.5, -6)
     Chevron.BackgroundTransparency = 1
     Chevron.Image = VRSLib.Icons.Get("chevron-down")
-    Chevron.ImageColor3 = VRSLib.Theme.TextMuted
+    Chevron.ImageColor3 = Color3.fromRGB(225, 230, 245)
     Chevron.Rotation = 0
     Chevron.Parent = HeaderBtn
     CategoryObj.Chevron = Chevron
@@ -2826,7 +2850,7 @@ function Window:AddCategory(categoryName, layoutOrder)
 
         TweenService:Create(Chevron, TweenInfo.new(0.2), {
             Rotation = self.Expanded and 0 or -90,
-            ImageColor3 = self.Expanded and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted
+            ImageColor3 = self.Expanded and VRSLib.Theme.Accent or Color3.fromRGB(225, 230, 245)
         }):Play()
 
         for _, tab in ipairs(self.Tabs) do
@@ -2842,8 +2866,8 @@ function Window:AddCategory(categoryName, layoutOrder)
         TweenService:Create(Chevron, TweenInfo.new(0.15), { ImageColor3 = VRSLib.Theme.TextPrimary }):Play()
     end)
     HeaderBtn.MouseLeave:Connect(function()
-        TweenService:Create(HeaderText, TweenInfo.new(0.15), { TextColor3 = VRSLib.Theme.TextMuted }):Play()
-        TweenService:Create(Chevron, TweenInfo.new(0.15), { ImageColor3 = self.Expanded and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted }):Play()
+        TweenService:Create(HeaderText, TweenInfo.new(0.15), { TextColor3 = Color3.fromRGB(225, 230, 245) }):Play()
+        TweenService:Create(Chevron, TweenInfo.new(0.15), { ImageColor3 = self.Expanded and VRSLib.Theme.Accent or Color3.fromRGB(225, 230, 245) }):Play()
     end)
     HeaderBtn.MouseButton1Click:Connect(function()
         CategoryObj:Toggle()
@@ -2946,8 +2970,8 @@ function Window:CreateSidebarTab(config)
     TabLabel.BackgroundTransparency = 1
     TabLabel.Text = tabName
     TabLabel.Font = Enum.Font.GothamMedium
-    TabLabel.TextSize = 11.5
-    TabLabel.TextColor3 = VRSLib.Theme.TextMuted
+    TabLabel.TextSize = 12
+    TabLabel.TextColor3 = Color3.fromRGB(240, 244, 255)
     TabLabel.TextXAlignment = Enum.TextXAlignment.Left
     TabLabel.Parent = TabBtn
     ProtectLocalization(TabLabel)
@@ -3009,7 +3033,7 @@ function Window:CreateSidebarTab(config)
     TabBtn.MouseLeave:Connect(function()
         if self.ActiveTab ~= TabObj then
             TweenService:Create(TabBtn, TweenInfo.new(0.15), { BackgroundTransparency = 1 }):Play()
-            TweenService:Create(TabLabel, TweenInfo.new(0.15), { TextColor3 = VRSLib.Theme.TextMuted }):Play()
+            TweenService:Create(TabLabel, TweenInfo.new(0.15), { TextColor3 = Color3.fromRGB(240, 244, 255) }):Play()
         end
     end)
 
@@ -3139,7 +3163,7 @@ function Window:CreateSidebarTab(config)
         SubLabel.Text = subName
         SubLabel.Font = Enum.Font.GothamMedium
         SubLabel.TextSize = 11.5
-        SubLabel.TextColor3 = VRSLib.Theme.TextMuted
+        SubLabel.TextColor3 = Color3.fromRGB(240, 244, 255)
         SubLabel.TextXAlignment = Enum.TextXAlignment.Left
         SubLabel.Parent = SubBtn
         ProtectLocalization(SubLabel)
@@ -3207,7 +3231,7 @@ function Window:CreateSidebarTab(config)
         SubBtn.MouseLeave:Connect(function()
             if self.Window.ActiveTab ~= SubTabObj then
                 TweenService:Create(SubBtn, TweenInfo.new(0.15), { BackgroundTransparency = 1 }):Play()
-                TweenService:Create(SubLabel, TweenInfo.new(0.15), { TextColor3 = VRSLib.Theme.TextMuted }):Play()
+                TweenService:Create(SubLabel, TweenInfo.new(0.15), { TextColor3 = Color3.fromRGB(240, 244, 255) }):Play()
                 TweenService:Create(TreePip, TweenInfo.new(0.15), { BackgroundColor3 = VRSLib.Theme.Outline }):Play()
             end
         end)
