@@ -26,7 +26,7 @@ local RunService       = cloneref(game:GetService("RunService"))
 local LocalPlayer      = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
 local VRSLib = {
-    Version = "1.2.5",
+    Version = "1.2.6",
     Theme = {
         Background      = Color3.fromRGB(13, 14, 19),
         Sidebar         = Color3.fromRGB(16, 17, 24),
@@ -1755,7 +1755,14 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
 
         local cTitle = ctrlConfig.Title or ctrlConfig.Text or tostring(id)
         local values = ctrlConfig.Values or ctrlConfig.Items or {}
-        local curSel = ctrlConfig.Default or values[1] or "Select..."
+        local curSel
+        if type(ctrlConfig.Default) == "number" and values[ctrlConfig.Default] ~= nil then
+            curSel = values[ctrlConfig.Default]
+        elseif ctrlConfig.Default ~= nil then
+            curSel = ctrlConfig.Default
+        else
+            curSel = values[1] or "Select..."
+        end
         local cb = ctrlConfig.Callback or ctrlConfig.Func or function() end
 
         local DFrame = Instance.new("Frame")
@@ -1846,6 +1853,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
             TweenService:Create(Chevron, TweenInfo.new(0.15), { Rotation = isOpen and 180 or 0 }):Play()
         end
 
+        local optBtns = {}
         local dropObj
         for i, val in ipairs(values) do
             local OptBtn = Instance.new("TextButton")
@@ -1854,10 +1862,11 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
             OptBtn.Text = tostring(val)
             OptBtn.Font = Enum.Font.Gotham
             OptBtn.TextSize = 10.5
-            OptBtn.TextColor3 = (val == curSel and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted)
+            OptBtn.TextColor3 = (tostring(val) == tostring(curSel) and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted)
             OptBtn.ZIndex = 26
             OptBtn.Parent = DropList
             ProtectLocalization(OptBtn)
+            table.insert(optBtns, OptBtn)
 
             OptBtn.MouseEnter:Connect(function()
                 OptBtn.BackgroundTransparency = 0.8
@@ -1870,6 +1879,9 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                 curSel = val
                 if dropObj then dropObj.Value = val end
                 SelText.Text = tostring(val)
+                for _, opt in ipairs(optBtns) do
+                    opt.TextColor3 = (opt.Text == tostring(val) and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted)
+                end
                 ToggleDrop(false)
                 task.spawn(cb, val)
             end)
@@ -1881,9 +1893,15 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         dropObj = {
             Value = curSel,
             Set = function(val)
+                if type(val) == "number" and values[val] ~= nil then
+                    val = values[val]
+                end
                 curSel = val
                 dropObj.Value = val
                 SelText.Text = tostring(val)
+                for _, opt in ipairs(optBtns) do
+                    opt.TextColor3 = (opt.Text == tostring(val) and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted)
+                end
                 task.spawn(cb, val)
             end,
             SetValue = function(selfOrVal, maybeVal)
