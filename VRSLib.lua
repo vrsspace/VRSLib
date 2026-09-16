@@ -26,7 +26,7 @@ local RunService       = cloneref(game:GetService("RunService"))
 local LocalPlayer      = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
 local VRSLib = {
-    Version = "1.2.0",
+    Version = "1.2.1",
     Theme = {
         Background      = Color3.fromRGB(13, 14, 19),
         Sidebar         = Color3.fromRGB(16, 17, 24),
@@ -1849,7 +1849,9 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon)
                         self.Value = tostring(v)
                     end
                 }
-                if self.Window and self.Window.Options then self.Window.Options[id] = keyObj end
+                local win = BoxObj.Window or (self and self.Window)
+                if win and win.Options then win.Options[id] = keyObj end
+                if VRSLib and VRSLib.Options then VRSLib.Options[id] = keyObj end
                 if _G.Options then _G.Options[id] = keyObj end
                 if getgenv then getgenv().Options[id] = keyObj end
                 return keyObj
@@ -2056,15 +2058,17 @@ function Window:AddCategory(categoryName, layoutOrder)
         return self.CategoryObjects[upperName]
     end
 
+    local order = layoutOrder or (#self.Categories * 100 + 100)
+
     local CategoryObj = {
         Window    = self,
         Name      = upperName,
+        Order     = order,
         Expanded  = true,
         Tabs      = {},
     }
 
     -- Top spacing divider between categories (except first category)
-    local order = layoutOrder or (#self.Categories * 10 + 20)
     if #self.Categories > 0 then
         local Spacer = Instance.new("Frame")
         Spacer.Name = "CategorySpacer_" .. upperName
@@ -2183,7 +2187,14 @@ function Window:CreateSidebarTab(config)
     local tabName     = config.Name or "Tab"
     local category    = config.Category or "UNIVERSAL"
     local iconId      = VRSLib.Icons.Get(config.Icon or "Visuals")
-    local layoutOrder = config.LayoutOrder or 50
+
+    local catUpper = string.upper(category)
+    local catObj = self.CategoryObjects[catUpper]
+    if not catObj then
+        catObj = self:AddCategory(category)
+    end
+
+    local layoutOrder = config.LayoutOrder or (catObj.Order + #catObj.Tabs + 1)
 
     local TabBtn = Instance.new("TextButton")
     TabBtn.Name = "Tab_" .. tabName
@@ -2252,11 +2263,6 @@ function Window:CreateSidebarTab(config)
     BadgeText.TextColor3 = VRSLib.Theme.BadgeText
     BadgeText.Parent = Badge
     ProtectLocalization(BadgeText)
-
-    local catUpper = string.upper(category)
-    if not self.CategoryObjects[catUpper] then
-        self:AddCategory(category)
-    end
 
     local TabObj = {
         Window      = self,
