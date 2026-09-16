@@ -1369,6 +1369,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
     local BoxObj = {
         Frame = GroupCard,
         Content = Content,
+        Container = Content,
         Chevron = GChevron,
         Window = self,
         IsCollapsed = collapsed,
@@ -2562,7 +2563,7 @@ function Window:AddCategory(categoryName, layoutOrder)
         return self.CategoryObjects[upperName]
     end
 
-    local order = layoutOrder or (#self.Categories * 100 + 100)
+    local order = layoutOrder and ((layoutOrder < 100 and layoutOrder * 100) or layoutOrder) or (#self.Categories * 100 + 100)
 
     local CategoryObj = {
         Window    = self,
@@ -2698,7 +2699,8 @@ function Window:CreateSidebarTab(config)
         catObj = self:AddCategory(category)
     end
 
-    local layoutOrder = config.LayoutOrder or (catObj.Order + #catObj.Tabs + 1)
+    local baseCatOrder = (catObj.Order < 100 and catObj.Order * 100) or catObj.Order
+    local layoutOrder = config.LayoutOrder or (baseCatOrder + (#catObj.Tabs + 1) * 10)
 
     local TabBtn = Instance.new("TextButton")
     TabBtn.Name = "Tab_" .. tabName
