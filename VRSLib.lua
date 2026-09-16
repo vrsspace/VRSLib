@@ -1783,13 +1783,29 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
 
         local cTitle = ctrlConfig.Title or ctrlConfig.Text or tostring(id)
         local values = ctrlConfig.Values or ctrlConfig.Items or {}
+        local isMulti = (ctrlConfig.Multi == true or ctrlConfig.Multiselect == true)
         local curSel
-        if type(ctrlConfig.Default) == "number" and values[ctrlConfig.Default] ~= nil then
-            curSel = values[ctrlConfig.Default]
-        elseif ctrlConfig.Default ~= nil then
-            curSel = ctrlConfig.Default
+        if isMulti then
+            curSel = {}
+            if type(ctrlConfig.Default) == "table" then
+                for k, v in pairs(ctrlConfig.Default) do
+                    if type(k) == "number" and type(v) == "string" then
+                        curSel[v] = true
+                    elseif type(k) == "string" and v == true then
+                        curSel[k] = true
+                    end
+                end
+            elseif type(ctrlConfig.Default) == "string" then
+                curSel[ctrlConfig.Default] = true
+            end
         else
-            curSel = values[1] or "Select..."
+            if type(ctrlConfig.Default) == "number" and values[ctrlConfig.Default] ~= nil then
+                curSel = values[ctrlConfig.Default]
+            elseif ctrlConfig.Default ~= nil then
+                curSel = ctrlConfig.Default
+            else
+                curSel = values[1] or "Select..."
+            end
         end
         local cb = ctrlConfig.Callback or ctrlConfig.Func or function() end
 
@@ -1828,11 +1844,24 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         DStroke.Thickness = 1
         DStroke.Parent = MainBtn
 
+        local function getSummary()
+            if not isMulti then return tostring(curSel) end
+            local active = {}
+            for _, v in ipairs(values) do
+                if curSel[v] then
+                    table.insert(active, tostring(v))
+                end
+            end
+            if #active == 0 then return "None" end
+            if #active == #values and #values > 1 then return "All Selected (" .. #values .. ")" end
+            return table.concat(active, ", ")
+        end
+
         local SelText = Instance.new("TextLabel")
         SelText.Size = UDim2.new(1, -26, 1, 0)
         SelText.Position = UDim2.new(0, 8, 0, 0)
         SelText.BackgroundTransparency = 1
-        SelText.Text = tostring(curSel)
+        SelText.Text = getSummary()
         SelText.Font = Enum.Font.Gotham
         SelText.TextSize = 10.5
         SelText.TextColor3 = VRSLib.Theme.TextPrimary
@@ -1849,15 +1878,20 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         Chevron.ImageColor3 = VRSLib.Theme.TextMuted
         Chevron.Parent = MainBtn
 
-        local DropList = Instance.new("Frame")
-        DropList.Size = UDim2.new(1, 0, 0, 0)
-        DropList.Position = UDim2.new(0, 0, 1, 4)
+        local listHeight = math.min(#values * 26 + 6, 160)
+        local DropList = Instance.new("ScrollingFrame")
+        DropList.Size = UDim2.new(1, 0, 0, listHeight)
+        DropList.Position = UDim2.new(0, 0, 0, 46)
         DropList.BackgroundColor3 = VRSLib.Theme.Card
         DropList.BorderSizePixel = 0
         DropList.Visible = false
         DropList.ZIndex = 25
         DropList.ClipsDescendants = true
-        DropList.Parent = MainBtn
+        DropList.ScrollBarThickness = 3
+        DropList.ScrollBarImageColor3 = VRSLib.Theme.Accent
+        DropList.CanvasSize = UDim2.new(0, 0, 0, 0)
+        DropList.AutomaticCanvasSize = Enum.AutomaticSize.Y
+        DropList.Parent = DFrame
 
         local DLCorner = Instance.new("UICorner")
         DLCorner.CornerRadius = UDim.new(0, 5)
@@ -1877,24 +1911,79 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         local function ToggleDrop(open)
             isOpen = (open ~= nil and open) or not isOpen
             DropList.Visible = isOpen
-            DFrame.Size = UDim2.new(1, 0, 0, isOpen and (48 + #values * 26 + 6) or 48)
-            TweenService:Create(Chevron, TweenInfo.new(0.15), { Rotation = isOpen and 180 or 0 }):Play()
+            local targetH = math.min(#values * 26 + 6, 160)
+            DropList.Size = UDim2.new(1, 0, 0, targetH)
+            DFrame.Size = UDim2.new(1, 0, 0, isOpen and (48 + targetH + 6) or 48)
+            pcall(function()
+                TweenService:Create(Chevron, TweenInfo.new(0.15), { Rotation = isOpen and 180 or 0 }):Play()
+            end)
         end
+        MainBtn.MouseButton1Click:Connect(function() ToggleDrop() end)
 
         local optBtns = {}
         local dropObj
         local dropCallbacks = {}
         if ctrlConfig.Callback then table.insert(dropCallbacks, ctrlConfig.Callback) end
         if ctrlConfig.Func then table.insert(dropCallbacks, ctrlConfig.Func) end
+
+        local function refreshBtnColors()
+            for _, btn in ipairs(optBtns) do
+                local val = btn:GetAttribute("Val")
+                local active = isMulti and (curSel[val] == true) or (tostring(val) == tostring(curSel))
+                btn.TextColor3 = active and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted
+                btn.Text = (isMulti and (active and "✓ " or "  ") or "") .. tostring(val)
+            end
+        end
+
+        local function handleItemToggle(val)
+            if isMulti then
+                if val == "All In Stock" or val == "All Items" then
+                    local newAllState = not curSel[val]
+                    for _, v in ipairs(values) do
+                        curSel[v] = newAllState
+                    end
+                else
+                    curSel[val] = not curSel[val]
+                    local allActive = true
+                    for _, v in ipairs(values) do
+                        if v ~= "All In Stock" and v ~= "All Items" and not curSel[v] then
+                            allActive = false
+                            break
+                        end
+                    end
+                    if curSel["All In Stock"] ~= nil then curSel["All In Stock"] = allActive end
+                    if curSel["All Items"] ~= nil then curSel["All Items"] = allActive end
+                end
+                if dropObj then dropObj.Value = curSel end
+                SelText.Text = getSummary()
+                refreshBtnColors()
+                for _, fn in ipairs(dropCallbacks) do
+                    task.spawn(fn, curSel)
+                end
+            else
+                curSel = val
+                if dropObj then dropObj.Value = val end
+                SelText.Text = tostring(val)
+                refreshBtnColors()
+                ToggleDrop(false)
+                for _, fn in ipairs(dropCallbacks) do
+                    task.spawn(fn, val)
+                end
+            end
+        end
+
         for i, val in ipairs(values) do
             local OptBtn = Instance.new("TextButton")
             OptBtn.Size = UDim2.new(1, 0, 0, 24)
             OptBtn.BackgroundTransparency = 1
-            OptBtn.Text = tostring(val)
+            OptBtn.Text = (isMulti and (curSel[val] and "✓ " or "  ") or "") .. tostring(val)
             OptBtn.Font = Enum.Font.Gotham
             OptBtn.TextSize = 10.5
-            OptBtn.TextColor3 = (tostring(val) == tostring(curSel) and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted)
+            local isSelected = isMulti and (curSel[val] == true) or (tostring(val) == tostring(curSel))
+            OptBtn.TextColor3 = (isSelected and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted)
+            if isMulti then OptBtn.TextXAlignment = Enum.TextXAlignment.Left end
             OptBtn.ZIndex = 26
+            OptBtn:SetAttribute("Val", val)
             OptBtn.Parent = DropList
             ProtectLocalization(OptBtn)
             table.insert(optBtns, OptBtn)
@@ -1907,57 +1996,81 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                 OptBtn.BackgroundTransparency = 1
             end)
             OptBtn.MouseButton1Click:Connect(function()
-                curSel = val
-                if dropObj then dropObj.Value = val end
-                SelText.Text = tostring(val)
-                for _, opt in ipairs(optBtns) do
-                    opt.TextColor3 = (opt.Text == tostring(val) and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted)
-                end
-                ToggleDrop(false)
-                for _, fn in ipairs(dropCallbacks) do
-                    task.spawn(fn, val)
-                end
+                handleItemToggle(val)
             end)
         end
-
-        DropList.Size = UDim2.new(1, 0, 0, #values * 26 + 4)
-        MainBtn.MouseButton1Click:Connect(function() ToggleDrop() end)
 
         dropObj = {
             Value = curSel,
             Set = function(val)
-                if type(val) == "number" and values[val] ~= nil then
-                    val = values[val]
-                end
-                curSel = val
-                dropObj.Value = val
-                SelText.Text = tostring(val)
-                for _, opt in ipairs(optBtns) do
-                    opt.TextColor3 = (opt.Text == tostring(val) and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted)
-                end
-                for _, fn in ipairs(dropCallbacks) do
-                    task.spawn(fn, val)
+                if isMulti then
+                    if type(val) == "table" then
+                        curSel = {}
+                        for k, v in pairs(val) do
+                            if type(k) == "number" and type(v) == "string" then
+                                curSel[v] = true
+                            elseif type(k) == "string" and v == true then
+                                curSel[k] = true
+                            end
+                        end
+                    elseif type(val) == "string" then
+                        curSel[val] = true
+                    end
+                    dropObj.Value = curSel
+                    SelText.Text = getSummary()
+                    refreshBtnColors()
+                    for _, fn in ipairs(dropCallbacks) do
+                        task.spawn(fn, curSel)
+                    end
+                else
+                    if type(val) == "number" and values[val] ~= nil then
+                        val = values[val]
+                    end
+                    curSel = val
+                    dropObj.Value = val
+                    SelText.Text = tostring(val)
+                    refreshBtnColors()
+                    for _, fn in ipairs(dropCallbacks) do
+                        task.spawn(fn, val)
+                    end
                 end
             end,
             SetValue = function(selfOrVal, maybeVal)
                 local v = (maybeVal ~= nil and maybeVal) or selfOrVal
                 dropObj.Set(v)
             end,
-            SetValues = function(selfOrVals, maybeVals)
+            SetValues = function(selfOrVals, maybeVals, shouldSelectAll)
                 local newVals = maybeVals or selfOrVals
                 if type(newVals) == "table" then
                     values = newVals
                     for _, b in ipairs(optBtns) do pcall(function() b:Destroy() end) end
                     optBtns = {}
-                    for i, val in ipairs(values) do
+                    local targetH = math.min(#values * 26 + 6, 160)
+                    DropList.Size = UDim2.new(1, 0, 0, targetH)
+                    if isOpen then
+                        DFrame.Size = UDim2.new(1, 0, 0, 48 + targetH + 6)
+                    end
+                    if isMulti and shouldSelectAll ~= false then
+                        curSel = {}
+                        for _, v in ipairs(values) do
+                            curSel[v] = true
+                        end
+                    elseif not isMulti then
+                        curSel = values[1] or "Select..."
+                    end
+                    dropObj.Value = curSel
+                    for _, val in ipairs(values) do
                         local OptBtn = Instance.new("TextButton")
                         OptBtn.Size = UDim2.new(1, 0, 0, 24)
                         OptBtn.BackgroundTransparency = 1
-                        OptBtn.Text = tostring(val)
+                        OptBtn.Text = (isMulti and (curSel[val] and "✓ " or "  ") or "") .. tostring(val)
                         OptBtn.Font = Enum.Font.Gotham
                         OptBtn.TextSize = 10.5
-                        OptBtn.TextColor3 = (tostring(val) == tostring(curSel) and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted)
+                        local isSelected = isMulti and (curSel[val] == true) or (tostring(val) == tostring(curSel))
+                        OptBtn.TextColor3 = (isSelected and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted)
+                        if isMulti then OptBtn.TextXAlignment = Enum.TextXAlignment.Left end
                         OptBtn.ZIndex = 26
+                        OptBtn:SetAttribute("Val", val)
                         OptBtn.Parent = DropList
                         ProtectLocalization(OptBtn)
                         table.insert(optBtns, OptBtn)
@@ -1970,19 +2083,11 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                             OptBtn.BackgroundTransparency = 1
                         end)
                         OptBtn.MouseButton1Click:Connect(function()
-                            curSel = val
-                            dropObj.Value = val
-                            SelText.Text = tostring(val)
-                            for _, opt in ipairs(optBtns) do
-                                opt.TextColor3 = (opt.Text == tostring(val) and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted)
-                            end
-                            ToggleDrop(false)
-                            for _, fn in ipairs(dropCallbacks) do
-                                task.spawn(fn, val)
-                            end
+                            handleItemToggle(val)
                         end)
                     end
-                    DropList.Size = UDim2.new(1, 0, 0, #values * 26 + 4)
+                    SelText.Text = isMulti and getSummary() or tostring(curSel)
+                    refreshBtnColors()
                 end
             end,
             OnChanged = function(selfOrFn, maybeFn)
@@ -2066,23 +2171,40 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         local cColor = (type(ctrlConfig) == "table" and ctrlConfig.Color) or (typeof(optionalColor) == "Color3" and optionalColor) or VRSLib.Theme.TextMuted
 
         local Lbl = Instance.new("TextLabel")
-        Lbl.Size = UDim2.new(1, 0, 0, 18)
+        local isMulti = tostring(cText):find("\n") ~= nil or optionalColor == true
+        Lbl.Size = isMulti and UDim2.new(1, 0, 0, 0) or UDim2.new(1, 0, 0, 18)
+        Lbl.AutomaticSize = isMulti and Enum.AutomaticSize.Y or Enum.AutomaticSize.None
+        Lbl.TextWrapped = isMulti
         Lbl.BackgroundTransparency = 1
         Lbl.Text = cText
         Lbl.Font = Enum.Font.Gotham
         Lbl.TextSize = 10.5
-        Lbl.TextColor3 = cColor
+        Lbl.TextColor3 = (typeof(optionalColor) == "Color3" and optionalColor) or cColor
         Lbl.TextXAlignment = Enum.TextXAlignment.Left
-        Lbl.TextTruncate = Enum.TextTruncate.AtEnd
+        Lbl.TextTruncate = isMulti and Enum.TextTruncate.None or Enum.TextTruncate.AtEnd
         Lbl.Parent = Content
         ProtectLocalization(Lbl)
 
         local labelObj
         labelObj = {
-            Set = function(t) Lbl.Text = tostring(t) end,
+            Set = function(t)
+                Lbl.Text = tostring(t)
+                if tostring(t):find("\n") then
+                    Lbl.TextWrapped = true
+                    Lbl.AutomaticSize = Enum.AutomaticSize.Y
+                    Lbl.TextTruncate = Enum.TextTruncate.None
+                    Lbl.Size = UDim2.new(1, 0, 0, 0)
+                end
+            end,
             SetText = function(selfOrText, maybeText)
                 local t = (maybeText ~= nil and maybeText) or selfOrText
                 Lbl.Text = tostring(t)
+                if tostring(t):find("\n") then
+                    Lbl.TextWrapped = true
+                    Lbl.AutomaticSize = Enum.AutomaticSize.Y
+                    Lbl.TextTruncate = Enum.TextTruncate.None
+                    Lbl.Size = UDim2.new(1, 0, 0, 0)
+                end
             end,
             AddKeyPicker = function(selfOrId, idOrCfg, optionalCfg)
                 local id = (type(selfOrId) == "string" and selfOrId) or (type(idOrCfg) == "string" and idOrCfg) or "Keybind"
