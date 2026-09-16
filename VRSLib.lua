@@ -1706,6 +1706,9 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         local dragging = false
         local curVal = def
         local sliderObj
+        local sliderCallbacks = {}
+        if ctrlConfig.Callback then table.insert(sliderCallbacks, ctrlConfig.Callback) end
+        if ctrlConfig.Func then table.insert(sliderCallbacks, ctrlConfig.Func) end
 
         local function UpdateSlider(input)
             local frac = math.clamp((input.Position.X - Track.AbsolutePosition.X) / Track.AbsoluteSize.X, 0, 1)
@@ -1735,10 +1738,6 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
             end
         end)
 
-        local sliderCallbacks = {}
-        if ctrlConfig.Callback then table.insert(sliderCallbacks, ctrlConfig.Callback) end
-        if ctrlConfig.Func then table.insert(sliderCallbacks, ctrlConfig.Func) end
-
         sliderObj = {
             Value = curVal,
             Set = function(val)
@@ -1753,7 +1752,8 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                 end
             end,
             SetValue = function(selfOrVal, maybeVal)
-                local v = (maybeVal ~= nil and maybeVal) or selfOrVal
+                local v = maybeVal
+                if v == nil then v = selfOrVal end
                 sliderObj.Set(v)
             end,
             OnChanged = function(selfOrFn, maybeFn)
