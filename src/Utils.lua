@@ -114,6 +114,55 @@ function Utils.MakeDraggable(guiObject, dragHandle, onDragCallback)
             end
         end
     end)
+-- Smart Mobile Detection Engine
+function Utils.IsMobile()
+    local isTouch = UserInputService.TouchEnabled
+    local hasKeyboard = UserInputService.KeyboardEnabled
+    local hasMouse = UserInputService.MouseEnabled
+
+    if isTouch and (not hasKeyboard or not hasMouse) then
+        return true
+    end
+
+    local cam = workspace.CurrentCamera
+    if cam and cam.ViewportSize then
+        local vp = cam.ViewportSize
+        if vp.X > 0 and vp.Y > 0 then
+            if vp.X < 960 or vp.Y < 580 then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+-- Smart Adaptive Scale Calculator
+function Utils.CalculateSmartScale(baseW, baseH, isMobile, customMobileScale, desktopScale)
+    local cam = workspace.CurrentCamera
+    local vp = (cam and cam.ViewportSize) or Vector2.new(1280, 720)
+    if vp.X <= 0 or vp.Y <= 0 then return 1.0 end
+
+    local padX = isMobile and 24 or 40
+    local padY = isMobile and 20 or 40
+    local maxW = math.max(260, vp.X - padX)
+    local maxH = math.max(200, vp.Y - padY)
+
+    local scaleX = maxW / (baseW or 1020)
+    local scaleY = maxH / (baseH or 620)
+    local ideal = math.min(scaleX, scaleY)
+
+    if isMobile then
+        if customMobileScale then
+            ideal = math.min(customMobileScale, ideal)
+        else
+            ideal = math.min(ideal, 0.72)
+        end
+    else
+        ideal = math.min(desktopScale or 1.0, ideal)
+    end
+
+    return math.clamp(ideal, 0.45, 1.0)
 end
 
 return Utils

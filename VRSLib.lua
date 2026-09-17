@@ -91,6 +91,32 @@ local VRSLib = {
     Windows = {},
 }
 
+-- Smart Mobile Detection Engine
+function VRSLib:IsMobile()
+    local isTouch = UserInputService.TouchEnabled
+    local hasKeyboard = UserInputService.KeyboardEnabled
+    local hasMouse = UserInputService.MouseEnabled
+
+    -- Pure mobile / touch devices (Smartphones & Tablets)
+    if isTouch and (not hasKeyboard or not hasMouse) then
+        return true
+    end
+
+    -- Viewport bounds fallback: standard desktop resolution is >= 1280x720.
+    -- If screen viewport is smaller than 960x580, it is a phone or compact screen.
+    local cam = workspace.CurrentCamera
+    if cam and cam.ViewportSize then
+        local vp = cam.ViewportSize
+        if vp.X > 0 and vp.Y > 0 then
+            if vp.X < 960 or vp.Y < 580 then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
 -- Safe GUI Container Resolver
 local function GetSafeContainer()
     if gethui then
@@ -184,12 +210,25 @@ local function MakeDraggable(dragHandle, targetFrame)
     UserInputService.InputChanged:Connect(function(input)
         if input == dragInput and dragging then
             local delta = input.Position - dragStart
+            local newX = startPos.X.Offset + delta.X
+            local newY = startPos.Y.Offset + delta.Y
+
+            -- Safe viewport bounds clamping for MainFrame on small/mobile screens
+            local cam = workspace.CurrentCamera
+            if cam and cam.ViewportSize and targetFrame.Name == "MainFrame" then
+                local vp = cam.ViewportSize
+                local limitX = math.max(20, (vp.X / 2) - 40)
+                local limitY = math.max(20, (vp.Y / 2) - 30)
+                newX = math.clamp(newX, -limitX, limitX)
+                newY = math.clamp(newY, -limitY, limitY)
+            end
+
             TweenService:Create(targetFrame, TweenInfo.new(0.04, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
                 Position = UDim2.new(
                     startPos.X.Scale,
-                    startPos.X.Offset + delta.X,
+                    newX,
                     startPos.Y.Scale,
-                    startPos.Y.Offset + delta.Y
+                    newY
                 )
             }):Play()
         end
@@ -207,9 +246,12 @@ local function EnsureNotifyContainer()
     sg.ResetOnSpawn = false
     sg.Parent = GetSafeContainer()
 
+    local isMobile = VRSLib:IsMobile()
+    local notifyWidth = isMobile and 260 or 310
+
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0, 310, 1, -40)
-    frame.Position = UDim2.new(1, -325, 0, 20)
+    frame.Size = UDim2.new(0, notifyWidth, 1, -40)
+    frame.Position = UDim2.new(1, -(notifyWidth + 15), 0, 20)
     frame.BackgroundTransparency = 1
     frame.Parent = sg
 
@@ -348,6 +390,83 @@ function Window:Notify(...)
     return VRSLib:Notify(...)
 end
 
+function Window:CheckMobile()
+    return (self.IsMobileCustom ~= nil and self.IsMobileCustom) or VRSLib:IsMobile()
+end
+
+function Window:GetScale()
+    return (self.UIScale and self.UIScale.Scale) or self.CurrentScale or 1.0
+end
+
+function Window:SetScale(newScale, animate)
+    newScale = math.clamp(newScale, self.MinScale or 0.45, self.MaxScale or 1.2)
+    self.CurrentScale = newScale
+    if self.UIScale then
+        if animate then
+            TweenService:Create(self.UIScale, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                Scale = newScale
+            }):Play()
+        else
+            self.UIScale.Scale = newScale
+        end
+    end
+    self:ReflowGrid()
+end
+
+function Window:SetAutoScaling(enabled)
+    self.AutoScaling = enabled
+    if enabled then
+        self:UpdateScale(true)
+    end
+end
+
+function Window:UpdateScale(animate)
+    if not self.AutoScaling then return end
+    local cam = workspace.CurrentCamera
+    local vp = (cam and cam.ViewportSize) or Vector2.new(1280, 720)
+    if vp.X <= 0 or vp.Y <= 0 then return end
+
+    local isMob = self:CheckMobile()
+    self.IsMobile = isMob
+
+    local padX = isMob and 24 or 40
+    local padY = isMob and 20 or 40
+    local maxW = math.max(260, vp.X - padX)
+    local maxH = math.max(200, vp.Y - padY)
+
+    local targetSize = self.IsMaximized and self.MaximizedSize or self.DefaultSize
+    local scaleX = maxW / targetSize.X.Offset
+    local scaleY = maxH / targetSize.Y.Offset
+    local idealScale = math.min(scaleX, scaleY)
+
+    if isMob then
+        if self.MobileScaleCustom then
+            idealScale = math.min(self.MobileScaleCustom, idealScale)
+        else
+            -- Smart mobile scale: fit comfortably without feeling oversized
+            idealScale = math.min(idealScale, 0.72)
+        end
+    else
+        -- Desktop: standard size (1.0), only scale down if viewport is smaller than default window
+        idealScale = math.min(self.DesktopScale or 1.0, idealScale)
+    end
+
+    local finalScale = math.clamp(idealScale, self.MinScale or 0.45, self.MaxScale or 1.0)
+    self:SetScale(finalScale, animate)
+
+    -- Keep window within visible screen bounds
+    if self.MainFrame then
+        local curW = (targetSize.X.Offset * finalScale)
+        local curH = (targetSize.Y.Offset * finalScale)
+        local maxOffsetX = math.max(0, (vp.X - curW) / 2)
+        local maxOffsetY = math.max(0, (vp.Y - curH) / 2)
+        local currentOffset = self.MainFrame.Position
+        local clampedX = math.clamp(currentOffset.X.Offset, -maxOffsetX, maxOffsetX)
+        local clampedY = math.clamp(currentOffset.Y.Offset, -maxOffsetY, maxOffsetY)
+        self.MainFrame.Position = UDim2.new(0.5, clampedX, 0.5, clampedY)
+    end
+end
+
 function VRSLib:CreateWindow(config)
     config = config or {}
     local self = setmetatable({}, Window)
@@ -368,6 +487,16 @@ function VRSLib:CreateWindow(config)
     self.Tabs           = {}
     self.AllCards       = {}
 
+    -- Smart Mobile & Auto-Scaling Configuration
+    self.AutoScaling        = (config.AutoScaling == nil and true) or config.AutoScaling
+    self.MobileScaleCustom  = config.MobileScale
+    self.DesktopScale       = config.DesktopScale or 1.0
+    self.MinScale           = config.MinScale or 0.45
+    self.MaxScale           = config.MaxScale or 1.0
+    self.IsMobileCustom     = config.IsMobile
+    self.IsMobile           = (config.IsMobile ~= nil and config.IsMobile) or VRSLib:IsMobile()
+    self.CurrentScale       = 1.0
+
     if config.Accent then
         VRSLib.Theme.Accent = config.Accent
         VRSLib.Theme.CardStrokeHover = config.Accent
@@ -387,13 +516,20 @@ function VRSLib:CreateWindow(config)
     local Main = Instance.new("Frame")
     Main.Name = "MainFrame"
     Main.Size = self.DefaultSize
-    Main.Position = UDim2.new(0.5, -self.DefaultSize.X.Offset / 2, 0.5, -self.DefaultSize.Y.Offset / 2)
+    Main.AnchorPoint = Vector2.new(0.5, 0.5)
+    Main.Position = UDim2.new(0.5, 0, 0.5, 0)
     Main.BackgroundColor3 = VRSLib.Theme.Background
     Main.BorderSizePixel = 0
     Main.Active = true
     Main.ClipsDescendants = false
     Main.Parent = ScreenGui
     self.MainFrame = Main
+
+    local WindowScale = Instance.new("UIScale")
+    WindowScale.Name = "VRS_WindowScale"
+    WindowScale.Scale = 1.0
+    WindowScale.Parent = Main
+    self.UIScale = WindowScale
 
     local MainCorner = Instance.new("UICorner")
     MainCorner.CornerRadius = UDim.new(0, 10)
@@ -1125,7 +1261,9 @@ function VRSLib:CreateWindow(config)
         resizing = true
         resizeMode = mode
         resizeStart = input.Position
-        startSize = Main.AbsoluteSize
+        local scale = (self.UIScale and self.UIScale.Scale) or 1
+        if scale <= 0 then scale = 1 end
+        startSize = Vector2.new(Main.Size.X.Offset, Main.Size.Y.Offset)
 
         local connEnd, connMove
         connEnd = UserInputService.InputEnded:Connect(function(endInput)
@@ -1138,15 +1276,17 @@ function VRSLib:CreateWindow(config)
 
         connMove = UserInputService.InputChanged:Connect(function(moveInput)
             if resizing and (moveInput.UserInputType == Enum.UserInputType.MouseMovement or moveInput.UserInputType == Enum.UserInputType.Touch) then
-                local delta = moveInput.Position - resizeStart
+                local currentScale = (self.UIScale and self.UIScale.Scale) or 1
+                if currentScale <= 0 then currentScale = 1 end
+                local delta = (moveInput.Position - resizeStart) / currentScale
                 local newW = startSize.X
                 local newH = startSize.Y
 
                 if resizeMode == "Both" or resizeMode == "Width" then
-                    newW = math.clamp(startSize.X + delta.X, 720, 1500)
+                    newW = math.clamp(startSize.X + delta.X, 600, 1500)
                 end
                 if resizeMode == "Both" or resizeMode == "Height" then
-                    newH = math.clamp(startSize.Y + delta.Y, 440, 950)
+                    newH = math.clamp(startSize.Y + delta.Y, 380, 950)
                 end
 
                 Main.Size = UDim2.fromOffset(newW, newH)
@@ -1193,9 +1333,13 @@ function VRSLib:CreateWindow(config)
     end)
 
     MakeDraggable(FloatingToggle, FloatingToggle)
-    FloatingToggle.MouseButton1Click:Connect(function()
+    local lastToggle = 0
+    local function SafeToggle()
+        if tick() - lastToggle < 0.25 then return end
+        lastToggle = tick()
         self:Toggle()
-    end)
+    end
+    FloatingToggle.MouseButton1Click:Connect(SafeToggle)
     self.FloatingToggle = FloatingToggle
 
     -- Keybind Listener
@@ -1225,6 +1369,26 @@ function VRSLib:CreateWindow(config)
 
     self:InitQuickCategory()
     table.insert(VRSLib.Windows, self)
+
+    -- Responsive Smart Scaling Listeners
+    local function BindCamera(cam)
+        if not cam then return end
+        cam:GetPropertyChangedSignal("ViewportSize"):Connect(function()
+            self:UpdateScale(false)
+        end)
+    end
+    BindCamera(workspace.CurrentCamera)
+    workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
+        BindCamera(workspace.CurrentCamera)
+        self:UpdateScale(false)
+    end)
+    ScreenGui:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+        self:UpdateScale(false)
+    end)
+
+    -- Apply initial smart scale
+    self:UpdateScale(false)
+
     task.defer(function() self:ReflowGrid() end)
     return self
 end
@@ -2790,9 +2954,13 @@ end
 
 function Window:ReflowGrid()
     if self.CurrentView ~= "Grid" then return end
-    local scrollW = (self.CardsScroll and self.CardsScroll.AbsoluteSize.X > 50) and self.CardsScroll.AbsoluteSize.X or (self.MainFrame.AbsoluteSize.X - 221)
+    local scale = (self.UIScale and self.UIScale.Scale) or 1
+    if scale <= 0 then scale = 1 end
+
+    local rawScrollW = (self.CardsScroll and self.CardsScroll.AbsoluteSize.X > 50) and self.CardsScroll.AbsoluteSize.X or (self.MainFrame.AbsoluteSize.X - 221)
+    local scrollW = rawScrollW / scale
     if scrollW <= 100 then
-        scrollW = self.MainFrame.AbsoluteSize.X - 221
+        scrollW = (self.MainFrame.Size.X.Offset - 221)
     end
     -- Deduct 32px (16px left + 16px right scroll padding)
     local availableW = scrollW - 32
@@ -3917,7 +4085,10 @@ function Window:SetViewMode(mode)
     if mode == "Grid" then
         self:ReflowGrid()
     elseif mode == "List" then
-        local scrollW = (self.CardsScroll and self.CardsScroll.AbsoluteSize.X > 50) and self.CardsScroll.AbsoluteSize.X or (self.MainFrame.AbsoluteSize.X - 186)
+        local scale = (self.UIScale and self.UIScale.Scale) or 1
+        if scale <= 0 then scale = 1 end
+        local rawScrollW = (self.CardsScroll and self.CardsScroll.AbsoluteSize.X > 50) and self.CardsScroll.AbsoluteSize.X or (self.MainFrame.AbsoluteSize.X - 186)
+        local scrollW = rawScrollW / scale
         local availableW = scrollW - 32
         self.GridLayout.FillDirectionMaxCells = 1
         self.GridLayout.CellPadding = UDim2.fromOffset(8, 6)
@@ -3930,17 +4101,22 @@ end
 -- ==============================================================================
 function Window:Toggle()
     self.Visible = not self.Visible
+    local targetSize = self.IsMaximized and self.MaximizedSize or self.DefaultSize
+
     if self.Visible then
         self.MainFrame.Visible = true
-        self.MainFrame.Size = UDim2.new(0, self.DefaultSize.X.Offset * 0.95, 0, self.DefaultSize.Y.Offset * 0.95)
+        self.MainFrame.Size = UDim2.new(0, targetSize.X.Offset * 0.95, 0, targetSize.Y.Offset * 0.95)
+        if self.AutoScaling then
+            self:UpdateScale(false)
+        end
         TweenService:Create(self.MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-            Size = (self.IsMaximized and self.MaximizedSize or self.DefaultSize),
+            Size = targetSize,
             BackgroundTransparency = 0
         }):Play()
         task.delay(0.25, function() self:ReflowGrid() end)
     else
         local tw = TweenService:Create(self.MainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-            Size = UDim2.new(0, self.DefaultSize.X.Offset * 0.9, 0, self.DefaultSize.Y.Offset * 0.9),
+            Size = UDim2.new(0, targetSize.X.Offset * 0.9, 0, targetSize.Y.Offset * 0.9),
             BackgroundTransparency = 1
         })
         tw:Play()
@@ -3956,9 +4132,13 @@ function Window:ToggleMaximize()
     self.IsMaximized = not self.IsMaximized
     local targetSize = self.IsMaximized and self.MaximizedSize or self.DefaultSize
 
+    if self.AutoScaling then
+        self:UpdateScale(true)
+    end
+
     TweenService:Create(self.MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
         Size = targetSize,
-        Position = UDim2.new(0.5, -targetSize.X.Offset / 2, 0.5, -targetSize.Y.Offset / 2)
+        Position = UDim2.new(0.5, 0, 0.5, 0)
     }):Play()
     task.delay(0.25, function() self:ReflowGrid() end)
 end

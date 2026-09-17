@@ -59,12 +59,18 @@ local Window = VRSLib:CreateWindow({
 ### Konfigurasi Parameter
 ```lua
 local Window = VRSLib:CreateWindow({
-    Title    = "VRS Artelier",             -- Judul utama di header
-    SubTitle = "v1.2.1",                   -- Sub-judul kecil di header
-    GameName = nil,                        -- Opsional: biarkan nil agar auto-detect dari PlaceId
-    Size     = UDim2.fromOffset(1020, 620),-- Ukuran awal window (Min: 720x440, Max: 1500x950)
-    Accent   = Color3.fromRGB(255, 64, 140),-- Warna aksen utama (Default: Neon Magenta Pink)
-    Keybind  = Enum.KeyCode.RightControl   -- Tombol keyboard untuk toggle buka/tutup window
+    Title       = "VRS Artelier",             -- Judul utama di header
+    SubTitle    = "v1.3.0",                   -- Sub-judul kecil di header
+    GameName    = nil,                        -- Opsional: biarkan nil agar auto-detect dari PlaceId
+    Size        = UDim2.fromOffset(1020, 620),-- Ukuran standar window di desktop
+    Accent      = Color3.fromRGB(255, 64, 140),-- Warna aksen utama (Default: Neon Magenta Pink)
+    Keybind     = Enum.KeyCode.RightControl,  -- Tombol keyboard untuk toggle buka/tutup window
+    -- 📱 Smart Mobile & Auto-Scaling:
+    AutoScaling = true,                       -- Otomatis mendeteksi perangkat mobile/layar kecil & menyesuaikan ukuran (Default: true)
+    MobileScale = nil,                        -- Opsional: tentukan scale manual khusus mobile (contoh: 0.65). Biarkan nil untuk auto-fit
+    DesktopScale= 1.0,                        -- Scale bawaan desktop (Default: 1.0)
+    MinScale    = 0.45,                       -- Batas minimum scaling (Default: 0.45)
+    MaxScale    = 1.0,                        -- Batas maksimum scaling (Default: 1.0)
 })
 ```
 
@@ -73,6 +79,11 @@ local Window = VRSLib:CreateWindow({
 | :--- | :--- |
 | `Window:Toggle()` | Membuka atau menutup window dengan animasi smooth tween. |
 | `Window:ToggleMaximize()` | Memperbesar window ke ukuran layar maksimal atau kembali ke ukuran semula. |
+| `Window:IsMobile()` | Mengembalikan nilai boolean `true` jika pemain menggunakan perangkat mobile / layar sentuh. |
+| `Window:GetScale()` | Mengambil nilai scale UI saat ini (`UIScale.Scale`). |
+| `Window:SetScale(scale, animate)` | Mengatur skala UI secara manual (misal: `Window:SetScale(0.7, true)`). |
+| `Window:SetAutoScaling(enabled)` | Menyalakan atau mematikan adaptive auto-scaling. |
+| `Window:UpdateScale(animate)` | Menghitung dan menerapkan ulang skala UI otomatis berdasarkan ViewportSize terkini. |
 | `Window:Unload()` | Menutup window, membersihkan GUI dari CoreGui, dan mengeksekusi `Window.OnUnload`. |
 | `Window.OnUnload = function()` | Callback yang dipanggil saat script di-unload (tombol `[X]` ditekan). |
 
@@ -284,10 +295,13 @@ local userLogo = VRSLib.Icons.Wings      -- Wings brand logo resmi
 
 ---
 
-## 📱 Floating Mobile Widget & Drag-Resizing
+## 📱 Smart Mobile Detection, Scaling & Floating Widget
 
-- **Floating Widget**: Tombol logo sayap transparan yang dapat digeser (drag) bebas di layar untuk membuka/menutup UI, sangat ramah untuk pengguna mobile/touch screen.
-- **Resize Grip**: Tarik icon `⤡` di pojok kanan bawah footer bar atau drag border tepi window untuk resize window secara instan.
+- **Smart Mobile Detection**: Sistem otomatis mendeteksi apakah pemain menggunakan perangkat sentuh (HP / tablet) atau berada pada resolusi layar yang sempit.
+- **Adaptive UIScale**: Di mobile, window tidak akan lagi terlihat kegedean atau keluar dari batas layar. Skala window (`UIScale`) otomatis dikecilkan secara proporsional (~0.55 – 0.72) dengan memperhitungkan viewport kamera dan rotasi layar secara live.
+- **Screen Boundary Protection**: Window dan dragger tidak akan pernah bisa tergeser keluar dari layar sehingga tombol penting (header, minimize, close) selalu dapat diakses.
+- **Floating Widget**: Tombol logo sayap transparan yang dapat digeser (*drag*) bebas di layar untuk membuka/menutup UI dengan satu ketukan (*touch-tap*).
+- **Resize Grip**: Tarik icon `⤡` di pojok kanan bawah footer bar atau drag border tepi window untuk resize window secara instan (sudah otomatis dikoreksi terhadap faktor `UIScale`).
 
 ---
 

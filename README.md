@@ -45,6 +45,9 @@ Proprietary, modular Roblox Luau UI Library engineered for **VRS Artelier**, fea
 5. **Addons System**:
    - `addons/ThemeManager.lua`: Penggantian tema dan warna aksen secara live.
    - `addons/SaveManager.lua`: Penyimpanan & pemuatan konfigurasi otomatis ke disk executor.
+6. **Smart Mobile Detection & Auto-Scaling**:
+   - Deteksi otomatis perangkat HP/tablet & ukuran viewport.
+   - Window otomatis mengecil secara proporsional via `UIScale` (~0.55 – 0.72) sehingga nyaman dilihat dan tidak lagi kegedean atau terpotong di layar HP.
 
 ---
 
