@@ -80,8 +80,17 @@ local VRSLib = {
             Wings   = "rbxassetid://132717088484517",
             Default = "rbxassetid://10709782497",
             Get = function(name)
-                if name == "Wings" or name == "rbxassetid://132717088484517" then
+                local n = tostring(name or ""):lower()
+                if n == "wings" or n == "rbxassetid://132717088484517" then
                     return "rbxassetid://132717088484517"
+                elseif n == "check" or n == "lucide-check" then
+                    return "rbxassetid://10709790644"
+                elseif n == "search" or n == "lucide-search" then
+                    return "rbxassetid://10734943674"
+                elseif n == "chevron-down" or n == "lucide-chevron-down" then
+                    return "rbxassetid://10709790948"
+                elseif n == "chevron-up" or n == "lucide-chevron-up" then
+                    return "rbxassetid://10709791043"
                 end
                 return "rbxassetid://10709782497"
             end
@@ -1677,7 +1686,25 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                 return toggleObj
             end,
             Card = cardObj,
-            Frame = Row
+            Frame = Row,
+            AddDropdown = function(selfOrId, idOrConfig, optionalConfig)
+                local cfg = optionalConfig
+                local argId = idOrConfig
+                if type(selfOrId) ~= "table" or selfOrId ~= toggleObj then
+                    cfg = idOrConfig
+                    argId = selfOrId
+                end
+                return BoxObj:AddDropdown(argId, cfg)
+            end,
+            AddSlider = function(selfOrId, idOrConfig, optionalConfig)
+                local cfg = optionalConfig
+                local argId = idOrConfig
+                if type(selfOrId) ~= "table" or selfOrId ~= toggleObj then
+                    cfg = idOrConfig
+                    argId = selfOrId
+                end
+                return BoxObj:AddSlider(argId, cfg)
+            end
         }
 
         if self.Window.Toggles then self.Window.Toggles[id] = toggleObj end
@@ -1974,19 +2001,26 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         return sliderObj
     end
 
-    -- 4. AddDropdown (Clean popup selector - Dual Format)
+    -- 4. AddDropdown (Clean popup selector with Search & Multi-select Checkmarks)
     function BoxObj:AddDropdown(idOrConfig, optionalConfig)
         local id, ctrlConfig
         if type(idOrConfig) == "string" then
             id = idOrConfig
-            ctrlConfig = optionalConfig or {}
+            if type(optionalConfig) == "table" and optionalConfig[1] ~= nil and optionalConfig.Values == nil then
+                ctrlConfig = { Values = optionalConfig }
+            else
+                ctrlConfig = optionalConfig or {}
+            end
         else
             ctrlConfig = idOrConfig or {}
+            if ctrlConfig[1] ~= nil and ctrlConfig.Values == nil then
+                ctrlConfig = { Values = ctrlConfig }
+            end
             id = ctrlConfig.Id or ctrlConfig.Title or ctrlConfig.Text or "Dropdown"
         end
 
         local cTitle = ctrlConfig.Title or ctrlConfig.Text or tostring(id)
-        local values = ctrlConfig.Values or ctrlConfig.Items or {}
+        local values = ctrlConfig.Values or ctrlConfig.Items or ctrlConfig.Options or {}
         local isMulti = (ctrlConfig.Multi == true or ctrlConfig.Multiselect == true)
         local curSel
         if isMulti then
@@ -2014,12 +2048,15 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         local cb = ctrlConfig.Callback or ctrlConfig.Func or function() end
 
         local DFrame = Instance.new("Frame")
+        DFrame.Name = "Dropdown_" .. tostring(id)
         DFrame.Size = UDim2.new(1, 0, 0, 48)
         DFrame.BackgroundTransparency = 1
-        DFrame.ZIndex = 10
+        DFrame.ZIndex = 15
+        DFrame.ClipsDescendants = false
         DFrame.Parent = Content
 
         local Lbl = Instance.new("TextLabel")
+        Lbl.Name = "Label"
         Lbl.Size = UDim2.new(1, 0, 0, 16)
         Lbl.BackgroundTransparency = 1
         Lbl.Text = cTitle
@@ -2031,12 +2068,14 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         ProtectLocalization(Lbl)
 
         local MainBtn = Instance.new("TextButton")
+        MainBtn.Name = "Trigger"
         MainBtn.Size = UDim2.new(1, 0, 0, 26)
         MainBtn.Position = UDim2.new(0, 0, 0, 18)
         MainBtn.BackgroundColor3 = VRSLib.Theme.InputBackground
         MainBtn.BorderSizePixel = 0
         MainBtn.Text = ""
         MainBtn.AutoButtonColor = false
+        MainBtn.ZIndex = 16
         MainBtn.Parent = DFrame
 
         local DCorner = Instance.new("UICorner")
@@ -2049,7 +2088,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         DStroke.Parent = MainBtn
 
         local function getSummary()
-            if not isMulti then return tostring(curSel) end
+            if not isMulti then return tostring(curSel or "Select...") end
             local active = {}
             for _, v in ipairs(values) do
                 if curSel[v] then
@@ -2057,12 +2096,12 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                 end
             end
             if #active == 0 then return "None" end
-            if #active == #values and #values > 1 then return "All Selected (" .. #values .. ")" end
             return table.concat(active, ", ")
         end
 
         local SelText = Instance.new("TextLabel")
-        SelText.Size = UDim2.new(1, -26, 1, 0)
+        SelText.Name = "Summary"
+        SelText.Size = UDim2.new(1, -28, 1, 0)
         SelText.Position = UDim2.new(0, 8, 0, 0)
         SelText.BackgroundTransparency = 1
         SelText.Text = getSummary()
@@ -2071,73 +2110,177 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         SelText.TextColor3 = VRSLib.Theme.TextPrimary
         SelText.TextXAlignment = Enum.TextXAlignment.Left
         SelText.TextTruncate = Enum.TextTruncate.AtEnd
+        SelText.ZIndex = 17
         SelText.Parent = MainBtn
         ProtectLocalization(SelText)
 
         local Chevron = Instance.new("ImageLabel")
+        Chevron.Name = "Chevron"
         Chevron.Size = UDim2.fromOffset(12, 12)
         Chevron.Position = UDim2.new(1, -20, 0.5, -6)
         Chevron.BackgroundTransparency = 1
         Chevron.Image = VRSLib.Icons.Get("chevron-down")
         Chevron.ImageColor3 = VRSLib.Theme.TextMuted
+        Chevron.ZIndex = 17
         Chevron.Parent = MainBtn
 
-        local listHeight = math.min(#values * 26 + 6, 160)
-        local DropList = Instance.new("ScrollingFrame")
-        DropList.Size = UDim2.new(1, 0, 0, listHeight)
-        DropList.Position = UDim2.new(0, 0, 0, 46)
-        DropList.BackgroundColor3 = VRSLib.Theme.Card
-        DropList.BorderSizePixel = 0
-        DropList.Visible = false
-        DropList.ZIndex = 25
-        DropList.ClipsDescendants = true
-        DropList.ScrollBarThickness = 3
-        DropList.ScrollBarImageColor3 = VRSLib.Theme.Accent
-        DropList.CanvasSize = UDim2.new(0, 0, 0, 0)
-        DropList.AutomaticCanvasSize = Enum.AutomaticSize.Y
-        DropList.Parent = DFrame
+        -- Dropdown Popup Menu (Clean card style with search & options)
+        local DropMenu = Instance.new("Frame")
+        DropMenu.Name = "DropMenu"
+        DropMenu.Size = UDim2.new(1, 0, 0, 0)
+        DropMenu.Position = UDim2.new(0, 0, 0, 48)
+        DropMenu.BackgroundColor3 = VRSLib.Theme.Card
+        DropMenu.BorderSizePixel = 0
+        DropMenu.Visible = false
+        DropMenu.ZIndex = 30
+        DropMenu.ClipsDescendants = true
+        DropMenu.Parent = DFrame
 
-        local DLCorner = Instance.new("UICorner")
-        DLCorner.CornerRadius = UDim.new(0, 5)
-        DLCorner.Parent = DropList
+        local DMCorner = Instance.new("UICorner")
+        DMCorner.CornerRadius = UDim.new(0, 6)
+        DMCorner.Parent = DropMenu
 
-        local DLStroke = Instance.new("UIStroke")
-        DLStroke.Color = VRSLib.Theme.CardStroke
-        DLStroke.Thickness = 1
-        DLStroke.Parent = DropList
+        local DMStroke = Instance.new("UIStroke")
+        DMStroke.Color = VRSLib.Theme.CardStroke
+        DMStroke.Thickness = 1
+        DMStroke.Parent = DropMenu
 
-        local DLLayout = Instance.new("UIListLayout")
-        DLLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        DLLayout.Padding = UDim.new(0, 2)
-        DLLayout.Parent = DropList
+        -- Integrated Search Bar (ala modern UI)
+        local SearchBar = Instance.new("Frame")
+        SearchBar.Name = "SearchBar"
+        SearchBar.Size = UDim2.new(1, -12, 0, 24)
+        SearchBar.Position = UDim2.new(0, 6, 0, 6)
+        SearchBar.BackgroundColor3 = VRSLib.Theme.InputBackground
+        SearchBar.BorderSizePixel = 0
+        SearchBar.ZIndex = 31
+        SearchBar.Parent = DropMenu
 
-        local isOpen = false
-        local function ToggleDrop(open)
-            isOpen = (open ~= nil and open) or not isOpen
-            DropList.Visible = isOpen
-            local targetH = math.min(#values * 26 + 6, 160)
-            DropList.Size = UDim2.new(1, 0, 0, targetH)
-            DFrame.Size = UDim2.new(1, 0, 0, isOpen and (48 + targetH + 6) or 48)
-            pcall(function()
-                TweenService:Create(Chevron, TweenInfo.new(0.15), { Rotation = isOpen and 180 or 0 }):Play()
-            end)
-        end
-        MainBtn.MouseButton1Click:Connect(function() ToggleDrop() end)
+        local SBCorner = Instance.new("UICorner")
+        SBCorner.CornerRadius = UDim.new(0, 4)
+        SBCorner.Parent = SearchBar
 
-        local optBtns = {}
+        local SBStroke = Instance.new("UIStroke")
+        SBStroke.Color = VRSLib.Theme.InputStroke or Color3.fromRGB(30, 32, 44)
+        SBStroke.Thickness = 1
+        SBStroke.Parent = SearchBar
+
+        local SearchIcon = Instance.new("ImageLabel")
+        SearchIcon.Name = "SearchIcon"
+        SearchIcon.Size = UDim2.fromOffset(12, 12)
+        SearchIcon.Position = UDim2.new(0, 6, 0.5, -6)
+        SearchIcon.BackgroundTransparency = 1
+        SearchIcon.Image = VRSLib.Icons.Get("search")
+        SearchIcon.ImageColor3 = VRSLib.Theme.TextMuted
+        SearchIcon.ZIndex = 32
+        SearchIcon.Parent = SearchBar
+
+        local SearchInput = Instance.new("TextBox")
+        SearchInput.Name = "SearchInput"
+        SearchInput.Size = UDim2.new(1, -26, 1, 0)
+        SearchInput.Position = UDim2.new(0, 22, 0, 0)
+        SearchInput.BackgroundTransparency = 1
+        SearchInput.Text = ""
+        SearchInput.PlaceholderText = "search..."
+        SearchInput.PlaceholderColor3 = Color3.fromRGB(105, 110, 130)
+        SearchInput.TextColor3 = VRSLib.Theme.TextPrimary
+        SearchInput.Font = Enum.Font.Gotham
+        SearchInput.TextSize = 10.5
+        SearchInput.TextXAlignment = Enum.TextXAlignment.Left
+        SearchInput.ClearTextOnFocus = false
+        SearchInput.ZIndex = 32
+        SearchInput.Parent = SearchBar
+        ProtectLocalization(SearchInput)
+
+        -- Scrollable Options List
+        local DropScroll = Instance.new("ScrollingFrame")
+        DropScroll.Name = "DropScroll"
+        DropScroll.Size = UDim2.new(1, 0, 0, 0)
+        DropScroll.Position = UDim2.new(0, 0, 0, 34)
+        DropScroll.BackgroundTransparency = 1
+        DropScroll.BorderSizePixel = 0
+        DropScroll.ZIndex = 31
+        DropScroll.ClipsDescendants = true
+        DropScroll.ScrollBarThickness = 2
+        DropScroll.ScrollBarImageColor3 = VRSLib.Theme.Accent
+        DropScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+        DropScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+        DropScroll.Parent = DropMenu
+
+        local DSPadding = Instance.new("UIPadding")
+        DSPadding.PaddingLeft = UDim.new(0, 6)
+        DSPadding.PaddingRight = UDim.new(0, 6)
+        DSPadding.PaddingTop = UDim.new(0, 2)
+        DSPadding.PaddingBottom = UDim.new(0, 4)
+        DSPadding.Parent = DropScroll
+
+        local DSLayout = Instance.new("UIListLayout")
+        DSLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        DSLayout.Padding = UDim.new(0, 2)
+        DSLayout.Parent = DropScroll
+
+        local optItems = {}
         local dropObj
         local dropCallbacks = {}
         if ctrlConfig.Callback then table.insert(dropCallbacks, ctrlConfig.Callback) end
         if ctrlConfig.Func then table.insert(dropCallbacks, ctrlConfig.Func) end
 
-        local function refreshBtnColors()
-            for _, btn in ipairs(optBtns) do
-                local val = btn:GetAttribute("Val")
-                local isSelected = isMulti and (curSel[val] == true) or (tostring(val) == tostring(curSel))
-                btn.TextColor3 = isSelected and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted
-                btn.Text = (isMulti and (isSelected and "[x] " or "[ ] ") or "") .. tostring(val)
+        local function refreshItems()
+            for _, opt in ipairs(optItems) do
+                local val = opt.Value
+                local isSel = isMulti and (curSel[val] == true) or (tostring(val) == tostring(curSel))
+                opt.Label.TextColor3 = isSel and VRSLib.Theme.Accent or Color3.fromRGB(220, 224, 235)
+                opt.Check.ImageColor3 = VRSLib.Theme.Accent
+                opt.Check.Visible = isSel
             end
         end
+
+        local function getVisibleCount()
+            local count = 0
+            for _, opt in ipairs(optItems) do
+                if opt.Button.Visible then count = count + 1 end
+            end
+            return count
+        end
+
+        local isOpen = false
+        local function updateMenuHeight()
+            if not isOpen then return end
+            local count = getVisibleCount()
+            local visibleH = math.min(math.max(count, 1) * 26 + 4, 150)
+            DropScroll.Size = UDim2.new(1, 0, 0, visibleH)
+            DropMenu.Size = UDim2.new(1, 0, 0, 36 + visibleH + 4)
+            DFrame.Size = UDim2.new(1, 0, 0, 48 + 36 + visibleH + 8)
+        end
+
+        local function filterOptions(query)
+            query = string.lower(query or "")
+            for _, opt in ipairs(optItems) do
+                local matches = (query == "") or (string.find(string.lower(tostring(opt.Value)), query, 1, true) ~= nil)
+                opt.Button.Visible = matches
+            end
+            updateMenuHeight()
+        end
+
+        SearchInput:GetPropertyChangedSignal("Text"):Connect(function()
+            filterOptions(SearchInput.Text)
+        end)
+
+        local function ToggleDrop(open)
+            isOpen = (open ~= nil and open) or not isOpen
+            DropMenu.Visible = isOpen
+            if isOpen then
+                SearchInput.Text = ""
+                filterOptions("")
+                DropScroll.CanvasPosition = Vector2.new(0, 0)
+                updateMenuHeight()
+                TweenService:Create(Chevron, TweenInfo.new(0.15), { Rotation = 180 }):Play()
+            else
+                DFrame.Size = UDim2.new(1, 0, 0, 48)
+                TweenService:Create(Chevron, TweenInfo.new(0.15), { Rotation = 0 }):Play()
+            end
+        end
+
+        MainBtn.MouseButton1Click:Connect(function() ToggleDrop() end)
 
         local function handleItemToggle(val)
             if isMulti then
@@ -2160,7 +2303,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                 end
                 if dropObj then dropObj.Value = curSel end
                 SelText.Text = getSummary()
-                refreshBtnColors()
+                refreshItems()
                 for _, fn in ipairs(dropCallbacks) do
                     task.spawn(fn, curSel)
                 end
@@ -2168,7 +2311,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                 curSel = val
                 if dropObj then dropObj.Value = val end
                 SelText.Text = tostring(val)
-                refreshBtnColors()
+                refreshItems()
                 ToggleDrop(false)
                 for _, fn in ipairs(dropCallbacks) do
                     task.spawn(fn, val)
@@ -2176,33 +2319,77 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
             end
         end
 
-        for i, val in ipairs(values) do
-            local OptBtn = Instance.new("TextButton")
-            OptBtn.Size = UDim2.new(1, 0, 0, 24)
-            OptBtn.BackgroundTransparency = 1
-            OptBtn.Text = (isMulti and (curSel[val] and "[x] " or "[ ] ") or "") .. tostring(val)
-            OptBtn.Font = Enum.Font.GothamMedium
-            OptBtn.TextSize = 10.5
-            local isSelected = isMulti and (curSel[val] == true) or (tostring(val) == tostring(curSel))
-            OptBtn.TextColor3 = (isSelected and VRSLib.Theme.Accent or VRSLib.Theme.TextPrimary)
-            if isMulti then OptBtn.TextXAlignment = Enum.TextXAlignment.Left end
-            OptBtn.ZIndex = 26
-            OptBtn:SetAttribute("Val", val)
-            OptBtn.Parent = DropList
-            ProtectLocalization(OptBtn)
-            table.insert(optBtns, OptBtn)
+        local function buildOptions(newValues)
+            for _, opt in ipairs(optItems) do
+                pcall(function() opt.Button:Destroy() end)
+            end
+            optItems = {}
 
-            OptBtn.MouseEnter:Connect(function()
-                OptBtn.BackgroundTransparency = 0.8
-                OptBtn.BackgroundColor3 = VRSLib.Theme.Accent
-            end)
-            OptBtn.MouseLeave:Connect(function()
+            for idx, val in ipairs(newValues) do
+                local isSelected = isMulti and (curSel[val] == true) or (tostring(val) == tostring(curSel))
+
+                local OptBtn = Instance.new("TextButton")
+                OptBtn.Name = "Option_" .. tostring(val)
+                OptBtn.Size = UDim2.new(1, 0, 0, 24)
                 OptBtn.BackgroundTransparency = 1
-            end)
-            OptBtn.MouseButton1Click:Connect(function()
-                handleItemToggle(val)
-            end)
+                OptBtn.BackgroundColor3 = VRSLib.Theme.CardHover
+                OptBtn.BorderSizePixel = 0
+                OptBtn.Text = ""
+                OptBtn.AutoButtonColor = false
+                OptBtn.LayoutOrder = idx
+                OptBtn.ZIndex = 33
+                OptBtn.Parent = DropScroll
+
+                local OBCorner = Instance.new("UICorner")
+                OBCorner.CornerRadius = UDim.new(0, 4)
+                OBCorner.Parent = OptBtn
+
+                local OptLbl = Instance.new("TextLabel")
+                OptLbl.Name = "Text"
+                OptLbl.Size = UDim2.new(1, -26, 1, 0)
+                OptLbl.Position = UDim2.new(0, 8, 0, 0)
+                OptLbl.BackgroundTransparency = 1
+                OptLbl.Text = tostring(val)
+                OptLbl.Font = Enum.Font.GothamMedium
+                OptLbl.TextSize = 11
+                OptLbl.TextColor3 = isSelected and VRSLib.Theme.Accent or Color3.fromRGB(220, 224, 235)
+                OptLbl.TextXAlignment = Enum.TextXAlignment.Left
+                OptLbl.TextTruncate = Enum.TextTruncate.AtEnd
+                OptLbl.ZIndex = 34
+                OptLbl.Parent = OptBtn
+                ProtectLocalization(OptLbl)
+
+                local Check = Instance.new("ImageLabel")
+                Check.Name = "Check"
+                Check.Size = UDim2.fromOffset(12, 12)
+                Check.Position = UDim2.new(1, -18, 0.5, -6)
+                Check.BackgroundTransparency = 1
+                Check.Image = VRSLib.Icons.Get("check")
+                Check.ImageColor3 = VRSLib.Theme.Accent
+                Check.Visible = isSelected
+                Check.ZIndex = 34
+                Check.Parent = OptBtn
+
+                OptBtn.MouseEnter:Connect(function()
+                    TweenService:Create(OptBtn, TweenInfo.new(0.12), { BackgroundTransparency = 0.85 }):Play()
+                end)
+                OptBtn.MouseLeave:Connect(function()
+                    TweenService:Create(OptBtn, TweenInfo.new(0.12), { BackgroundTransparency = 1 }):Play()
+                end)
+                OptBtn.MouseButton1Click:Connect(function()
+                    handleItemToggle(val)
+                end)
+
+                table.insert(optItems, {
+                    Button = OptBtn,
+                    Label = OptLbl,
+                    Check = Check,
+                    Value = val
+                })
+            end
         end
+
+        buildOptions(values)
 
         dropObj = {
             Value = curSel,
@@ -2222,7 +2409,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                     end
                     dropObj.Value = curSel
                     SelText.Text = getSummary()
-                    refreshBtnColors()
+                    refreshItems()
                     for _, fn in ipairs(dropCallbacks) do
                         task.spawn(fn, curSel)
                     end
@@ -2233,7 +2420,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                     curSel = val
                     dropObj.Value = val
                     SelText.Text = tostring(val)
-                    refreshBtnColors()
+                    refreshItems()
                     for _, fn in ipairs(dropCallbacks) do
                         task.spawn(fn, val)
                     end
@@ -2248,13 +2435,6 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                 local newVals = maybeVals or selfOrVals
                 if type(newVals) == "table" then
                     values = newVals
-                    for _, b in ipairs(optBtns) do pcall(function() b:Destroy() end) end
-                    optBtns = {}
-                    local targetH = math.min(#values * 26 + 6, 160)
-                    DropList.Size = UDim2.new(1, 0, 0, targetH)
-                    if isOpen then
-                        DFrame.Size = UDim2.new(1, 0, 0, 48 + targetH + 6)
-                    end
                     if isMulti and shouldSelectAll ~= false then
                         curSel = {}
                         for _, v in ipairs(values) do
@@ -2264,35 +2444,9 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                         curSel = values[1] or "Select..."
                     end
                     dropObj.Value = curSel
-                    for _, val in ipairs(values) do
-                        local OptBtn = Instance.new("TextButton")
-                        OptBtn.Size = UDim2.new(1, 0, 0, 24)
-                        OptBtn.BackgroundTransparency = 1
-                        OptBtn.Text = (isMulti and (curSel[val] and "[x] " or "[ ] ") or "") .. tostring(val)
-                        OptBtn.Font = Enum.Font.GothamMedium
-                        OptBtn.TextSize = 10.5
-                        local isSelected = isMulti and (curSel[val] == true) or (tostring(val) == tostring(curSel))
-                        OptBtn.TextColor3 = (isSelected and VRSLib.Theme.Accent or VRSLib.Theme.TextPrimary)
-                        if isMulti then OptBtn.TextXAlignment = Enum.TextXAlignment.Left end
-                        OptBtn.ZIndex = 26
-                        OptBtn:SetAttribute("Val", val)
-                        OptBtn.Parent = DropList
-                        ProtectLocalization(OptBtn)
-                        table.insert(optBtns, OptBtn)
-
-                        OptBtn.MouseEnter:Connect(function()
-                            OptBtn.BackgroundTransparency = 0.8
-                            OptBtn.BackgroundColor3 = VRSLib.Theme.Accent
-                        end)
-                        OptBtn.MouseLeave:Connect(function()
-                            OptBtn.BackgroundTransparency = 1
-                        end)
-                        OptBtn.MouseButton1Click:Connect(function()
-                            handleItemToggle(val)
-                        end)
-                    end
-                    SelText.Text = isMulti and getSummary() or tostring(curSel)
-                    refreshBtnColors()
+                    buildOptions(values)
+                    SelText.Text = getSummary()
+                    if isOpen then updateMenuHeight() end
                 end
             end,
             OnChanged = function(selfOrFn, maybeFn)
@@ -4017,6 +4171,401 @@ function ModuleCard:AddSlider(config)
     end)
 
     return SliderFrame
+end
+
+-- Dropdown inside Card (with Search & Multi-select Checkmarks)
+function ModuleCard:AddDropdown(config)
+    config = config or {}
+    local name     = config.Name or config.Title or "Dropdown"
+    local values   = config.Values or config.Items or config.Options or {}
+    local isMulti  = (config.Multi == true or config.Multiselect == true)
+    local curSel
+    if isMulti then
+        curSel = {}
+        if type(config.Default) == "table" then
+            for k, v in pairs(config.Default) do
+                if type(k) == "number" and type(v) == "string" then
+                    curSel[v] = true
+                elseif type(k) == "string" and v == true then
+                    curSel[k] = true
+                end
+            end
+        elseif type(config.Default) == "string" then
+            curSel[config.Default] = true
+        end
+    else
+        if type(config.Default) == "number" and values[config.Default] ~= nil then
+            curSel = values[config.Default]
+        elseif config.Default ~= nil then
+            curSel = config.Default
+        else
+            curSel = values[1] or "Select..."
+        end
+    end
+    local callback = config.Callback or config.Func or function() end
+
+    self.Frame.Size = UDim2.fromOffset(self.Frame.Size.X.Offset, 126)
+    self.Frame.ClipsDescendants = false
+
+    local DropFrame = Instance.new("Frame")
+    DropFrame.Name = "CardDrop_" .. tostring(name)
+    DropFrame.Size = UDim2.new(1, -14, 0, 42)
+    DropFrame.Position = UDim2.new(0, 7, 0, 76)
+    DropFrame.BackgroundTransparency = 1
+    DropFrame.ZIndex = 20
+    DropFrame.ClipsDescendants = false
+    DropFrame.Parent = self.Frame
+
+    local DLabel = Instance.new("TextLabel")
+    DLabel.Size = UDim2.new(1, 0, 0, 14)
+    DLabel.Position = UDim2.new(0, 0, 0, 0)
+    DLabel.BackgroundTransparency = 1
+    DLabel.Text = name
+    DLabel.Font = Enum.Font.GothamMedium
+    DLabel.TextSize = 9.5
+    DLabel.TextColor3 = VRSLib.Theme.TextPrimary
+    DLabel.TextXAlignment = Enum.TextXAlignment.Left
+    DLabel.Parent = DropFrame
+    ProtectLocalization(DLabel)
+
+    local MainBtn = Instance.new("TextButton")
+    MainBtn.Size = UDim2.new(1, 0, 0, 24)
+    MainBtn.Position = UDim2.new(0, 0, 0, 16)
+    MainBtn.BackgroundColor3 = VRSLib.Theme.InputBackground
+    MainBtn.BorderSizePixel = 0
+    MainBtn.Text = ""
+    MainBtn.AutoButtonColor = false
+    MainBtn.ZIndex = 21
+    MainBtn.Parent = DropFrame
+
+    local DCorner = Instance.new("UICorner")
+    DCorner.CornerRadius = UDim.new(0, 4)
+    DCorner.Parent = MainBtn
+
+    local DStroke = Instance.new("UIStroke")
+    DStroke.Color = VRSLib.Theme.CardStroke
+    DStroke.Thickness = 1
+    DStroke.Parent = MainBtn
+
+    local function getSummary()
+        if not isMulti then return tostring(curSel or "Select...") end
+        local active = {}
+        for _, v in ipairs(values) do
+            if curSel[v] then
+                table.insert(active, tostring(v))
+            end
+        end
+        if #active == 0 then return "None" end
+        return table.concat(active, ", ")
+    end
+
+    local SelText = Instance.new("TextLabel")
+    SelText.Size = UDim2.new(1, -26, 1, 0)
+    SelText.Position = UDim2.new(0, 6, 0, 0)
+    SelText.BackgroundTransparency = 1
+    SelText.Text = getSummary()
+    SelText.Font = Enum.Font.GothamMedium
+    SelText.TextSize = 9.5
+    SelText.TextColor3 = VRSLib.Theme.TextPrimary
+    SelText.TextXAlignment = Enum.TextXAlignment.Left
+    SelText.TextTruncate = Enum.TextTruncate.AtEnd
+    SelText.ZIndex = 22
+    SelText.Parent = MainBtn
+    ProtectLocalization(SelText)
+
+    local Chevron = Instance.new("ImageLabel")
+    Chevron.Size = UDim2.fromOffset(11, 11)
+    Chevron.Position = UDim2.new(1, -18, 0.5, -5.5)
+    Chevron.BackgroundTransparency = 1
+    Chevron.Image = VRSLib.Icons.Get("chevron-down")
+    Chevron.ImageColor3 = VRSLib.Theme.TextMuted
+    Chevron.ZIndex = 22
+    Chevron.Parent = MainBtn
+
+    -- Dropdown Popup Menu
+    local DropMenu = Instance.new("Frame")
+    DropMenu.Name = "DropMenu"
+    DropMenu.Size = UDim2.new(1, 0, 0, 0)
+    DropMenu.Position = UDim2.new(0, 0, 0, 44)
+    DropMenu.BackgroundColor3 = VRSLib.Theme.Card
+    DropMenu.BorderSizePixel = 0
+    DropMenu.Visible = false
+    DropMenu.ZIndex = 40
+    DropMenu.ClipsDescendants = true
+    DropMenu.Parent = DropFrame
+
+    local DMCorner = Instance.new("UICorner")
+    DMCorner.CornerRadius = UDim.new(0, 5)
+    DMCorner.Parent = DropMenu
+
+    local DMStroke = Instance.new("UIStroke")
+    DMStroke.Color = VRSLib.Theme.CardStroke
+    DMStroke.Thickness = 1
+    DMStroke.Parent = DropMenu
+
+    -- Search Bar
+    local SearchBar = Instance.new("Frame")
+    SearchBar.Size = UDim2.new(1, -10, 0, 22)
+    SearchBar.Position = UDim2.new(0, 5, 0, 5)
+    SearchBar.BackgroundColor3 = VRSLib.Theme.InputBackground
+    SearchBar.BorderSizePixel = 0
+    SearchBar.ZIndex = 41
+    SearchBar.Parent = DropMenu
+
+    local SBCorner = Instance.new("UICorner")
+    SBCorner.CornerRadius = UDim.new(0, 4)
+    SBCorner.Parent = SearchBar
+
+    local SBStroke = Instance.new("UIStroke")
+    SBStroke.Color = VRSLib.Theme.InputStroke or Color3.fromRGB(30, 32, 44)
+    SBStroke.Thickness = 1
+    SBStroke.Parent = SearchBar
+
+    local SearchIcon = Instance.new("ImageLabel")
+    SearchIcon.Size = UDim2.fromOffset(11, 11)
+    SearchIcon.Position = UDim2.new(0, 5, 0.5, -5.5)
+    SearchIcon.BackgroundTransparency = 1
+    SearchIcon.Image = VRSLib.Icons.Get("search")
+    SearchIcon.ImageColor3 = VRSLib.Theme.TextMuted
+    SearchIcon.ZIndex = 42
+    SearchIcon.Parent = SearchBar
+
+    local SearchInput = Instance.new("TextBox")
+    SearchInput.Size = UDim2.new(1, -22, 1, 0)
+    SearchInput.Position = UDim2.new(0, 20, 0, 0)
+    SearchInput.BackgroundTransparency = 1
+    SearchInput.Text = ""
+    SearchInput.PlaceholderText = "search..."
+    SearchInput.PlaceholderColor3 = Color3.fromRGB(105, 110, 130)
+    SearchInput.TextColor3 = VRSLib.Theme.TextPrimary
+    SearchInput.Font = Enum.Font.Gotham
+    SearchInput.TextSize = 9.5
+    SearchInput.TextXAlignment = Enum.TextXAlignment.Left
+    SearchInput.ClearTextOnFocus = false
+    SearchInput.ZIndex = 42
+    SearchInput.Parent = SearchBar
+    ProtectLocalization(SearchInput)
+
+    local DropScroll = Instance.new("ScrollingFrame")
+    DropScroll.Size = UDim2.new(1, 0, 0, 0)
+    DropScroll.Position = UDim2.new(0, 0, 0, 30)
+    DropScroll.BackgroundTransparency = 1
+    DropScroll.BorderSizePixel = 0
+    DropScroll.ZIndex = 41
+    DropScroll.ClipsDescendants = true
+    DropScroll.ScrollBarThickness = 2
+    DropScroll.ScrollBarImageColor3 = VRSLib.Theme.Accent
+    DropScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+    DropScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    DropScroll.Parent = DropMenu
+
+    local DSPadding = Instance.new("UIPadding")
+    DSPadding.PaddingLeft = UDim.new(0, 5)
+    DSPadding.PaddingRight = UDim.new(0, 5)
+    DSPadding.PaddingTop = UDim.new(0, 2)
+    DSPadding.PaddingBottom = UDim.new(0, 4)
+    DSPadding.Parent = DropScroll
+
+    local DSLayout = Instance.new("UIListLayout")
+    DSLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    DSLayout.Padding = UDim.new(0, 2)
+    DSLayout.Parent = DropScroll
+
+    local optItems = {}
+    local dropCallbacks = { callback }
+
+    local function refreshItems()
+        for _, opt in ipairs(optItems) do
+            local val = opt.Value
+            local isSel = isMulti and (curSel[val] == true) or (tostring(val) == tostring(curSel))
+            opt.Label.TextColor3 = isSel and VRSLib.Theme.Accent or Color3.fromRGB(220, 224, 235)
+            opt.Check.ImageColor3 = VRSLib.Theme.Accent
+            opt.Check.Visible = isSel
+        end
+    end
+
+    local function getVisibleCount()
+        local count = 0
+        for _, opt in ipairs(optItems) do
+            if opt.Button.Visible then count = count + 1 end
+        end
+        return count
+    end
+
+    local isOpen = false
+    local function updateMenuHeight()
+        if not isOpen then return end
+        local count = getVisibleCount()
+        local visibleH = math.min(math.max(count, 1) * 24 + 4, 130)
+        DropScroll.Size = UDim2.new(1, 0, 0, visibleH)
+        DropMenu.Size = UDim2.new(1, 0, 0, 32 + visibleH + 4)
+    end
+
+    local function filterOptions(query)
+        query = string.lower(query or "")
+        for _, opt in ipairs(optItems) do
+            local matches = (query == "") or (string.find(string.lower(tostring(opt.Value)), query, 1, true) ~= nil)
+            opt.Button.Visible = matches
+        end
+        updateMenuHeight()
+    end
+
+    SearchInput:GetPropertyChangedSignal("Text"):Connect(function()
+        filterOptions(SearchInput.Text)
+    end)
+
+    local function ToggleDrop(open)
+        isOpen = (open ~= nil and open) or not isOpen
+        DropMenu.Visible = isOpen
+        if isOpen then
+            SearchInput.Text = ""
+            filterOptions("")
+            DropScroll.CanvasPosition = Vector2.new(0, 0)
+            updateMenuHeight()
+            TweenService:Create(Chevron, TweenInfo.new(0.15), { Rotation = 180 }):Play()
+        else
+            TweenService:Create(Chevron, TweenInfo.new(0.15), { Rotation = 0 }):Play()
+        end
+    end
+
+    MainBtn.MouseButton1Click:Connect(function() ToggleDrop() end)
+
+    local function handleItemToggle(val)
+        if isMulti then
+            curSel[val] = not curSel[val]
+            SelText.Text = getSummary()
+            refreshItems()
+            for _, fn in ipairs(dropCallbacks) do
+                task.spawn(fn, curSel)
+            end
+        else
+            curSel = val
+            SelText.Text = tostring(val)
+            refreshItems()
+            ToggleDrop(false)
+            for _, fn in ipairs(dropCallbacks) do
+                task.spawn(fn, val)
+            end
+        end
+    end
+
+    local function buildOptions(newValues)
+        for _, opt in ipairs(optItems) do
+            pcall(function() opt.Button:Destroy() end)
+        end
+        optItems = {}
+
+        for idx, val in ipairs(newValues) do
+            local isSelected = isMulti and (curSel[val] == true) or (tostring(val) == tostring(curSel))
+
+            local OptBtn = Instance.new("TextButton")
+            OptBtn.Name = "Option_" .. tostring(val)
+            OptBtn.Size = UDim2.new(1, 0, 0, 22)
+            OptBtn.BackgroundTransparency = 1
+            OptBtn.BackgroundColor3 = VRSLib.Theme.CardHover
+            OptBtn.BorderSizePixel = 0
+            OptBtn.Text = ""
+            OptBtn.AutoButtonColor = false
+            OptBtn.LayoutOrder = idx
+            OptBtn.ZIndex = 43
+            OptBtn.Parent = DropScroll
+
+            local OBCorner = Instance.new("UICorner")
+            OBCorner.CornerRadius = UDim.new(0, 3)
+            OBCorner.Parent = OptBtn
+
+            local OptLbl = Instance.new("TextLabel")
+            OptLbl.Name = "Text"
+            OptLbl.Size = UDim2.new(1, -24, 1, 0)
+            OptLbl.Position = UDim2.new(0, 6, 0, 0)
+            OptLbl.BackgroundTransparency = 1
+            OptLbl.Text = tostring(val)
+            OptLbl.Font = Enum.Font.GothamMedium
+            OptLbl.TextSize = 10
+            OptLbl.TextColor3 = isSelected and VRSLib.Theme.Accent or Color3.fromRGB(220, 224, 235)
+            OptLbl.TextXAlignment = Enum.TextXAlignment.Left
+            OptLbl.TextTruncate = Enum.TextTruncate.AtEnd
+            OptLbl.ZIndex = 44
+            OptLbl.Parent = OptBtn
+            ProtectLocalization(OptLbl)
+
+            local Check = Instance.new("ImageLabel")
+            Check.Name = "Check"
+            Check.Size = UDim2.fromOffset(11, 11)
+            Check.Position = UDim2.new(1, -16, 0.5, -5.5)
+            Check.BackgroundTransparency = 1
+            Check.Image = VRSLib.Icons.Get("check")
+            Check.ImageColor3 = VRSLib.Theme.Accent
+            Check.Visible = isSelected
+            Check.ZIndex = 44
+            Check.Parent = OptBtn
+
+            OptBtn.MouseEnter:Connect(function()
+                TweenService:Create(OptBtn, TweenInfo.new(0.12), { BackgroundTransparency = 0.85 }):Play()
+            end)
+            OptBtn.MouseLeave:Connect(function()
+                TweenService:Create(OptBtn, TweenInfo.new(0.12), { BackgroundTransparency = 1 }):Play()
+            end)
+            OptBtn.MouseButton1Click:Connect(function()
+                handleItemToggle(val)
+            end)
+
+            table.insert(optItems, {
+                Button = OptBtn,
+                Label = OptLbl,
+                Check = Check,
+                Value = val
+            })
+        end
+    end
+
+    buildOptions(values)
+
+    local cardDropObj = {
+        Value = curSel,
+        Set = function(val)
+            if isMulti then
+                if type(val) == "table" then
+                    curSel = {}
+                    for k, v in pairs(val) do
+                        if type(k) == "number" and type(v) == "string" then
+                            curSel[v] = true
+                        elseif type(k) == "string" and v == true then
+                            curSel[k] = true
+                        end
+                    end
+                elseif type(val) == "string" then
+                    curSel[val] = true
+                end
+                SelText.Text = getSummary()
+                refreshItems()
+                for _, fn in ipairs(dropCallbacks) do task.spawn(fn, curSel) end
+            else
+                curSel = val
+                SelText.Text = tostring(val)
+                refreshItems()
+                for _, fn in ipairs(dropCallbacks) do task.spawn(fn, val) end
+            end
+        end,
+        SetValues = function(selfOrVals, maybeVals)
+            local newVals = maybeVals or selfOrVals
+            if type(newVals) == "table" then
+                values = newVals
+                if not isMulti then curSel = values[1] or "Select..." end
+                buildOptions(values)
+                SelText.Text = getSummary()
+                if isOpen then updateMenuHeight() end
+            end
+        end,
+        OnChanged = function(selfOrFn, maybeFn)
+            local fn = maybeFn or selfOrFn
+            if type(fn) == "function" then table.insert(dropCallbacks, fn) end
+            return cardDropObj
+        end,
+        Frame = DropFrame
+    }
+
+    return cardDropObj
 end
 
 -- ==============================================================================

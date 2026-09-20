@@ -605,6 +605,27 @@ QueueBox:AddQueueList({
     }
 })
 
+-- [ Left Column - Box 3: Cards & Priority Multi-Dropdown ]
+local CardsBox = LeftCol:AddGroupbox({ Title = "Cards", Icon = "layers" })
+
+local cardToggle = CardsBox:AddToggle({
+    Title = "Auto Pick Cards",
+    Default = true,
+    Callback = function(v) print("[Cards] Auto Pick Cards:", v) end
+})
+
+cardToggle:AddDropdown("CardPriority", {
+    Title = "Card Priority (after rarity)",
+    Values = { "Damage", "Health", "Defense", "Cooldown", "Attack Speed", "Stamina", "Skills", "Speed" },
+    Multi = true,
+    Default = { "Damage", "Health" },
+    Callback = function(v)
+        local selected = {}
+        for item, st in pairs(v) do if st then table.insert(selected, item) end end
+        print("[Cards] Priority updated:", table.concat(selected, ", "))
+    end
+})
+
 -- [ Right Column - Box 1: Progression Presets & Options ]
 local PresetBox = RightCol:AddGroupbox({ Title = "Progression Presets & Options", Icon = "settings" })
 

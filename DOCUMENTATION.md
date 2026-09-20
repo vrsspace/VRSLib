@@ -236,7 +236,10 @@ LeftBox:AddSlider({
 })
 ```
 
-#### 4. Dropdown Selector
+#### 4. Dropdown Selector (Single & Multi-Select with Search Bar)
+Dropdown modern dengan pencarian instan (*live search*), aksen warna dinamis, dan centang (`✓`):
+
+**Single-Select:**
 ```lua
 LeftBox:AddDropdown({
     Title    = "Difficulty Level",
@@ -245,6 +248,45 @@ LeftBox:AddDropdown({
     Callback = function(choice)
         print("Selected:", choice)
     end
+})
+```
+
+**Multi-Select Dropdown:**
+```lua
+LeftBox:AddDropdown({
+    Title    = "Card Priority (after rarity)",
+    Values   = { "Damage", "Health", "Defense", "Cooldown", "Attack Speed", "Stamina", "Skills", "Speed" },
+    Multi    = true,
+    Default  = { "Damage", "Health" },
+    Callback = function(selectedTable)
+        for item, state in pairs(selectedTable) do
+            print(item, state)
+        end
+    end
+})
+```
+
+**Sub-Dropdown pada Toggle atau Card:**
+```lua
+-- Sub-dropdown di bawah Toggle:
+local CardToggle = LeftBox:AddToggle({ Title = "Auto Pick Cards", Default = true })
+local PriorityDrop = CardToggle:AddDropdown({
+    Title    = "Card Priority (after rarity)",
+    Values   = { "Damage", "Health", "Defense", "Cooldown", "Attack Speed", "Stamina", "Skills", "Speed" },
+    Multi    = true,
+    Default  = { "Damage", "Health" },
+    Callback = function(selected)
+        print("Cards priority updated:", selected)
+    end
+})
+
+-- Atau sub-dropdown pada Modular Card:
+local CardModule = Window:AddModule(Tab, { Title = "Cards", Icon = "layers" })
+CardModule:AddDropdown({
+    Title    = "Card Priority (after rarity)",
+    Values   = { "Damage", "Health", "Defense", "Cooldown" },
+    Multi    = true,
+    Default  = { "Damage", "Health" }
 })
 ```
 
