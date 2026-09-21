@@ -1554,11 +1554,203 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
     TitleBar.MouseButton1Click:Connect(function()
         BoxObj.IsCollapsed = not BoxObj.IsCollapsed
         Content.Visible = not BoxObj.IsCollapsed
+        if BoxObj.LockOverlay then
+            BoxObj.LockOverlay.Visible = (not BoxObj.IsCollapsed) and (BoxObj.IsLocked == true)
+        end
         TweenService:Create(GChevron, TweenInfo.new(0.2), {
             Rotation = BoxObj.IsCollapsed and -90 or 0,
             ImageColor3 = BoxObj.IsCollapsed and VRSLib.Theme.TextMuted or VRSLib.Theme.Accent
         }):Play()
     end)
+
+    -- Native Groupbox Locking & VIP Badge
+    function BoxObj:SetLocked(isLocked, badgeText)
+        self.IsLocked = (isLocked == true)
+        local badgeLabel = badgeText or "PREMIUM"
+
+        -- 1. TitleBar Badge
+        if self.IsLocked then
+            if not self.LockBadge then
+                local LockBadge = Instance.new("Frame")
+                LockBadge.Name = "LockBadge"
+                LockBadge.AnchorPoint = Vector2.new(1, 0.5)
+                LockBadge.Position = UDim2.new(1, -38, 0.5, 0)
+                LockBadge.Size = UDim2.new(0, 0, 0, 20)
+                LockBadge.AutomaticSize = Enum.AutomaticSize.X
+                LockBadge.BackgroundColor3 = Color3.fromRGB(42, 20, 32)
+                LockBadge.BackgroundTransparency = 0.15
+                LockBadge.BorderSizePixel = 0
+                LockBadge.ZIndex = 5
+                LockBadge.Parent = TitleBar
+
+                local LBCorner = Instance.new("UICorner")
+                LBCorner.CornerRadius = UDim.new(0, 4)
+                LBCorner.Parent = LockBadge
+
+                local LBStroke = Instance.new("UIStroke")
+                LBStroke.Color = Color3.fromRGB(255, 64, 140)
+                LBStroke.Thickness = 1
+                LBStroke.Transparency = 0.3
+                LBStroke.Parent = LockBadge
+
+                local LBPadding = Instance.new("UIPadding")
+                LBPadding.PaddingLeft = UDim.new(0, 6)
+                LBPadding.PaddingRight = UDim.new(0, 6)
+                LBPadding.Parent = LockBadge
+
+                local LBLayout = Instance.new("UIListLayout")
+                LBLayout.FillDirection = Enum.FillDirection.Horizontal
+                LBLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+                LBLayout.Padding = UDim.new(0, 4)
+                LBLayout.Parent = LockBadge
+
+                local lockIconId = (VRSLib.Icons and VRSLib.Icons.Get and VRSLib.Icons.Get("lock")) or "rbxassetid://10723434711"
+
+                local LBImg = Instance.new("ImageLabel")
+                LBImg.Size = UDim2.fromOffset(11, 11)
+                LBImg.BackgroundTransparency = 1
+                LBImg.Image = lockIconId
+                LBImg.ImageColor3 = Color3.fromRGB(255, 100, 160)
+                LBImg.ZIndex = 6
+                LBImg.Parent = LockBadge
+
+                local LBLbl = Instance.new("TextLabel")
+                LBLbl.Size = UDim2.new(0, 0, 1, 0)
+                LBLbl.AutomaticSize = Enum.AutomaticSize.X
+                LBLbl.BackgroundTransparency = 1
+                LBLbl.Text = badgeLabel
+                LBLbl.Font = Enum.Font.GothamBold
+                LBLbl.TextSize = 9.5
+                LBLbl.TextColor3 = Color3.fromRGB(255, 120, 180)
+                LBLbl.ZIndex = 6
+                LBLbl.Parent = LockBadge
+                ProtectLocalization(LBLbl)
+
+                self.LockBadge = LockBadge
+                self.LockBadgeText = LBLbl
+            else
+                self.LockBadge.Visible = true
+                self.LockBadgeText.Text = badgeLabel
+            end
+
+            -- 2. Click-intercepting LockOverlay over GroupCard (covers Content area without disrupting UIListLayout)
+            if not self.LockOverlay then
+                local overlay = Instance.new("TextButton")
+                overlay.Name = "LockOverlay"
+                overlay.Position = UDim2.new(0, 0, 0, 34)
+                overlay.BackgroundColor3 = Color3.fromRGB(10, 11, 16)
+                overlay.BackgroundTransparency = 0.55
+                overlay.BorderSizePixel = 0
+                overlay.AutoButtonColor = false
+                overlay.Text = ""
+                overlay.ZIndex = 50
+                overlay.Parent = GroupCard
+
+                local OCorner = Instance.new("UICorner")
+                OCorner.CornerRadius = UDim.new(0, 7)
+                OCorner.Parent = overlay
+
+                local OStroke = Instance.new("UIStroke")
+                OStroke.Color = Color3.fromRGB(255, 64, 140)
+                OStroke.Thickness = 1
+                OStroke.Transparency = 0.5
+                OStroke.Parent = overlay
+
+                -- Dynamic height matching Content without scale cycle
+                local function syncOverlayHeight()
+                    if overlay and Content and overlay.Parent then
+                        local h = Content.AbsoluteSize.Y
+                        overlay.Size = UDim2.new(1, 0, 0, math.max(h, 44))
+                    end
+                end
+                Content:GetPropertyChangedSignal("AbsoluteSize"):Connect(syncOverlayHeight)
+                task.defer(syncOverlayHeight)
+
+                -- Center VIP Pill
+                local CenterCard = Instance.new("Frame")
+                CenterCard.AnchorPoint = Vector2.new(0.5, 0.5)
+                CenterCard.Position = UDim2.new(0.5, 0, 0.5, 0)
+                CenterCard.Size = UDim2.new(0, 160, 0, 42)
+                CenterCard.BackgroundColor3 = Color3.fromRGB(18, 19, 28)
+                CenterCard.BackgroundTransparency = 0.1
+                CenterCard.BorderSizePixel = 0
+                CenterCard.ZIndex = 51
+                CenterCard.Parent = overlay
+
+                local CCorner = Instance.new("UICorner")
+                CCorner.CornerRadius = UDim.new(0, 6)
+                CCorner.Parent = CenterCard
+
+                local CStroke = Instance.new("UIStroke")
+                CStroke.Color = Color3.fromRGB(255, 64, 140)
+                CStroke.Thickness = 1
+                CStroke.Transparency = 0.3
+                CStroke.Parent = CenterCard
+
+                local CLbl = Instance.new("TextLabel")
+                CLbl.Size = UDim2.new(1, 0, 0, 20)
+                CLbl.Position = UDim2.new(0, 0, 0, 4)
+                CLbl.BackgroundTransparency = 1
+                CLbl.Text = "PREMIUM FEATURE"
+                CLbl.Font = Enum.Font.GothamBold
+                CLbl.TextSize = 11
+                CLbl.TextColor3 = Color3.fromRGB(255, 80, 160)
+                CLbl.TextXAlignment = Enum.TextXAlignment.Center
+                CLbl.ZIndex = 52
+                CLbl.Parent = CenterCard
+                ProtectLocalization(CLbl)
+
+                local CSub = Instance.new("TextLabel")
+                CSub.Size = UDim2.new(1, 0, 0, 16)
+                CSub.Position = UDim2.new(0, 0, 0, 22)
+                CSub.BackgroundTransparency = 1
+                CSub.Text = "Click to Unlock VIP"
+                CSub.Font = Enum.Font.GothamMedium
+                CSub.TextSize = 9.5
+                CSub.TextColor3 = Color3.fromRGB(160, 165, 185)
+                CSub.TextXAlignment = Enum.TextXAlignment.Center
+                CSub.ZIndex = 52
+                CSub.Parent = CenterCard
+                ProtectLocalization(CSub)
+
+                overlay.MouseEnter:Connect(function()
+                    TweenService:Create(CStroke, TweenInfo.new(0.15), { Transparency = 0 }):Play()
+                    TweenService:Create(CenterCard, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromRGB(28, 25, 38) }):Play()
+                end)
+                overlay.MouseLeave:Connect(function()
+                    TweenService:Create(CStroke, TweenInfo.new(0.15), { Transparency = 0.3 }):Play()
+                    TweenService:Create(CenterCard, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromRGB(18, 19, 28) }):Play()
+                end)
+
+                overlay.MouseButton1Click:Connect(function()
+                    local Lib = BoxObj.Window or (getgenv and getgenv().Library) or _G.Library
+                    if Lib and Lib.Notify then
+                        Lib:Notify({
+                            Title = "Premium Feature",
+                            Description = "Fitur ini khusus untuk pengguna Dungeon Lootr Premium! Link Discord disalin.",
+                            Duration = 4,
+                            Icon = "lock"
+                        })
+                    end
+                    if setclipboard then
+                        setclipboard("https://discord.gg/vrsartelier")
+                    end
+                end)
+
+                self.LockOverlay = overlay
+                self.LockOverlay.Visible = not self.IsCollapsed
+            else
+                self.LockOverlay.Visible = not self.IsCollapsed
+            end
+        else
+            if self.LockBadge then self.LockBadge.Visible = false end
+            if self.LockOverlay then self.LockOverlay.Visible = false end
+        end
+    end
+
+    if (config.Locked or (tabRef and tabRef.IsLocked)) and BoxObj.SetLocked then
+        BoxObj:SetLocked(true, config.Badge or (tabRef and tabRef.LockedBadge) or "PREMIUM")
+    end
 
     -- Divider separator
     function BoxObj:AddDivider()
@@ -3095,6 +3287,9 @@ function Window:SetupDualColumns(tabObj)
         function h:AddGroupbox(cfgOrTitle, optionalIcon)
             local box = self.Window:CreateGroupbox(colFrame, cfgOrTitle, optionalIcon, self.Tab)
             box.Tab = self.Tab
+            if self.Tab and self.Tab.IsLocked and box.SetLocked then
+                box:SetLocked(true, self.Tab.LockedBadge or "PREMIUM")
+            end
             return box
         end
         return h
@@ -3386,8 +3581,9 @@ function Window:CreateSidebarTab(config)
 
     function TabObj:SetLocked(isLocked, badgeText)
         self.IsLocked = (isLocked == true)
+        self.LockedBadge = badgeText or "PREMIUM"
         if self.IsLocked then
-            self:SetBadge(badgeText or "PREMIUM", Color3.fromRGB(42, 22, 34), Color3.fromRGB(255, 100, 160), Color3.fromRGB(255, 64, 140))
+            self:SetBadge(self.LockedBadge, Color3.fromRGB(42, 22, 34), Color3.fromRGB(255, 100, 160), Color3.fromRGB(255, 64, 140))
         else
             self:SetBadge(nil)
         end
