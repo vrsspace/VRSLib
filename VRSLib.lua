@@ -3312,20 +3312,43 @@ function Window:CreateSidebarTab(config)
     ProtectLocalization(TabLabel)
 
     local Badge = Instance.new("Frame")
-    Badge.Size = UDim2.new(0, 0, 0, 0)
-    Badge.BackgroundTransparency = 1
+    Badge.Name = "TabBadge"
+    Badge.AnchorPoint = Vector2.new(1, 0.5)
+    Badge.Position = UDim2.new(1, -8, 0.5, 0)
+    Badge.Size = UDim2.new(0, 0, 0, 18)
+    Badge.AutomaticSize = Enum.AutomaticSize.X
+    Badge.BackgroundColor3 = Color3.fromRGB(38, 22, 34)
+    Badge.BackgroundTransparency = 0.2
+    Badge.BorderSizePixel = 0
     Badge.Visible = false
     Badge.Parent = TabBtn
 
     local BadgeCorner = Instance.new("UICorner")
-    BadgeCorner.CornerRadius = UDim.new(0, 8)
+    BadgeCorner.CornerRadius = UDim.new(0, 4)
     BadgeCorner.Parent = Badge
 
+    local BadgeStroke = Instance.new("UIStroke")
+    BadgeStroke.Color = Color3.fromRGB(255, 64, 140)
+    BadgeStroke.Thickness = 1
+    BadgeStroke.Transparency = 0.4
+    BadgeStroke.Parent = Badge
+
+    local BadgePadding = Instance.new("UIPadding")
+    BadgePadding.PaddingLeft = UDim.new(0, 6)
+    BadgePadding.PaddingRight = UDim.new(0, 6)
+    BadgePadding.Parent = Badge
+
     local BadgeText = Instance.new("TextLabel")
-    BadgeText.Size = UDim2.new(0, 0, 0, 0)
+    BadgeText.Name = "BadgeText"
+    BadgeText.Size = UDim2.new(0, 0, 1, 0)
+    BadgeText.AutomaticSize = Enum.AutomaticSize.X
     BadgeText.BackgroundTransparency = 1
     BadgeText.Visible = false
     BadgeText.Text = ""
+    BadgeText.Font = Enum.Font.GothamBold
+    BadgeText.TextSize = 9.5
+    BadgeText.TextColor3 = Color3.fromRGB(255, 120, 180)
+    BadgeText.TextXAlignment = Enum.TextXAlignment.Center
     BadgeText.Parent = Badge
     ProtectLocalization(BadgeText)
 
@@ -3338,11 +3361,44 @@ function Window:CreateSidebarTab(config)
         Label       = TabLabel,
         Badge       = Badge,
         BadgeText   = BadgeText,
+        BadgeStroke = BadgeStroke,
         Indicator   = ActiveIndicator,
         IsQuickTab  = config.IsQuickTab or false,
         QuickFilter = config.QuickFilter,
         Cards       = {},
     }
+
+    function TabObj:SetBadge(text, bgColor, textColor, strokeColor)
+        if not text or text == "" then
+            Badge.Visible = false
+            BadgeText.Visible = false
+            TabLabel.Size = UDim2.new(1, -54, 1, 0)
+            return
+        end
+        Badge.Visible = true
+        BadgeText.Visible = true
+        BadgeText.Text = tostring(text)
+        if bgColor then Badge.BackgroundColor3 = bgColor end
+        if textColor then BadgeText.TextColor3 = textColor end
+        if strokeColor then BadgeStroke.Color = strokeColor end
+        TabLabel.Size = UDim2.new(1, -85, 1, 0)
+    end
+
+    function TabObj:SetLocked(isLocked, badgeText)
+        self.IsLocked = (isLocked == true)
+        if self.IsLocked then
+            self:SetBadge(badgeText or "PREMIUM", Color3.fromRGB(42, 22, 34), Color3.fromRGB(255, 100, 160), Color3.fromRGB(255, 64, 140))
+        else
+            self:SetBadge(nil)
+        end
+    end
+
+    if config.Badge then
+        TabObj:SetBadge(config.Badge, config.BadgeBg, config.BadgeColor, config.BadgeStroke)
+    end
+    if config.Locked then
+        TabObj:SetLocked(true, config.Badge)
+    end
 
     function TabObj:AddModule(modConfig)
         return self.Window:AddModule(self, modConfig)
@@ -3396,6 +3452,14 @@ function Window:CreateSidebarTab(config)
             end
         else
             self:SelectTab(TabObj)
+            if TabObj.IsLocked and self.Notify then
+                self:Notify({
+                    Title = "Premium Feature",
+                    Description = TabObj.Name .. " is a Premium feature.",
+                    Duration = 3,
+                    Icon = "lock"
+                })
+            end
         end
     end)
 
