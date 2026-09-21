@@ -512,11 +512,18 @@ function VRSLib:CreateWindow(config)
         VRSLib.Theme.ActionBtnIcon = config.Accent
     end
 
+    local safeContainer = GetSafeContainer()
+    for _, old in ipairs(safeContainer:GetChildren()) do
+        if old.Name == "VRS_Artelier_Engine" or old.Name == "VRSLib_NotifyGui" then
+            pcall(function() old:Destroy() end)
+        end
+    end
+
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "VRS_Artelier_Engine"
     ScreenGui.ResetOnSpawn = false
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    ScreenGui.Parent = GetSafeContainer()
+    ScreenGui.Parent = safeContainer
     self.Gui = ScreenGui
 
     ScreenGui.DescendantAdded:Connect(ProtectLocalization)
