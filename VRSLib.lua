@@ -854,7 +854,8 @@ function VRSLib:CreateWindow(config)
     UserNameLbl.Size = UDim2.new(1, -85, 0, 16)
     UserNameLbl.Position = UDim2.new(0, 46, 0.5, -8)
     UserNameLbl.BackgroundTransparency = 1
-    UserNameLbl.Text = LocalPlayer.Name
+    local rawName = tostring(LocalPlayer and LocalPlayer.Name or "User")
+    UserNameLbl.Text = (#rawName > 3) and (rawName:sub(1, 3) .. "***") or (rawName .. "***")
     UserNameLbl.Font = Enum.Font.GothamBold
     UserNameLbl.TextSize = 12.5
     UserNameLbl.TextColor3 = VRSLib.Theme.TextPrimary
