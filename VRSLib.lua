@@ -960,7 +960,7 @@ function VRSLib:CreateWindow(config)
     BreadcrumbCategory.Size = UDim2.new(0, 0, 1, 0)
     BreadcrumbCategory.AutomaticSize = Enum.AutomaticSize.X
     BreadcrumbCategory.BackgroundTransparency = 1
-    BreadcrumbCategory.Text = "QUICK / "
+    BreadcrumbCategory.Text = ""
     BreadcrumbCategory.Font = Enum.Font.GothamMedium
     BreadcrumbCategory.TextSize = 11.5
     BreadcrumbCategory.TextColor3 = Color3.fromRGB(225, 230, 245)
@@ -973,7 +973,7 @@ function VRSLib:CreateWindow(config)
     BreadcrumbTab.AutomaticSize = Enum.AutomaticSize.X
     BreadcrumbTab.Position = UDim2.new(1, 0, 0, 0)
     BreadcrumbTab.BackgroundTransparency = 1
-    BreadcrumbTab.Text = "All modules"
+    BreadcrumbTab.Text = ""
     BreadcrumbTab.Font = Enum.Font.GothamBold
     BreadcrumbTab.TextSize = 12.5
     BreadcrumbTab.TextColor3 = VRSLib.Theme.TextPrimary
@@ -1376,7 +1376,7 @@ function VRSLib:CreateWindow(config)
         getgenv().Options = self.Options
     end
 
-    self:InitQuickCategory()
+    -- self:InitQuickCategory() -- Disabled per user request (Quick category removed)
     table.insert(VRSLib.Windows, self)
 
     -- Responsive Smart Scaling Listeners
@@ -3176,7 +3176,7 @@ function Window:AddCategory(categoryName, layoutOrder)
 
     local HeaderBtn = Instance.new("TextButton")
     HeaderBtn.Name = "CategoryHeader_" .. upperName
-    HeaderBtn.Size = UDim2.new(1, 0, 0, 24)
+    HeaderBtn.Size = UDim2.new(1, 0, 0, 28)
     HeaderBtn.BackgroundTransparency = 1
     HeaderBtn.Text = ""
     HeaderBtn.AutoButtonColor = false
@@ -3190,7 +3190,7 @@ function Window:AddCategory(categoryName, layoutOrder)
     HeaderText.BackgroundTransparency = 1
     HeaderText.Text = upperName
     HeaderText.Font = Enum.Font.GothamBold
-    HeaderText.TextSize = 10
+    HeaderText.TextSize = 11.5
     HeaderText.TextColor3 = Color3.fromRGB(155, 165, 185)
     HeaderText.TextXAlignment = Enum.TextXAlignment.Left
     HeaderText.Parent = HeaderBtn
@@ -3199,8 +3199,8 @@ function Window:AddCategory(categoryName, layoutOrder)
 
     local Chevron = Instance.new("ImageLabel")
     Chevron.Name = "Chevron"
-    Chevron.Size = UDim2.fromOffset(12, 12)
-    Chevron.Position = UDim2.new(1, -16, 0.5, -6)
+    Chevron.Size = UDim2.fromOffset(14, 14)
+    Chevron.Position = UDim2.new(1, -16, 0.5, -7)
     Chevron.BackgroundTransparency = 1
     Chevron.Image = VRSLib.Icons.Get("chevron-down")
     Chevron.ImageColor3 = Color3.fromRGB(155, 165, 185)
@@ -3247,36 +3247,7 @@ function Window:AddCategoryHeader(name, layoutOrder)
 end
 
 function Window:InitQuickCategory()
-    self:AddCategory("QUICK", 1)
-
-    self.AllModulesTab = self:CreateSidebarTab({
-        Name = "All modules",
-        Category = "QUICK",
-        Icon = VRSLib.Icons.Get("all"),
-        LayoutOrder = 2,
-        IsQuickTab = true,
-        QuickFilter = "All"
-    })
-
-    self.PinnedTab = self:CreateSidebarTab({
-        Name = "Pinned",
-        Category = "QUICK",
-        Icon = VRSLib.Icons.Get("pinned"),
-        LayoutOrder = 3,
-        IsQuickTab = true,
-        QuickFilter = "Pinned"
-    })
-
-    self.ActiveTabBtn = self:CreateSidebarTab({
-        Name = "Active",
-        Category = "QUICK",
-        Icon = VRSLib.Icons.Get("active"),
-        LayoutOrder = 4,
-        IsQuickTab = true,
-        QuickFilter = "Active"
-    })
-
-    self:SelectTab(self.AllModulesTab)
+    -- Quick category (All modules, Pinned, Active) removed per user request
 end
 
 function Window:CreateSidebarTab(config)
@@ -3295,7 +3266,7 @@ function Window:CreateSidebarTab(config)
 
     local TabBtn = Instance.new("TextButton")
     TabBtn.Name = "Tab_" .. tabName
-    TabBtn.Size = UDim2.new(1, 0, 0, 30)
+    TabBtn.Size = UDim2.new(1, 0, 0, 36)
     TabBtn.BackgroundColor3 = VRSLib.Theme.Sidebar
     TabBtn.BackgroundTransparency = 1
     TabBtn.BorderSizePixel = 0
@@ -3304,13 +3275,13 @@ function Window:CreateSidebarTab(config)
     TabBtn.Parent = self.SidebarScroll
 
     local TabCorner = Instance.new("UICorner")
-    TabCorner.CornerRadius = UDim.new(0, 6)
+    TabCorner.CornerRadius = UDim.new(0, 7)
     TabCorner.Parent = TabBtn
 
     -- Left Accent Bar (Pink when active)
     local ActiveIndicator = Instance.new("Frame")
-    ActiveIndicator.Size = UDim2.new(0, 3, 0, 14)
-    ActiveIndicator.Position = UDim2.new(0, 2, 0.5, -7)
+    ActiveIndicator.Size = UDim2.new(0, 3.5, 0, 20)
+    ActiveIndicator.Position = UDim2.new(0, 3, 0.5, -10)
     ActiveIndicator.BackgroundColor3 = VRSLib.Theme.Accent
     ActiveIndicator.BorderSizePixel = 0
     ActiveIndicator.Visible = false
@@ -3321,20 +3292,20 @@ function Window:CreateSidebarTab(config)
     IndCorner.Parent = ActiveIndicator
 
     local TabIcon = Instance.new("ImageLabel")
-    TabIcon.Size = UDim2.fromOffset(14, 14)
-    TabIcon.Position = UDim2.new(0, 10, 0.5, -7)
+    TabIcon.Size = UDim2.fromOffset(18, 18)
+    TabIcon.Position = UDim2.new(0, 12, 0.5, -9)
     TabIcon.BackgroundTransparency = 1
     TabIcon.Image = iconId
     TabIcon.ImageColor3 = VRSLib.Theme.TextMuted
     TabIcon.Parent = TabBtn
 
     local TabLabel = Instance.new("TextLabel")
-    TabLabel.Size = UDim2.new(1, -38, 1, 0)
-    TabLabel.Position = UDim2.new(0, 30, 0, 0)
+    TabLabel.Size = UDim2.new(1, -54, 1, 0)
+    TabLabel.Position = UDim2.new(0, 38, 0, 0)
     TabLabel.BackgroundTransparency = 1
     TabLabel.Text = tabName
     TabLabel.Font = Enum.Font.GothamMedium
-    TabLabel.TextSize = 12
+    TabLabel.TextSize = 13.5
     TabLabel.TextColor3 = Color3.fromRGB(240, 244, 255)
     TabLabel.TextXAlignment = Enum.TextXAlignment.Left
     TabLabel.Parent = TabBtn
@@ -3486,7 +3457,7 @@ function Window:CreateSidebarTab(config)
         local subOrder = #self.SubTabs + 1
         local SubBtn = Instance.new("TextButton")
         SubBtn.Name = "SubTab_" .. subName
-        SubBtn.Size = UDim2.new(1, 0, 0, 30)
+        SubBtn.Size = UDim2.new(1, 0, 0, 32)
         SubBtn.BackgroundTransparency = 1
         SubBtn.BackgroundColor3 = VRSLib.Theme.Card
         SubBtn.BorderSizePixel = 0
@@ -3502,8 +3473,8 @@ function Window:CreateSidebarTab(config)
         -- Sub-tab Tree branch pip (Single sleek vertical guide line that changes color to Neon Pink when active)
         local TreePip = Instance.new("Frame")
         TreePip.Name = "TreePip"
-        TreePip.Size = UDim2.new(0, 2.5, 0, 16)
-        TreePip.Position = UDim2.new(0, 6, 0.5, -8)
+        TreePip.Size = UDim2.new(0, 2.5, 0, 18)
+        TreePip.Position = UDim2.new(0, 8, 0.5, -9)
         TreePip.BackgroundColor3 = VRSLib.Theme.Outline
         TreePip.BorderSizePixel = 0
         TreePip.Parent = SubBtn
@@ -3513,8 +3484,8 @@ function Window:CreateSidebarTab(config)
         TreeCorner.Parent = TreePip
 
         local SubIcon = Instance.new("ImageLabel")
-        SubIcon.Size = UDim2.fromOffset(14, 14)
-        SubIcon.Position = UDim2.new(0, 18, 0.5, -7)
+        SubIcon.Size = UDim2.fromOffset(16, 16)
+        SubIcon.Position = UDim2.new(0, 20, 0.5, -8)
         SubIcon.BackgroundTransparency = 1
         SubIcon.Image = subIcon
         SubIcon.ImageColor3 = VRSLib.Theme.TextMuted
@@ -3522,11 +3493,11 @@ function Window:CreateSidebarTab(config)
 
         local SubLabel = Instance.new("TextLabel")
         SubLabel.Size = UDim2.new(1, -68, 1, 0)
-        SubLabel.Position = UDim2.new(0, 38, 0, 0)
+        SubLabel.Position = UDim2.new(0, 44, 0, 0)
         SubLabel.BackgroundTransparency = 1
         SubLabel.Text = subName
         SubLabel.Font = Enum.Font.GothamMedium
-        SubLabel.TextSize = 11.5
+        SubLabel.TextSize = 12.5
         SubLabel.TextColor3 = Color3.fromRGB(240, 244, 255)
         SubLabel.TextXAlignment = Enum.TextXAlignment.Left
         SubLabel.Parent = SubBtn
@@ -3631,7 +3602,11 @@ function Window:AddTab(tabNameOrConfig, optionalIcon, optionalCategory)
     else
         config = tabNameOrConfig or {}
     end
-    return self:CreateSidebarTab(config)
+    local tab = self:CreateSidebarTab(config)
+    if not self.ActiveTab then
+        self:SelectTab(tab)
+    end
+    return tab
 end
 
 function Window:AddTabGroup(tabNameOrConfig, optionalIcon, optionalCategory)
