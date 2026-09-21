@@ -549,17 +549,7 @@ function VRSLib:CreateWindow(config)
     MainStroke.Thickness = 1.2
     MainStroke.Parent = Main
 
-    -- Outer Ambient Neon Pink Glow
-    local AmbientGlow = Instance.new("ImageLabel")
-    AmbientGlow.Name = "AmbientGlow"
-    AmbientGlow.Size = UDim2.new(1, 50, 1, 50)
-    AmbientGlow.Position = UDim2.new(0, -25, 0, -25)
-    AmbientGlow.BackgroundTransparency = 1
-    AmbientGlow.Image = "rbxassetid://5028857084"
-    AmbientGlow.ImageColor3 = VRSLib.Theme.Accent
-    AmbientGlow.ImageTransparency = 0.85
-    AmbientGlow.ZIndex = 0
-    AmbientGlow.Parent = Main
+    -- AmbientGlow removed: eliminates the vertical pink artifact line on the right edge
 
     -- ==============================================================================
     -- TOPBAR
@@ -912,7 +902,8 @@ function VRSLib:CreateWindow(config)
 
     -- Header / Sub-navbar inside Content Area (Sidebar Toggle + Breadcrumb + View Switchers)
     local ContentHeader = Instance.new("Frame")
-    ContentHeader.Size = UDim2.new(1, 0, 0, 38)
+    ContentHeader.Size = UDim2.new(1, 0, 0, 0)
+    ContentHeader.Visible = false
     ContentHeader.BackgroundTransparency = 1
     ContentHeader.Parent = ContentArea
 
@@ -1055,7 +1046,7 @@ function VRSLib:CreateWindow(config)
     local SubNavBar = Instance.new("Frame")
     SubNavBar.Name = "SubNavBar"
     SubNavBar.Size = UDim2.new(1, 0, 0, 34)
-    SubNavBar.Position = UDim2.new(0, 0, 0, 38)
+    SubNavBar.Position = UDim2.new(0, 0, 0, 0)
     SubNavBar.BackgroundColor3 = VRSLib.Theme.Sidebar
     SubNavBar.BackgroundTransparency = 0.5
     SubNavBar.BorderSizePixel = 0
@@ -1093,8 +1084,8 @@ function VRSLib:CreateWindow(config)
     -- Scrolling Container for Content (Cards & Columns)
     local CardsScroll = Instance.new("ScrollingFrame")
     CardsScroll.Name = "CardsScroll"
-    CardsScroll.Size = UDim2.new(1, 0, 1, -38)
-    CardsScroll.Position = UDim2.new(0, 0, 0, 38)
+    CardsScroll.Size = UDim2.new(1, 0, 1, 0)
+    CardsScroll.Position = UDim2.new(0, 0, 0, 0)
     CardsScroll.BackgroundTransparency = 1
     CardsScroll.BorderSizePixel = 0
     CardsScroll.ScrollBarThickness = 3
@@ -3622,8 +3613,8 @@ function Window:SelectTab(tabObj)
     -- Manage Top Horizontal SubNavBar
     if parentOfCurrent and #parentOfCurrent.SubTabs > 0 then
         self.SubNavBar.Visible = true
-        self.CardsScroll.Position = UDim2.new(0, 0, 0, 72)
-        self.CardsScroll.Size = UDim2.new(1, 0, 1, -72)
+        self.CardsScroll.Position = UDim2.new(0, 0, 0, 34)
+        self.CardsScroll.Size = UDim2.new(1, 0, 1, -34)
 
         -- Clear old subnav buttons
         for _, ch in ipairs(self.SubNavScroll:GetChildren()) do
@@ -3704,8 +3695,8 @@ function Window:SelectTab(tabObj)
         end
     else
         self.SubNavBar.Visible = false
-        self.CardsScroll.Position = UDim2.new(0, 0, 0, 38)
-        self.CardsScroll.Size = UDim2.new(1, 0, 1, -38)
+        self.CardsScroll.Position = UDim2.new(0, 0, 0, 0)
+        self.CardsScroll.Size = UDim2.new(1, 0, 1, 0)
     end
 
     -- Switch between Grid Mode and Columns Mode
