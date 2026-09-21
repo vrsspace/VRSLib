@@ -528,6 +528,7 @@ function VRSLib:CreateWindow(config)
     Main.AnchorPoint = Vector2.new(0.5, 0.5)
     Main.Position = UDim2.new(0.5, 0, 0.5, 0)
     Main.BackgroundColor3 = VRSLib.Theme.Background
+    Main.BackgroundTransparency = 0.1
     Main.BorderSizePixel = 0
     Main.Active = true
     Main.ClipsDescendants = false
@@ -558,6 +559,7 @@ function VRSLib:CreateWindow(config)
     Topbar.Name = "Topbar"
     Topbar.Size = UDim2.new(1, 0, 0, 50)
     Topbar.BackgroundColor3 = VRSLib.Theme.Header
+    Topbar.BackgroundTransparency = 0.1
     Topbar.BorderSizePixel = 0
     Topbar.Parent = Main
 
@@ -569,6 +571,7 @@ function VRSLib:CreateWindow(config)
     TopbarCover.Size = UDim2.new(1, 0, 0, 10)
     TopbarCover.Position = UDim2.new(0, 0, 1, -10)
     TopbarCover.BackgroundColor3 = VRSLib.Theme.Header
+    TopbarCover.BackgroundTransparency = 0.1
     TopbarCover.BorderSizePixel = 0
     TopbarCover.Parent = Topbar
 
@@ -775,6 +778,7 @@ function VRSLib:CreateWindow(config)
     self.Sidebar = Sidebar
     self.SidebarCollapsed = false
     Sidebar.BackgroundColor3 = VRSLib.Theme.Sidebar
+    Sidebar.BackgroundTransparency = 0.15
     Sidebar.BorderSizePixel = 0
     Sidebar.Parent = Body
 
@@ -815,6 +819,7 @@ function VRSLib:CreateWindow(config)
     ProfileBar.Size = UDim2.new(1, 0, 0, 50)
     ProfileBar.Position = UDim2.new(0, 0, 1, -50)
     ProfileBar.BackgroundColor3 = VRSLib.Theme.Sidebar
+    ProfileBar.BackgroundTransparency = 0.15
     ProfileBar.BorderSizePixel = 0
     ProfileBar.Parent = Sidebar
 
@@ -904,6 +909,7 @@ function VRSLib:CreateWindow(config)
     local ContentHeader = Instance.new("Frame")
     ContentHeader.Size = UDim2.new(1, 0, 0, 0)
     ContentHeader.Visible = false
+    ContentHeader.ClipsDescendants = true
     ContentHeader.BackgroundTransparency = 1
     ContentHeader.Parent = ContentArea
 
@@ -1084,8 +1090,8 @@ function VRSLib:CreateWindow(config)
     -- Scrolling Container for Content (Cards & Columns)
     local CardsScroll = Instance.new("ScrollingFrame")
     CardsScroll.Name = "CardsScroll"
-    CardsScroll.Size = UDim2.new(1, 0, 1, 0)
-    CardsScroll.Position = UDim2.new(0, 0, 0, 0)
+    CardsScroll.Size = UDim2.new(1, 0, 1, -12)
+    CardsScroll.Position = UDim2.new(0, 0, 0, 12)
     CardsScroll.BackgroundTransparency = 1
     CardsScroll.BorderSizePixel = 0
     CardsScroll.ScrollBarThickness = 3
@@ -1107,7 +1113,7 @@ function VRSLib:CreateWindow(config)
     local GridPadding = Instance.new("UIPadding")
     GridPadding.PaddingLeft = UDim.new(0, 16)
     GridPadding.PaddingRight = UDim.new(0, 16)
-    GridPadding.PaddingTop = UDim.new(0, 4)
+    GridPadding.PaddingTop = UDim.new(0, 14)
     GridPadding.PaddingBottom = UDim.new(0, 28)
     GridPadding.Parent = GridContainer
 
@@ -1148,6 +1154,7 @@ function VRSLib:CreateWindow(config)
     FooterBar.Size = UDim2.new(1, 0, 0, 22)
     FooterBar.Position = UDim2.new(0, 0, 1, -22)
     FooterBar.BackgroundColor3 = Color3.fromRGB(11, 12, 16)
+    FooterBar.BackgroundTransparency = 0.1
     FooterBar.BorderSizePixel = 0
     FooterBar.ZIndex = 25
     FooterBar.Parent = Main
@@ -1457,6 +1464,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
     GroupCard.Size = UDim2.new(1, 0, 0, 0)
     GroupCard.AutomaticSize = Enum.AutomaticSize.Y
     GroupCard.BackgroundColor3 = VRSLib.Theme.Card
+    GroupCard.BackgroundTransparency = 0.2
     GroupCard.BorderSizePixel = 0
     GroupCard.ClipsDescendants = true
     GroupCard.Parent = parentFrame
@@ -1526,7 +1534,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
     local CPadding = Instance.new("UIPadding")
     CPadding.PaddingLeft = UDim.new(0, 10)
     CPadding.PaddingRight = UDim.new(0, 10)
-    CPadding.PaddingTop = UDim.new(0, 4)
+    CPadding.PaddingTop = UDim.new(0, 14)
     CPadding.PaddingBottom = UDim.new(0, 12)
     CPadding.Parent = Content
 
@@ -3051,7 +3059,7 @@ function Window:SetupDualColumns(tabObj)
     local CPadding = Instance.new("UIPadding")
     CPadding.PaddingLeft = UDim.new(0, 16)
     CPadding.PaddingRight = UDim.new(0, 16)
-    CPadding.PaddingTop = UDim.new(0, 4)
+    CPadding.PaddingTop = UDim.new(0, 14)
     CPadding.PaddingBottom = UDim.new(0, 28)
     CPadding.Parent = ColContainer
 
@@ -3613,8 +3621,8 @@ function Window:SelectTab(tabObj)
     -- Manage Top Horizontal SubNavBar
     if parentOfCurrent and #parentOfCurrent.SubTabs > 0 then
         self.SubNavBar.Visible = true
-        self.CardsScroll.Position = UDim2.new(0, 0, 0, 34)
-        self.CardsScroll.Size = UDim2.new(1, 0, 1, -34)
+        self.CardsScroll.Position = UDim2.new(0, 0, 0, 48)
+        self.CardsScroll.Size = UDim2.new(1, 0, 1, -48)
 
         -- Clear old subnav buttons
         for _, ch in ipairs(self.SubNavScroll:GetChildren()) do
@@ -3695,8 +3703,8 @@ function Window:SelectTab(tabObj)
         end
     else
         self.SubNavBar.Visible = false
-        self.CardsScroll.Position = UDim2.new(0, 0, 0, 0)
-        self.CardsScroll.Size = UDim2.new(1, 0, 1, 0)
+        self.CardsScroll.Position = UDim2.new(0, 0, 0, 12)
+        self.CardsScroll.Size = UDim2.new(1, 0, 1, -12)
     end
 
     -- Switch between Grid Mode and Columns Mode
