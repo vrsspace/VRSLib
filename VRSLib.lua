@@ -354,7 +354,7 @@ function VRSLib:Notify(a1, a2, a3, a4)
     tLbl.BackgroundTransparency = 1
     tLbl.Text = title
     tLbl.Font = Enum.Font.GothamBold
-    tLbl.TextSize = 12.5
+    tLbl.TextSize = 13.5
     tLbl.TextColor3 = VRSLib.Theme.TextPrimary
     tLbl.TextXAlignment = Enum.TextXAlignment.Left
     tLbl.Parent = toast
@@ -365,7 +365,7 @@ function VRSLib:Notify(a1, a2, a3, a4)
     dLbl.BackgroundTransparency = 1
     dLbl.Text = desc
     dLbl.Font = Enum.Font.GothamMedium
-    dLbl.TextSize = 11
+    dLbl.TextSize = 12
     dLbl.TextColor3 = VRSLib.Theme.TextMuted
     dLbl.TextXAlignment = Enum.TextXAlignment.Left
     dLbl.TextTruncate = Enum.TextTruncate.AtEnd
@@ -641,7 +641,7 @@ function VRSLib:CreateWindow(config)
     SearchInput.PlaceholderColor3 = VRSLib.Theme.TextMuted
     SearchInput.Text = ""
     SearchInput.TextColor3 = VRSLib.Theme.TextPrimary
-    SearchInput.TextSize = 11.5
+    SearchInput.TextSize = 13
     SearchInput.TextXAlignment = Enum.TextXAlignment.Left
     SearchInput.ClearTextOnFocus = false
     SearchInput.Parent = SearchFrame
@@ -679,7 +679,7 @@ function VRSLib:CreateWindow(config)
     SPText.BackgroundTransparency = 1
     SPText.Text = "/"
     SPText.Font = Enum.Font.GothamBold
-    SPText.TextSize = 10
+    SPText.TextSize = 11
     SPText.TextColor3 = VRSLib.Theme.TextMuted
     SPText.Parent = ShortcutPill
     ProtectLocalization(SPText)
@@ -851,7 +851,7 @@ function VRSLib:CreateWindow(config)
     UserNameLbl.BackgroundTransparency = 1
     UserNameLbl.Text = LocalPlayer.Name
     UserNameLbl.Font = Enum.Font.GothamBold
-    UserNameLbl.TextSize = 11.5
+    UserNameLbl.TextSize = 12.5
     UserNameLbl.TextColor3 = VRSLib.Theme.TextPrimary
     UserNameLbl.TextXAlignment = Enum.TextXAlignment.Left
     UserNameLbl.TextTruncate = Enum.TextTruncate.AtEnd
@@ -1045,7 +1045,7 @@ function VRSLib:CreateWindow(config)
     -- Horizontal Sub-Navbar (Centered Layout, Obsidian-Grade Architecture)
     local SubNavBar = Instance.new("Frame")
     SubNavBar.Name = "SubNavBar"
-    SubNavBar.Size = UDim2.new(1, 0, 0, 34)
+    SubNavBar.Size = UDim2.new(1, 0, 0, 38)
     SubNavBar.Position = UDim2.new(0, 0, 0, 0)
     SubNavBar.BackgroundColor3 = VRSLib.Theme.Sidebar
     SubNavBar.BackgroundTransparency = 0.5
@@ -1175,7 +1175,7 @@ function VRSLib:CreateWindow(config)
     FooterLabel.BackgroundTransparency = 1
     FooterLabel.Text = "Copyright © VRS Artelier | " .. initialGame
     FooterLabel.Font = Enum.Font.GothamMedium
-    FooterLabel.TextSize = 10.5
+    FooterLabel.TextSize = 11
     FooterLabel.TextColor3 = Color3.fromRGB(225, 230, 245)
     FooterLabel.TextXAlignment = Enum.TextXAlignment.Center
     FooterLabel.TextTruncate = Enum.TextTruncate.AtEnd
@@ -1473,14 +1473,14 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
     -- Title Bar
     local TitleBar = Instance.new("TextButton")
     TitleBar.Name = "TitleBar"
-    TitleBar.Size = UDim2.new(1, 0, 0, 34)
+    TitleBar.Size = UDim2.new(1, 0, 0, 38)
     TitleBar.BackgroundTransparency = 1
     TitleBar.Text = ""
     TitleBar.AutoButtonColor = false
     TitleBar.Parent = GroupCard
 
     local GIcon = Instance.new("ImageLabel")
-    GIcon.Size = UDim2.fromOffset(14, 14)
+    GIcon.Size = UDim2.fromOffset(16, 16)
     GIcon.Position = UDim2.new(0, 10, 0.5, -7)
     GIcon.BackgroundTransparency = 1
     GIcon.Image = iconId
@@ -1493,14 +1493,14 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
     GTitle.BackgroundTransparency = 1
     GTitle.Text = title
     GTitle.Font = Enum.Font.GothamBold
-    GTitle.TextSize = 11.5
+    GTitle.TextSize = 13.5
     GTitle.TextColor3 = VRSLib.Theme.TextPrimary
     GTitle.TextXAlignment = Enum.TextXAlignment.Left
     GTitle.Parent = TitleBar
     ProtectLocalization(GTitle)
 
     local GChevron = Instance.new("ImageLabel")
-    GChevron.Size = UDim2.fromOffset(12, 12)
+    GChevron.Size = UDim2.fromOffset(14, 14)
     GChevron.Position = UDim2.new(1, -22, 0.5, -6)
     GChevron.BackgroundTransparency = 1
     GChevron.Image = VRSLib.Icons.Get("chevron-down")
@@ -1578,7 +1578,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         local cb = ctrlConfig.Callback or ctrlConfig.Func or function() end
 
         local Row = Instance.new("Frame")
-        Row.Size = UDim2.new(1, 0, 0, 26)
+        Row.Size = UDim2.new(1, 0, 0, 30)
         Row.BackgroundTransparency = 1
         Row.Parent = Content
 
@@ -1587,14 +1587,14 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         Lbl.BackgroundTransparency = 1
         Lbl.Text = cTitle
         Lbl.Font = Enum.Font.GothamMedium
-        Lbl.TextSize = 11.5
+        Lbl.TextSize = 13
         Lbl.TextColor3 = VRSLib.Theme.TextPrimary
         Lbl.TextXAlignment = Enum.TextXAlignment.Left
         Lbl.Parent = Row
         ProtectLocalization(Lbl)
 
         local Switch = Instance.new("TextButton")
-        Switch.Size = UDim2.fromOffset(30, 16)
+        Switch.Size = UDim2.fromOffset(32, 18)
         Switch.Position = UDim2.new(1, -30, 0.5, -8)
         Switch.BackgroundColor3 = (defVal and VRSLib.Theme.Accent or VRSLib.Theme.SwitchOff)
         Switch.BorderSizePixel = 0
@@ -1717,7 +1717,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         local cb = ctrlConfig.Callback or ctrlConfig.Func or function() end
 
         local Btn = Instance.new("TextButton")
-        Btn.Size = UDim2.new(1, 0, 0, 28)
+        Btn.Size = UDim2.new(1, 0, 0, 32)
         Btn.BackgroundColor3 = VRSLib.Theme.InputBackground
         Btn.BorderSizePixel = 0
         Btn.Text = ""
@@ -1747,7 +1747,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
 
         if cIcon then
             local BImg = Instance.new("ImageLabel")
-            BImg.Size = UDim2.fromOffset(13, 13)
+            BImg.Size = UDim2.fromOffset(15, 15)
             BImg.BackgroundTransparency = 1
             BImg.Image = cIcon
             BImg.ImageColor3 = VRSLib.Theme.Accent
@@ -1760,7 +1760,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         BLbl.BackgroundTransparency = 1
         BLbl.Text = cTitle
         BLbl.Font = Enum.Font.GothamBold
-        BLbl.TextSize = 11
+        BLbl.TextSize = 13
         BLbl.TextColor3 = VRSLib.Theme.TextPrimary
         BLbl.Parent = ContentBox
         ProtectLocalization(BLbl)
@@ -1852,12 +1852,12 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         local curVal = roundVal(def)
 
         local SFrame = Instance.new("Frame")
-        SFrame.Size = UDim2.new(1, 0, 0, 42)
+        SFrame.Size = UDim2.new(1, 0, 0, 48)
         SFrame.BackgroundTransparency = 1
         SFrame.Parent = Content
 
         local TopRow = Instance.new("Frame")
-        TopRow.Size = UDim2.new(1, 0, 0, 18)
+        TopRow.Size = UDim2.new(1, 0, 0, 22)
         TopRow.BackgroundTransparency = 1
         TopRow.Parent = SFrame
 
@@ -1866,26 +1866,26 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         TitleLbl.BackgroundTransparency = 1
         TitleLbl.Text = cTitle
         TitleLbl.Font = Enum.Font.GothamMedium
-        TitleLbl.TextSize = 11.5
+        TitleLbl.TextSize = 13
         TitleLbl.TextColor3 = VRSLib.Theme.TextPrimary
         TitleLbl.TextXAlignment = Enum.TextXAlignment.Left
         TitleLbl.Parent = TopRow
         ProtectLocalization(TitleLbl)
 
         local ValBadge = Instance.new("TextLabel")
-        ValBadge.Size = UDim2.new(0, 65, 1, 0)
+        ValBadge.Size = UDim2.new(0, 75, 1, 0)
         ValBadge.Position = UDim2.new(1, -65, 0, 0)
         ValBadge.BackgroundTransparency = 1
         ValBadge.Text = formatVal(curVal)
         ValBadge.Font = Enum.Font.GothamBold
-        ValBadge.TextSize = 10.5
+        ValBadge.TextSize = 12.5
         ValBadge.TextColor3 = VRSLib.Theme.Accent
         ValBadge.TextXAlignment = Enum.TextXAlignment.Right
         ValBadge.Parent = TopRow
         ProtectLocalization(ValBadge)
 
         local BarFrame = Instance.new("TextButton")
-        BarFrame.Size = UDim2.new(1, 0, 0, 14)
+        BarFrame.Size = UDim2.new(1, 0, 0, 16)
         BarFrame.Position = UDim2.new(0, 0, 0, 22)
         BarFrame.BackgroundTransparency = 1
         BarFrame.Text = ""
@@ -2040,7 +2040,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
 
         local DFrame = Instance.new("Frame")
         DFrame.Name = "Dropdown_" .. tostring(id)
-        DFrame.Size = UDim2.new(1, 0, 0, 48)
+        DFrame.Size = UDim2.new(1, 0, 0, 56)
         DFrame.BackgroundTransparency = 1
         DFrame.ZIndex = 15
         DFrame.ClipsDescendants = false
@@ -2048,11 +2048,11 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
 
         local Lbl = Instance.new("TextLabel")
         Lbl.Name = "Label"
-        Lbl.Size = UDim2.new(1, 0, 0, 16)
+        Lbl.Size = UDim2.new(1, 0, 0, 20)
         Lbl.BackgroundTransparency = 1
         Lbl.Text = cTitle
         Lbl.Font = Enum.Font.GothamMedium
-        Lbl.TextSize = 11.5
+        Lbl.TextSize = 13
         Lbl.TextColor3 = VRSLib.Theme.TextPrimary
         Lbl.TextXAlignment = Enum.TextXAlignment.Left
         Lbl.Parent = DFrame
@@ -2060,7 +2060,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
 
         local MainBtn = Instance.new("TextButton")
         MainBtn.Name = "Trigger"
-        MainBtn.Size = UDim2.new(1, 0, 0, 26)
+        MainBtn.Size = UDim2.new(1, 0, 0, 32)
         MainBtn.Position = UDim2.new(0, 0, 0, 18)
         MainBtn.BackgroundColor3 = VRSLib.Theme.InputBackground
         MainBtn.BorderSizePixel = 0
@@ -2097,7 +2097,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         SelText.BackgroundTransparency = 1
         SelText.Text = getSummary()
         SelText.Font = Enum.Font.GothamMedium
-        SelText.TextSize = 10.5
+        SelText.TextSize = 12.5
         SelText.TextColor3 = VRSLib.Theme.TextPrimary
         SelText.TextXAlignment = Enum.TextXAlignment.Left
         SelText.TextTruncate = Enum.TextTruncate.AtEnd
@@ -2107,8 +2107,8 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
 
         local Chevron = Instance.new("ImageLabel")
         Chevron.Name = "Chevron"
-        Chevron.Size = UDim2.fromOffset(12, 12)
-        Chevron.Position = UDim2.new(1, -20, 0.5, -6)
+        Chevron.Size = UDim2.fromOffset(14, 14)
+        Chevron.Position = UDim2.new(1, -22, 0.5, -7)
         Chevron.BackgroundTransparency = 1
         Chevron.Image = VRSLib.Icons.Get("chevron-down")
         Chevron.ImageColor3 = VRSLib.Theme.TextMuted
@@ -2139,7 +2139,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         -- Integrated Search Bar (ala modern UI)
         local SearchBar = Instance.new("Frame")
         SearchBar.Name = "SearchBar"
-        SearchBar.Size = UDim2.new(1, -12, 0, 24)
+        SearchBar.Size = UDim2.new(1, -12, 0, 28)
         SearchBar.Position = UDim2.new(0, 6, 0, 6)
         SearchBar.BackgroundColor3 = VRSLib.Theme.InputBackground
         SearchBar.BorderSizePixel = 0
@@ -2175,7 +2175,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         SearchInput.PlaceholderColor3 = Color3.fromRGB(105, 110, 130)
         SearchInput.TextColor3 = VRSLib.Theme.TextPrimary
         SearchInput.Font = Enum.Font.Gotham
-        SearchInput.TextSize = 10.5
+        SearchInput.TextSize = 12
         SearchInput.TextXAlignment = Enum.TextXAlignment.Left
         SearchInput.ClearTextOnFocus = false
         SearchInput.ZIndex = 32
@@ -2240,7 +2240,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
             local visibleH = math.min(math.max(count, 1) * 26 + 4, 150)
             DropScroll.Size = UDim2.new(1, 0, 0, visibleH)
             DropMenu.Size = UDim2.new(1, 0, 0, 36 + visibleH + 4)
-            DFrame.Size = UDim2.new(1, 0, 0, 48 + 36 + visibleH + 8)
+            DFrame.Size = UDim2.new(1, 0, 0, 56 + 38 + visibleH + 8)
         end
 
         local function filterOptions(query)
@@ -2266,7 +2266,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                 updateMenuHeight()
                 TweenService:Create(Chevron, TweenInfo.new(0.15), { Rotation = 180 }):Play()
             else
-                DFrame.Size = UDim2.new(1, 0, 0, 48)
+                DFrame.Size = UDim2.new(1, 0, 0, 56)
                 TweenService:Create(Chevron, TweenInfo.new(0.15), { Rotation = 0 }):Play()
             end
         end
@@ -2321,7 +2321,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
 
                 local OptBtn = Instance.new("TextButton")
                 OptBtn.Name = "Option_" .. tostring(val)
-                OptBtn.Size = UDim2.new(1, 0, 0, 24)
+                OptBtn.Size = UDim2.new(1, 0, 0, 28)
                 OptBtn.BackgroundTransparency = 1
                 OptBtn.BackgroundColor3 = VRSLib.Theme.CardHover
                 OptBtn.BorderSizePixel = 0
@@ -2342,7 +2342,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                 OptLbl.BackgroundTransparency = 1
                 OptLbl.Text = tostring(val)
                 OptLbl.Font = Enum.Font.GothamMedium
-                OptLbl.TextSize = 11
+                OptLbl.TextSize = 13.5
                 OptLbl.TextColor3 = isSelected and VRSLib.Theme.Accent or Color3.fromRGB(220, 224, 235)
                 OptLbl.TextXAlignment = Enum.TextXAlignment.Left
                 OptLbl.TextTruncate = Enum.TextTruncate.AtEnd
@@ -2528,7 +2528,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         Lbl.BackgroundTransparency = 1
         Lbl.Text = cText
         Lbl.Font = Enum.Font.GothamMedium
-        Lbl.TextSize = 11.5
+        Lbl.TextSize = 13
         Lbl.TextColor3 = (typeof(optionalColor) == "Color3" and optionalColor) or cColor or VRSLib.Theme.TextPrimary
         Lbl.TextXAlignment = Enum.TextXAlignment.Left
         Lbl.TextTruncate = isMulti and Enum.TextTruncate.None or Enum.TextTruncate.AtEnd
@@ -2576,7 +2576,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                 KeyBtn.Font = Enum.Font.GothamBold
                 KeyBtn.Text = "[" .. tostring(keyName) .. "]"
                 KeyBtn.TextColor3 = VRSLib.Theme.TextPrimary
-                KeyBtn.TextSize = 11
+                KeyBtn.TextSize = 12
                 KeyBtn.AutoButtonColor = false
                 KeyBtn.ZIndex = 5
                 KeyBtn.Parent = Lbl
@@ -2699,7 +2699,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         keyName = tostring(keyName)
 
         local Row = Instance.new("Frame")
-        Row.Size = UDim2.new(1, 0, 0, 26)
+        Row.Size = UDim2.new(1, 0, 0, 30)
         Row.BackgroundTransparency = 1
         Row.Parent = Content
 
@@ -2723,7 +2723,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         KeyBtn.Font = Enum.Font.GothamBold
         KeyBtn.Text = "[" .. tostring(keyName) .. "]"
         KeyBtn.TextColor3 = VRSLib.Theme.TextPrimary
-        KeyBtn.TextSize = 11
+        KeyBtn.TextSize = 12
         KeyBtn.AutoButtonColor = false
         KeyBtn.Parent = Row
 
@@ -2917,23 +2917,23 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         local clearFocus = (ctrlConfig.ClearTextOnFocus == true)
 
         local IFrame = Instance.new("Frame")
-        IFrame.Size = UDim2.new(1, 0, 0, 48)
+        IFrame.Size = UDim2.new(1, 0, 0, 56)
         IFrame.BackgroundTransparency = 1
         IFrame.Parent = Content
 
         local Lbl = Instance.new("TextLabel")
-        Lbl.Size = UDim2.new(1, 0, 0, 16)
+        Lbl.Size = UDim2.new(1, 0, 0, 20)
         Lbl.BackgroundTransparency = 1
         Lbl.Text = cTitle
         Lbl.Font = Enum.Font.GothamMedium
-        Lbl.TextSize = 11.5
+        Lbl.TextSize = 13
         Lbl.TextColor3 = VRSLib.Theme.TextPrimary
         Lbl.TextXAlignment = Enum.TextXAlignment.Left
         Lbl.Parent = IFrame
         ProtectLocalization(Lbl)
 
         local BoxFrame = Instance.new("Frame")
-        BoxFrame.Size = UDim2.new(1, 0, 0, 26)
+        BoxFrame.Size = UDim2.new(1, 0, 0, 32)
         BoxFrame.Position = UDim2.new(0, 0, 0, 18)
         BoxFrame.BackgroundColor3 = VRSLib.Theme.InputBackground
         BoxFrame.BorderSizePixel = 0
@@ -2955,7 +2955,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         TBox.Text = tostring(defVal)
         TBox.PlaceholderText = placeholder
         TBox.Font = Enum.Font.GothamMedium
-        TBox.TextSize = 10.5
+        TBox.TextSize = 12.5
         TBox.TextColor3 = VRSLib.Theme.TextPrimary
         TBox.PlaceholderColor3 = Color3.fromRGB(100, 105, 125)
         TBox.TextXAlignment = Enum.TextXAlignment.Left
@@ -3167,7 +3167,7 @@ function Window:AddCategory(categoryName, layoutOrder)
 
     local HeaderBtn = Instance.new("TextButton")
     HeaderBtn.Name = "CategoryHeader_" .. upperName
-    HeaderBtn.Size = UDim2.new(1, 0, 0, 28)
+    HeaderBtn.Size = UDim2.new(1, 0, 0, 32)
     HeaderBtn.BackgroundTransparency = 1
     HeaderBtn.Text = ""
     HeaderBtn.AutoButtonColor = false
@@ -3649,7 +3649,7 @@ function Window:SelectTab(tabObj)
             SLayout.Parent = SBox
 
             local SIcon = Instance.new("ImageLabel")
-            SIcon.Size = UDim2.fromOffset(13, 13)
+            SIcon.Size = UDim2.fromOffset(16, 16)
             SIcon.BackgroundTransparency = 1
             SIcon.Image = sub.Icon.Image
             SIcon.ImageColor3 = isActive and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted
@@ -3661,7 +3661,7 @@ function Window:SelectTab(tabObj)
             SLbl.BackgroundTransparency = 1
             SLbl.Text = sub.Name
             SLbl.Font = Enum.Font.GothamBold
-            SLbl.TextSize = 11
+            SLbl.TextSize = 12.5
             SLbl.TextColor3 = isActive and VRSLib.Theme.TextPrimary or VRSLib.Theme.TextMuted
             SLbl.Parent = SBox
             ProtectLocalization(SLbl)
@@ -3853,7 +3853,7 @@ function Window:AddModule(tabOrConfig, optionalConfig)
     TitleLabel.BackgroundTransparency = 1
     TitleLabel.Text = title
     TitleLabel.Font = Enum.Font.GothamBold
-    TitleLabel.TextSize = 11
+    TitleLabel.TextSize = 13
     TitleLabel.TextColor3 = VRSLib.Theme.TextPrimary
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
     TitleLabel.TextTruncate = Enum.TextTruncate.AtEnd
@@ -3887,7 +3887,7 @@ function Window:AddModule(tabOrConfig, optionalConfig)
     DescLabel.BackgroundTransparency = 1
     DescLabel.Text = desc
     DescLabel.Font = Enum.Font.GothamMedium
-    DescLabel.TextSize = 9.5
+    DescLabel.TextSize = 11.5
     DescLabel.TextColor3 = VRSLib.Theme.TextMuted
     DescLabel.TextXAlignment = Enum.TextXAlignment.Left
     DescLabel.TextYAlignment = Enum.TextYAlignment.Top
@@ -4071,7 +4071,7 @@ function ModuleCard:AddSlider(config)
     SLabel.BackgroundTransparency = 1
     SLabel.Text = name
     SLabel.Font = Enum.Font.GothamMedium
-    SLabel.TextSize = 9.5
+    SLabel.TextSize = 11.5
     SLabel.TextColor3 = VRSLib.Theme.TextPrimary
     SLabel.TextXAlignment = Enum.TextXAlignment.Left
     SLabel.Parent = SliderFrame
@@ -4082,7 +4082,7 @@ function ModuleCard:AddSlider(config)
     SVal.BackgroundTransparency = 1
     SVal.Text = formatVal(curVal)
     SVal.Font = Enum.Font.GothamBold
-    SVal.TextSize = 9.5
+    SVal.TextSize = 11.5
     SVal.TextColor3 = VRSLib.Theme.Accent
     SVal.TextXAlignment = Enum.TextXAlignment.Right
     SVal.Parent = SliderFrame
@@ -4188,7 +4188,7 @@ function ModuleCard:AddDropdown(config)
     DLabel.BackgroundTransparency = 1
     DLabel.Text = name
     DLabel.Font = Enum.Font.GothamMedium
-    DLabel.TextSize = 9.5
+    DLabel.TextSize = 11.5
     DLabel.TextColor3 = VRSLib.Theme.TextPrimary
     DLabel.TextXAlignment = Enum.TextXAlignment.Left
     DLabel.Parent = DropFrame
@@ -4231,7 +4231,7 @@ function ModuleCard:AddDropdown(config)
     SelText.BackgroundTransparency = 1
     SelText.Text = getSummary()
     SelText.Font = Enum.Font.GothamMedium
-    SelText.TextSize = 9.5
+    SelText.TextSize = 11.5
     SelText.TextColor3 = VRSLib.Theme.TextPrimary
     SelText.TextXAlignment = Enum.TextXAlignment.Left
     SelText.TextTruncate = Enum.TextTruncate.AtEnd
@@ -4305,7 +4305,7 @@ function ModuleCard:AddDropdown(config)
     SearchInput.PlaceholderColor3 = Color3.fromRGB(105, 110, 130)
     SearchInput.TextColor3 = VRSLib.Theme.TextPrimary
     SearchInput.Font = Enum.Font.Gotham
-    SearchInput.TextSize = 9.5
+    SearchInput.TextSize = 13
     SearchInput.TextXAlignment = Enum.TextXAlignment.Left
     SearchInput.ClearTextOnFocus = false
     SearchInput.ZIndex = 42
@@ -4447,7 +4447,7 @@ function ModuleCard:AddDropdown(config)
             OptLbl.BackgroundTransparency = 1
             OptLbl.Text = tostring(val)
             OptLbl.Font = Enum.Font.GothamMedium
-            OptLbl.TextSize = 10
+            OptLbl.TextSize = 12
             OptLbl.TextColor3 = isSelected and VRSLib.Theme.Accent or Color3.fromRGB(220, 224, 235)
             OptLbl.TextXAlignment = Enum.TextXAlignment.Left
             OptLbl.TextTruncate = Enum.TextTruncate.AtEnd
