@@ -1633,13 +1633,13 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                 self.LockBadgeText.Text = badgeLabel
             end
 
-            -- 2. Click-intercepting LockOverlay over GroupCard (covers Content area without disrupting UIListLayout)
+            -- 2. Frosted Blur-style Click-intercepting LockOverlay over GroupCard
             if not self.LockOverlay then
                 local overlay = Instance.new("TextButton")
                 overlay.Name = "LockOverlay"
                 overlay.Position = UDim2.new(0, 0, 0, 34)
-                overlay.BackgroundColor3 = Color3.fromRGB(10, 11, 16)
-                overlay.BackgroundTransparency = 0.55
+                overlay.BackgroundColor3 = Color3.fromRGB(11, 12, 18)
+                overlay.BackgroundTransparency = 0.14 -- Frosted semi-opaque so text is obscured & protected
                 overlay.BorderSizePixel = 0
                 overlay.AutoButtonColor = false
                 overlay.Text = ""
@@ -1653,7 +1653,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                 local OStroke = Instance.new("UIStroke")
                 OStroke.Color = Color3.fromRGB(255, 64, 140)
                 OStroke.Thickness = 1
-                OStroke.Transparency = 0.5
+                OStroke.Transparency = 0.7
                 OStroke.Parent = overlay
 
                 -- Dynamic height matching Content without scale cycle
@@ -1666,60 +1666,65 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                 Content:GetPropertyChangedSignal("AbsoluteSize"):Connect(syncOverlayHeight)
                 task.defer(syncOverlayHeight)
 
-                -- Center VIP Pill
+                -- Sleek Centered Pill: Lock Icon on top + "Premium Feature" text underneath
                 local CenterCard = Instance.new("Frame")
                 CenterCard.AnchorPoint = Vector2.new(0.5, 0.5)
                 CenterCard.Position = UDim2.new(0.5, 0, 0.5, 0)
-                CenterCard.Size = UDim2.new(0, 160, 0, 42)
+                CenterCard.Size = UDim2.new(0, 130, 0, 54)
                 CenterCard.BackgroundColor3 = Color3.fromRGB(18, 19, 28)
-                CenterCard.BackgroundTransparency = 0.1
+                CenterCard.BackgroundTransparency = 0.2
                 CenterCard.BorderSizePixel = 0
                 CenterCard.ZIndex = 51
                 CenterCard.Parent = overlay
 
                 local CCorner = Instance.new("UICorner")
-                CCorner.CornerRadius = UDim.new(0, 6)
+                CCorner.CornerRadius = UDim.new(0, 8)
                 CCorner.Parent = CenterCard
 
                 local CStroke = Instance.new("UIStroke")
                 CStroke.Color = Color3.fromRGB(255, 64, 140)
                 CStroke.Thickness = 1
-                CStroke.Transparency = 0.3
+                CStroke.Transparency = 0.4
                 CStroke.Parent = CenterCard
 
+                local CLayout = Instance.new("UIListLayout")
+                CLayout.FillDirection = Enum.FillDirection.Vertical
+                CLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+                CLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+                CLayout.Padding = UDim.new(0, 4)
+                CLayout.Parent = CenterCard
+
+                local lockIconId = (VRSLib.Icons and VRSLib.Icons.Get and VRSLib.Icons.Get("lock")) or "rbxassetid://10723434711"
+
+                local CIcon = Instance.new("ImageLabel")
+                CIcon.Size = UDim2.fromOffset(20, 20)
+                CIcon.BackgroundTransparency = 1
+                CIcon.Image = lockIconId
+                CIcon.ImageColor3 = Color3.fromRGB(255, 80, 160)
+                CIcon.ZIndex = 52
+                CIcon.Parent = CenterCard
+
                 local CLbl = Instance.new("TextLabel")
-                CLbl.Size = UDim2.new(1, 0, 0, 20)
-                CLbl.Position = UDim2.new(0, 0, 0, 4)
+                CLbl.Size = UDim2.new(1, -12, 0, 16)
                 CLbl.BackgroundTransparency = 1
-                CLbl.Text = "PREMIUM FEATURE"
+                CLbl.Text = "Premium Feature"
                 CLbl.Font = Enum.Font.GothamBold
-                CLbl.TextSize = 11
-                CLbl.TextColor3 = Color3.fromRGB(255, 80, 160)
+                CLbl.TextSize = 10.5
+                CLbl.TextColor3 = Color3.fromRGB(250, 250, 255)
                 CLbl.TextXAlignment = Enum.TextXAlignment.Center
                 CLbl.ZIndex = 52
                 CLbl.Parent = CenterCard
                 ProtectLocalization(CLbl)
 
-                local CSub = Instance.new("TextLabel")
-                CSub.Size = UDim2.new(1, 0, 0, 16)
-                CSub.Position = UDim2.new(0, 0, 0, 22)
-                CSub.BackgroundTransparency = 1
-                CSub.Text = "Click to Unlock VIP"
-                CSub.Font = Enum.Font.GothamMedium
-                CSub.TextSize = 9.5
-                CSub.TextColor3 = Color3.fromRGB(160, 165, 185)
-                CSub.TextXAlignment = Enum.TextXAlignment.Center
-                CSub.ZIndex = 52
-                CSub.Parent = CenterCard
-                ProtectLocalization(CSub)
-
                 overlay.MouseEnter:Connect(function()
-                    TweenService:Create(CStroke, TweenInfo.new(0.15), { Transparency = 0 }):Play()
-                    TweenService:Create(CenterCard, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromRGB(28, 25, 38) }):Play()
+                    TweenService:Create(CStroke, TweenInfo.new(0.15), { Transparency = 0.1 }):Play()
+                    TweenService:Create(CenterCard, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromRGB(26, 24, 38) }):Play()
+                    TweenService:Create(CIcon, TweenInfo.new(0.15), { ImageColor3 = Color3.fromRGB(255, 120, 190) }):Play()
                 end)
                 overlay.MouseLeave:Connect(function()
-                    TweenService:Create(CStroke, TweenInfo.new(0.15), { Transparency = 0.3 }):Play()
+                    TweenService:Create(CStroke, TweenInfo.new(0.15), { Transparency = 0.4 }):Play()
                     TweenService:Create(CenterCard, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromRGB(18, 19, 28) }):Play()
+                    TweenService:Create(CIcon, TweenInfo.new(0.15), { ImageColor3 = Color3.fromRGB(255, 80, 160) }):Play()
                 end)
 
                 overlay.MouseButton1Click:Connect(function()
