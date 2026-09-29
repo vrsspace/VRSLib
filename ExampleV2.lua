@@ -7,8 +7,29 @@
     ==============================================================================
 ]]
 
--- Anti-multi execution
+-- Anti-multi execution & clean ghost windows
 if _G.VRSV2_UNLOAD then pcall(_G.VRSV2_UNLOAD) end
+if _G.VRS_UNLOAD then pcall(_G.VRS_UNLOAD) end
+pcall(function()
+    local CoreGui = game:GetService("CoreGui")
+    local Players = game:GetService("Players")
+    local lp = Players.LocalPlayer
+    local targets = {}
+    if gethui then table.insert(targets, gethui()) end
+    if CoreGui then table.insert(targets, CoreGui) end
+    if lp and lp:FindFirstChild("PlayerGui") then table.insert(targets, lp.PlayerGui) end
+    for _, container in ipairs(targets) do
+        for _, child in ipairs(container:GetChildren()) do
+            if child:IsA("ScreenGui") then
+                local nm = child.Name:lower()
+                if nm:find("vrs") or nm:find("artelier") then
+                    child:Destroy()
+                end
+            end
+        end
+    end
+end)
+
 
 -- 1. Load VRSLibV2 (Local file fallback for instant execution + Raw GitHub fallback)
 local VRSLibV2
@@ -36,7 +57,8 @@ local Window = VRSLibV2:CreateWindow({
     SubTitle = "v0.141",
     Size     = UDim2.fromOffset(1020, 620),
     Accent   = Color3.fromRGB(255, 64, 140), -- VRS Signature Neon Pink (#FF408C)
-    Keybind  = Enum.KeyCode.RightControl
+    Keybind  = Enum.KeyCode.RightControl,
+    Logo     = "wings"
 })
 
 Window.OnUnload = function()
@@ -86,7 +108,7 @@ SubOverview:AddGameCard({
 SubOverview:AddBanner({
     Title       = "Madium",
     Description = "Not on the supported list. Some features may not work.",
-    Icon        = "shield",
+    Icon        = "shield-alert",
     Color       = Color3.fromRGB(255, 175, 60),
     Badge       = "RCtrl to hide",
     LayoutOrder = 4
@@ -116,7 +138,7 @@ SubOverview:AddFeatureList({
     Title       = "Feature list",
     Subtitle    = "7 features across 2 tabs",
     ButtonText  = "View Features",
-    Icon        = "list",
+    Icon        = "list-checks",
     Callback    = function()
         Window:Notify({
             Title = "Features",
