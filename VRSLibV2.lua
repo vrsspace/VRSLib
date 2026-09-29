@@ -1,31 +1,10 @@
 --[[
     ==============================================================================
-    🌸 VRSLib V2 — NEXT-GEN OBSIDIAN & NEON PINK ROBLOX UI ENGINE
+    🌸 VRSLib V2 — 1:1 RECREATION OF TARGET MODERN HUB DESIGN
     ==============================================================================
-    Engineered for maximum visual quality, 1:1 modern hub layout fidelity,
-    ultra-smooth animations, responsive auto-scaling, and clean modular code.
-    
-    Features:
-      • Modern Matte Obsidian UI (#0F1015) with Signature Neon Pink (#FF408C) Accents
-      • 76px Floating Left Sidebar with Wings Brand Logo & User Profile Card
-      • Active Tab indicator pill (smooth vertical pink glow bar)
-      • Topbar with Header Icon, Title, Horizontal Sub-Nav Pills, Search Bar & Window Controls
-      • Full Dashboard Suite:
-          - User Welcome Card (Avatar headshot, display name, handle, streamer mode toggles)
-          - 6-Box Stat Grid (Live Players, Friends, Execs, Session timer, FPS, Ping)
-          - Game Info Card (Thumbnail, Developer, Job/Place/Universe IDs, Quick Server Actions)
-          - Notice & Warning Banners (Status badge, RCtrl hotkey indicator)
-          - Two-Column Quick Links (Discord, Supported Games, Copy buttons)
-          - Feature List summary card
-      • Standard Groupbox & Dual-Column Section Suite:
-          - Toggles (Sleek animated neon pink pill switch)
-          - Sliders (Draggable smooth progress bar with numeric readout)
-          - Buttons (Interactive cards with hover glow and click tweens)
-          - Dropdowns (Inline drop bars with search filter & multi-select)
-          - Text Inputs, Keybinds, Paragraphs, Dividers
-      • Built-in Toast Notifications with sliding animations
-      • Draggable Window + Draggable Floating Logo Widget
-      • Auto-Scaling for Mobile & Compact Screens (UIScale)
+    Features authentic Liquid Glassmorphism, 1:1 sidebar replication (detached-feel
+    capsule, white/pink pill active indicator, 2-line avatar profile footer),
+    exact header tabs, strict-order 6-box stat grid, and server action card.
     ==============================================================================
 ]]
 
@@ -35,36 +14,36 @@ local Players          = cloneref(game:GetService("Players"))
 local TweenService     = cloneref(game:GetService("TweenService"))
 local UserInputService = cloneref(game:GetService("UserInputService"))
 local RunService       = cloneref(game:GetService("RunService"))
-local HttpService      = cloneref(game:GetService("HttpService"))
 local TeleportService  = cloneref(game:GetService("TeleportService"))
+local Lighting         = cloneref(game:GetService("Lighting"))
 local LocalPlayer      = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
 local VRSLibV2 = {
-    Version = "2.0.0",
+    Version = "2.2.0",
     Theme = {
-        Background        = Color3.fromRGB(15, 16, 21),       -- #0F1015 Deep Matte Obsidian
-        Sidebar           = Color3.fromRGB(12, 13, 17),       -- #0C0D11 Dark Floating Sidebar
-        SidebarHover      = Color3.fromRGB(22, 24, 32),
-        SidebarActive     = Color3.fromRGB(26, 28, 38),
-        Header            = Color3.fromRGB(15, 16, 21),
-        Card              = Color3.fromRGB(20, 21, 28),       -- #14151C Clean Card Background
-        CardHover         = Color3.fromRGB(27, 29, 39),
-        CardStroke        = Color3.fromRGB(32, 35, 46),       -- #20232E Subtle border
-        CardStrokeHover   = Color3.fromRGB(255, 64, 140),     -- Signature Pink Glow
-        InputBackground   = Color3.fromRGB(16, 17, 23),
-        InputStroke       = Color3.fromRGB(34, 37, 50),
-        Accent            = Color3.fromRGB(255, 64, 140),     -- Signature Neon Pink (#FF408C)
-        AccentHover       = Color3.fromRGB(255, 96, 162),
-        AccentGlow        = Color3.fromRGB(255, 64, 140),
-        TextPrimary       = Color3.fromRGB(245, 248, 255),    -- Crisp White
-        TextSecondary     = Color3.fromRGB(165, 170, 190),    -- Slate Light
-        TextMuted         = Color3.fromRGB(120, 125, 145),    -- Muted Gray
-        Outline           = Color3.fromRGB(28, 30, 40),
-        SwitchOff         = Color3.fromRGB(32, 34, 46),
-        SwitchOffKnob     = Color3.fromRGB(140, 145, 165),
-        SwitchOnKnob      = Color3.fromRGB(255, 255, 255),
-        OnlineGreen       = Color3.fromRGB(46, 204, 113),     -- Online dot status
-        WarningOrange     = Color3.fromRGB(255, 175, 60),
+        Background          = Color3.fromRGB(15, 16, 21),       -- #0F1015 Deep Matte Obsidian
+        BackgroundTrans     = 0.18,                             -- Liquid Glass Transparency
+        Sidebar             = Color3.fromRGB(12, 13, 17),       -- Dark Floating Sidebar
+        SidebarTrans        = 0.25,
+        SidebarActiveBtn    = Color3.fromRGB(36, 39, 52),       -- Active Tab Card
+        SidebarActiveTrans  = 0.40,
+        Card                = Color3.fromRGB(22, 24, 32),       -- Frosted Glass Card
+        CardTrans           = 0.40,
+        CardStroke          = Color3.fromRGB(48, 52, 70),       -- Glass Edge Refraction
+        CardStrokeTrans     = 0.65,
+        InputBackground     = Color3.fromRGB(16, 17, 24),
+        InputTrans          = 0.40,
+        InputStroke         = Color3.fromRGB(44, 48, 66),
+        Accent              = Color3.fromRGB(255, 64, 140),     -- Signature Neon Pink (#FF408C)
+        AccentGlow          = Color3.fromRGB(255, 64, 140),
+        TextPrimary         = Color3.fromRGB(248, 250, 255),    -- Pure White
+        TextSecondary       = Color3.fromRGB(155, 160, 180),    -- Slate Light
+        TextMuted           = Color3.fromRGB(115, 120, 140),    -- Muted Gray
+        SwitchOff           = Color3.fromRGB(34, 37, 50),
+        SwitchOffKnob       = Color3.fromRGB(145, 150, 170),
+        SwitchOnKnob        = Color3.fromRGB(255, 255, 255),
+        OnlineGreen         = Color3.fromRGB(46, 204, 113),     -- Online dot
+        WarningOrange       = Color3.fromRGB(255, 175, 60),     -- Warning status
     },
     Windows = {},
 }
@@ -87,55 +66,62 @@ local function ProtectLocalization(instance)
 end
 
 -- ==============================================================================
--- BRAND LOGO ENGINE
+-- LIQUID GLASS FROSTED BLUR EFFECT (In Lighting)
 -- ==============================================================================
-local BRAND_LOGO_URL = "https://raw.githubusercontent.com/vrsspace/VRSLib/v1.1.9/assets/logo.png"
-local cachedLogoAsset = nil
-
-local function GetBrandLogo()
-    if cachedLogoAsset then return cachedLogoAsset end
-    local fileName = "vrs_artelier_logo_v2.png"
-
-    if writefile and isfile and (getcustomasset or getsynasset) then
-        local customAsset = getcustomasset or getsynasset
-        if not isfile(fileName) then
-            pcall(function()
-                local data = game:HttpGet(BRAND_LOGO_URL)
-                if data and #data > 50 then
-                    writefile(fileName, data)
-                end
-            end)
+local GlassBlur = nil
+local function EnableGlassBlur()
+    if GlassBlur and GlassBlur.Parent then return end
+    pcall(function()
+        for _, old in ipairs(Lighting:GetChildren()) do
+            if old.Name == "VRSV2_GlassBlur" then old:Destroy() end
         end
-        if isfile(fileName) then
-            local ok, asset = pcall(function() return customAsset(fileName) end)
-            if ok and asset then
-                cachedLogoAsset = asset
-                return asset
-            end
-        end
-    end
-    return "rbxassetid://132717088484517"
+        local blur = Instance.new("BlurEffect")
+        blur.Name = "VRSV2_GlassBlur"
+        blur.Size = 14
+        blur.Enabled = true
+        blur.Parent = Lighting
+        GlassBlur = blur
+    end)
 end
 
-local function ApplyBrandLogo(imageLabel)
-    local asset = GetBrandLogo()
-    imageLabel.Image = asset
-    if tostring(asset):find("132717088484517") then
-        imageLabel.ImageRectOffset = Vector2.new(159, 225)
-        imageLabel.ImageRectSize = Vector2.new(686, 535)
-        imageLabel.ImageColor3 = VRSLibV2.Theme.Accent
-    else
-        imageLabel.ImageRectOffset = Vector2.new(0, 0)
-        imageLabel.ImageRectSize = Vector2.new(0, 0)
-        imageLabel.ImageColor3 = Color3.fromRGB(255, 255, 255)
+local function DisableGlassBlur()
+    if GlassBlur and GlassBlur.Parent then
+        pcall(function() GlassBlur:Destroy() end)
+        GlassBlur = nil
     end
+end
+
+-- Specular Glass Shine Utility
+local function ApplyGlassSpecular(parentFrame)
+    local spec = Instance.new("Frame")
+    spec.Name = "GlassSheen"
+    spec.Size = UDim2.new(1, 0, 1, 0)
+    spec.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    spec.BackgroundTransparency = 0.96
+    spec.BorderSizePixel = 0
+    spec.ZIndex = parentFrame.ZIndex or 1
+    spec.Parent = parentFrame
+
+    local sCorner = Instance.new("UICorner")
+    sCorner.CornerRadius = UDim.new(0, 10)
+    sCorner.Parent = spec
+
+    local grad = Instance.new("UIGradient")
+    grad.Rotation = 45
+    grad.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0.0, 0.92),
+        NumberSequenceKeypoint.new(0.3, 0.96),
+        NumberSequenceKeypoint.new(0.7, 0.99),
+        NumberSequenceKeypoint.new(1.0, 1.00),
+    })
+    grad.Parent = spec
+    return spec
 end
 
 -- ==============================================================================
 -- LUCIDE ICONS ENGINE
 -- ==============================================================================
 VRSLibV2.Icons = (function()
-    -- Try importing from local or repo
     local function TryLoad()
         pcall(function()
             if readfile and isfile and isfile("src/Icons.lua") then
@@ -149,7 +135,6 @@ VRSLibV2.Icons = (function()
     local loaded = TryLoad()
     if loaded then return loaded end
 
-    -- Core High-Quality Lucide Asset Registry
     local Registry = {
         ["home"]              = "rbxassetid://10723407389",
         ["settings"]          = "rbxassetid://10734950309",
@@ -187,13 +172,12 @@ VRSLibV2.Icons = (function()
         ["unlock"]            = "rbxassetid://10734982755",
         ["grid"]              = "rbxassetid://10723425515",
         ["sliders"]           = "rbxassetid://10734974868",
-        ["trash"]             = "rbxassetid://10734977456",
-        ["info"]              = "rbxassetid://10723415903",
-        ["server"]            = "rbxassetid://10734963400",
+        ["aperture"]          = "rbxassetid://10709774620",
+        ["disc"]              = "rbxassetid://10709793574",
+        ["clan"]              = "rbxassetid://10734972879",
     }
 
     local Engine = {
-        Wings   = "rbxassetid://132717088484517",
         Default = "rbxassetid://10709782497",
         Get = function(name)
             if not name or name == "" then return "rbxassetid://10709782497" end
@@ -210,7 +194,7 @@ VRSLibV2.Icons = (function()
 end)()
 
 -- ==============================================================================
--- DRAG & TWEEN UTILITIES
+-- DRAGGING UTILITIES
 -- ==============================================================================
 local function MakeDraggable(handle, targetFrame)
     local dragging = false
@@ -250,7 +234,7 @@ local function MakeDraggable(handle, targetFrame)
 end
 
 -- ==============================================================================
--- FLOATING TOAST NOTIFICATION SYSTEM
+-- TOAST NOTIFICATIONS
 -- ==============================================================================
 local NotifyContainer = nil
 local function EnsureNotifyContainer()
@@ -269,7 +253,7 @@ local function EnsureNotifyContainer()
 
     local list = Instance.new("UIListLayout")
     list.VerticalAlignment = Enum.VerticalAlignment.Bottom
-    list.Padding = UDim.new(0, 8)
+    list.Padding = UDim.new(0, 10)
     list.Parent = frame
 
     NotifyContainer = frame
@@ -281,14 +265,15 @@ function VRSLibV2:Notify(cfg)
     local title = tostring(cfg.Title or "VRS Artelier V2")
     local desc  = tostring(cfg.Description or cfg.Content or "")
     local dur   = tonumber(cfg.Duration) or 3.5
-    local iconId = VRSLibV2.Icons.Get(cfg.Icon or "Wings")
+    local iconId = VRSLibV2.Icons.Get(cfg.Icon or "home")
 
     local container = EnsureNotifyContainer()
 
     local toast = Instance.new("Frame")
-    toast.Size = UDim2.new(1, 0, 0, 60)
+    toast.Size = UDim2.new(1, 0, 0, 62)
     toast.Position = UDim2.new(1, 350, 0, 0)
     toast.BackgroundColor3 = VRSLibV2.Theme.Card
+    toast.BackgroundTransparency = VRSLibV2.Theme.CardTrans
     toast.BorderSizePixel = 0
     toast.ClipsDescendants = true
     toast.Parent = container
@@ -299,14 +284,18 @@ function VRSLibV2:Notify(cfg)
 
     local stroke = Instance.new("UIStroke")
     stroke.Color = VRSLibV2.Theme.CardStroke
+    stroke.Transparency = VRSLibV2.Theme.CardStrokeTrans
     stroke.Thickness = 1
     stroke.Parent = toast
 
-    -- Pink Glowing Accent Bar on left
+    ApplyGlassSpecular(toast)
+
     local bar = Instance.new("Frame")
-    bar.Size = UDim2.new(0, 4, 1, 0)
+    bar.Size = UDim2.new(0, 4, 1, -12)
+    bar.Position = UDim2.new(0, 4, 0.5, -25)
     bar.BackgroundColor3 = VRSLibV2.Theme.Accent
     bar.BorderSizePixel = 0
+    bar.ZIndex = 2
     bar.Parent = toast
 
     local bCorner = Instance.new("UICorner")
@@ -315,31 +304,29 @@ function VRSLibV2:Notify(cfg)
 
     local icon = Instance.new("ImageLabel")
     icon.Size = UDim2.fromOffset(24, 24)
-    icon.Position = UDim2.new(0, 16, 0.5, -12)
+    icon.Position = UDim2.new(0, 18, 0.5, -12)
     icon.BackgroundTransparency = 1
-    if tostring(iconId):lower():find("wings") then
-        ApplyBrandLogo(icon)
-    else
-        icon.Image = iconId
-        icon.ImageColor3 = VRSLibV2.Theme.Accent
-    end
+    icon.Image = iconId
+    icon.ImageColor3 = VRSLibV2.Theme.Accent
+    icon.ZIndex = 2
     icon.Parent = toast
 
     local tLbl = Instance.new("TextLabel")
-    tLbl.Size = UDim2.new(1, -55, 0, 18)
-    tLbl.Position = UDim2.new(0, 48, 0, 11)
+    tLbl.Size = UDim2.new(1, -60, 0, 18)
+    tLbl.Position = UDim2.new(0, 52, 0, 12)
     tLbl.BackgroundTransparency = 1
     tLbl.Text = title
     tLbl.Font = Enum.Font.GothamBold
     tLbl.TextSize = 13.5
     tLbl.TextColor3 = VRSLibV2.Theme.TextPrimary
     tLbl.TextXAlignment = Enum.TextXAlignment.Left
+    tLbl.ZIndex = 2
     tLbl.Parent = toast
     ProtectLocalization(tLbl)
 
     local dLbl = Instance.new("TextLabel")
-    dLbl.Size = UDim2.new(1, -55, 0, 16)
-    dLbl.Position = UDim2.new(0, 48, 0, 31)
+    dLbl.Size = UDim2.new(1, -60, 0, 16)
+    dLbl.Position = UDim2.new(0, 52, 0, 32)
     dLbl.BackgroundTransparency = 1
     dLbl.Text = desc
     dLbl.Font = Enum.Font.GothamMedium
@@ -347,6 +334,7 @@ function VRSLibV2:Notify(cfg)
     dLbl.TextColor3 = VRSLibV2.Theme.TextSecondary
     dLbl.TextXAlignment = Enum.TextXAlignment.Left
     dLbl.TextTruncate = Enum.TextTruncate.AtEnd
+    dLbl.ZIndex = 2
     dLbl.Parent = toast
     ProtectLocalization(dLbl)
 
@@ -378,12 +366,17 @@ end
 function Window:Toggle()
     self.Visible = not self.Visible
     self.MainFrame.Visible = self.Visible
-    if self.FloatingToggle then
-        self.FloatingToggle.Visible = not self.Visible
+    if self.ShadowFrame then self.ShadowFrame.Visible = self.Visible end
+    if self.FloatingToggle then self.FloatingToggle.Visible = not self.Visible end
+    if self.Visible then
+        EnableGlassBlur()
+    else
+        DisableGlassBlur()
     end
 end
 
 function Window:Unload()
+    DisableGlassBlur()
     if self.OnUnload then pcall(self.OnUnload) end
     if self.Gui then self.Gui:Destroy() end
     if NotifyContainer and NotifyContainer.Parent then
@@ -398,7 +391,6 @@ function VRSLibV2:CreateWindow(config)
     config = config or {}
     local self = setmetatable({}, Window)
 
-    -- Auto-detect Game Name
     local detectedGame = "Roblox"
     pcall(function()
         local info = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
@@ -425,7 +417,6 @@ function VRSLibV2:CreateWindow(config)
 
     if config.Accent then
         VRSLibV2.Theme.Accent = config.Accent
-        VRSLibV2.Theme.CardStrokeHover = config.Accent
     end
 
     local safeContainer = GetSafeContainer()
@@ -434,6 +425,8 @@ function VRSLibV2:CreateWindow(config)
             pcall(function() old:Destroy() end)
         end
     end
+
+    EnableGlassBlur()
 
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "VRSLibV2_Engine"
@@ -444,60 +437,65 @@ function VRSLibV2:CreateWindow(config)
 
     ScreenGui.DescendantAdded:Connect(ProtectLocalization)
 
-    -- Floating Wings Widget (When minimized)
-    local FloatingToggle = Instance.new("ImageButton")
-    FloatingToggle.Name = "VRSV2_FloatingLogo"
-    FloatingToggle.Size = UDim2.fromOffset(48, 48)
-    FloatingToggle.Position = UDim2.new(0, 20, 0.45, 0)
-    FloatingToggle.BackgroundColor3 = VRSLibV2.Theme.Sidebar
-    FloatingToggle.BorderSizePixel = 0
-    FloatingToggle.Visible = false
-    FloatingToggle.Parent = ScreenGui
+    -- Ambient Drop Shadow
+    local ShadowFrame = Instance.new("Frame")
+    ShadowFrame.Name = "WindowShadow"
+    ShadowFrame.Size = self.Size + UDim2.fromOffset(28, 28)
+    ShadowFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    ShadowFrame.Position = UDim2.new(0.5, 0, 0.5, 4)
+    ShadowFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    ShadowFrame.BackgroundTransparency = 0.5
+    ShadowFrame.BorderSizePixel = 0
+    ShadowFrame.ZIndex = 1
+    ShadowFrame.Parent = ScreenGui
+    self.ShadowFrame = ShadowFrame
 
-    local FloatCorner = Instance.new("UICorner")
-    FloatCorner.CornerRadius = UDim.new(1, 0)
-    FloatCorner.Parent = FloatingToggle
+    local ShadowCorner = Instance.new("UICorner")
+    ShadowCorner.CornerRadius = UDim.new(0, 22)
+    ShadowCorner.Parent = ShadowFrame
 
-    local FloatStroke = Instance.new("UIStroke")
-    FloatStroke.Color = VRSLibV2.Theme.Accent
-    FloatStroke.Thickness = 1.5
-    FloatStroke.Parent = FloatingToggle
-
-    local FloatLogo = Instance.new("ImageLabel")
-    FloatLogo.Size = UDim2.fromOffset(28, 22)
-    FloatLogo.AnchorPoint = Vector2.new(0.5, 0.5)
-    FloatLogo.Position = UDim2.new(0.5, 0, 0.5, 0)
-    FloatLogo.BackgroundTransparency = 1
-    ApplyBrandLogo(FloatLogo)
-    FloatLogo.Parent = FloatingToggle
-
-    MakeDraggable(FloatingToggle, FloatingToggle)
-    FloatingToggle.MouseButton1Click:Connect(function()
-        self:Toggle()
-    end)
-    self.FloatingToggle = FloatingToggle
-
-    -- Main Shell Frame
+    -- Main Shell Frame (Liquid Glass with Acrylic Translucency)
     local Main = Instance.new("Frame")
     Main.Name = "MainFrame"
     Main.Size = self.Size
     Main.AnchorPoint = Vector2.new(0.5, 0.5)
     Main.Position = UDim2.new(0.5, 0, 0.5, 0)
     Main.BackgroundColor3 = VRSLibV2.Theme.Background
+    Main.BackgroundTransparency = VRSLibV2.Theme.BackgroundTrans
     Main.BorderSizePixel = 0
     Main.Active = true
     Main.ClipsDescendants = true
+    Main.ZIndex = 2
     Main.Parent = ScreenGui
     self.MainFrame = Main
 
     local MainCorner = Instance.new("UICorner")
-    MainCorner.CornerRadius = UDim.new(0, 14)
+    MainCorner.CornerRadius = UDim.new(0, 16)
     MainCorner.Parent = Main
 
     local MainStroke = Instance.new("UIStroke")
-    MainStroke.Color = VRSLibV2.Theme.CardStroke
-    MainStroke.Thickness = 1
+    MainStroke.Color = Color3.fromRGB(55, 60, 80)
+    MainStroke.Transparency = 0.55
+    MainStroke.Thickness = 1.2
     MainStroke.Parent = Main
+
+    -- Specular shine across top edge
+    local MainSpecular = Instance.new("Frame")
+    MainSpecular.Name = "MainSpecular"
+    MainSpecular.Size = UDim2.new(1, 0, 0, 80)
+    MainSpecular.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    MainSpecular.BackgroundTransparency = 0.96
+    MainSpecular.BorderSizePixel = 0
+    MainSpecular.ZIndex = 2
+    MainSpecular.Parent = Main
+
+    local MSSpecGrad = Instance.new("UIGradient")
+    MSSpecGrad.Rotation = 90
+    MSSpecGrad.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0.0, 0.92),
+        NumberSequenceKeypoint.new(1.0, 1.00),
+    })
+    MSSpecGrad.Parent = MainSpecular
 
     -- Responsive Smart Scaling Engine
     local WindowScale = Instance.new("UIScale")
@@ -523,14 +521,16 @@ function VRSLibV2:CreateWindow(config)
     UpdateScale()
 
     -- ==============================================================================
-    -- LEFT FLOATING SIDEBAR (76px width)
+    -- 1:1 REPRODUCED FLOATING SIDEBAR (70px width)
     -- ==============================================================================
     local Sidebar = Instance.new("Frame")
     Sidebar.Name = "Sidebar"
-    Sidebar.Size = UDim2.new(0, 76, 1, 0)
+    Sidebar.Size = UDim2.new(0, 70, 1, 0)
     Sidebar.Position = UDim2.new(0, 0, 0, 0)
     Sidebar.BackgroundColor3 = VRSLibV2.Theme.Sidebar
+    Sidebar.BackgroundTransparency = VRSLibV2.Theme.SidebarTrans
     Sidebar.BorderSizePixel = 0
+    Sidebar.ZIndex = 3
     Sidebar.Parent = Main
     self.Sidebar = Sidebar
 
@@ -538,10 +538,11 @@ function VRSLibV2:CreateWindow(config)
     SidebarBorder.Size = UDim2.new(0, 1, 1, 0)
     SidebarBorder.Position = UDim2.new(1, -1, 0, 0)
     SidebarBorder.BackgroundColor3 = VRSLibV2.Theme.CardStroke
+    SidebarBorder.BackgroundTransparency = VRSLibV2.Theme.CardStrokeTrans
     SidebarBorder.BorderSizePixel = 0
     SidebarBorder.Parent = Sidebar
 
-    -- Top Logo Emblem
+    -- Top Logo Emblem (Swirl / Ouroboros Emblem)
     local LogoContainer = Instance.new("Frame")
     LogoContainer.Name = "LogoContainer"
     LogoContainer.Size = UDim2.new(1, 0, 0, 68)
@@ -549,10 +550,11 @@ function VRSLibV2:CreateWindow(config)
     LogoContainer.Parent = Sidebar
 
     local LogoBadge = Instance.new("Frame")
-    LogoBadge.Size = UDim2.fromOffset(42, 42)
+    LogoBadge.Size = UDim2.fromOffset(44, 44)
     LogoBadge.AnchorPoint = Vector2.new(0.5, 0.5)
     LogoBadge.Position = UDim2.new(0.5, 0, 0.5, 2)
-    LogoBadge.BackgroundColor3 = Color3.fromRGB(20, 22, 30)
+    LogoBadge.BackgroundColor3 = Color3.fromRGB(25, 28, 38)
+    LogoBadge.BackgroundTransparency = 0.4
     LogoBadge.BorderSizePixel = 0
     LogoBadge.Parent = LogoContainer
 
@@ -561,31 +563,33 @@ function VRSLibV2:CreateWindow(config)
     LBCorner.Parent = LogoBadge
 
     local LBStroke = Instance.new("UIStroke")
-    LBStroke.Color = VRSLibV2.Theme.CardStroke
+    LBStroke.Color = Color3.fromRGB(50, 55, 75)
+    LBStroke.Transparency = 0.6
     LBStroke.Thickness = 1
     LBStroke.Parent = LogoBadge
 
     local LogoImg = Instance.new("ImageLabel")
-    LogoImg.Size = UDim2.fromOffset(26, 20)
+    LogoImg.Size = UDim2.fromOffset(26, 26)
     LogoImg.AnchorPoint = Vector2.new(0.5, 0.5)
     LogoImg.Position = UDim2.new(0.5, 0, 0.5, 0)
     LogoImg.BackgroundTransparency = 1
-    ApplyBrandLogo(LogoImg)
+    LogoImg.Image = VRSLibV2.Icons.Get("disc")
+    LogoImg.ImageColor3 = Color3.fromRGB(245, 248, 255)
     LogoImg.Parent = LogoBadge
 
     LogoContainer.MouseEnter:Connect(function()
-        TweenService:Create(LBStroke, TweenInfo.new(0.2), { Color = VRSLibV2.Theme.Accent }):Play()
-        TweenService:Create(LogoImg, TweenInfo.new(0.2), { Size = UDim2.fromOffset(29, 23) }):Play()
+        TweenService:Create(LBStroke, TweenInfo.new(0.2), { Color = VRSLibV2.Theme.Accent, Transparency = 0.2 }):Play()
+        TweenService:Create(LogoImg, TweenInfo.new(0.2), { ImageColor3 = VRSLibV2.Theme.Accent }):Play()
     end)
     LogoContainer.MouseLeave:Connect(function()
-        TweenService:Create(LBStroke, TweenInfo.new(0.2), { Color = VRSLibV2.Theme.CardStroke }):Play()
-        TweenService:Create(LogoImg, TweenInfo.new(0.2), { Size = UDim2.fromOffset(26, 20) }):Play()
+        TweenService:Create(LBStroke, TweenInfo.new(0.2), { Color = Color3.fromRGB(50, 55, 75), Transparency = 0.6 }):Play()
+        TweenService:Create(LogoImg, TweenInfo.new(0.2), { ImageColor3 = Color3.fromRGB(245, 248, 255) }):Play()
     end)
 
     -- Tab Buttons Scroll
     local TabScroll = Instance.new("ScrollingFrame")
     TabScroll.Name = "TabScroll"
-    TabScroll.Size = UDim2.new(1, 0, 1, -134)
+    TabScroll.Size = UDim2.new(1, 0, 1, -150)
     TabScroll.Position = UDim2.new(0, 0, 0, 70)
     TabScroll.BackgroundTransparency = 1
     TabScroll.BorderSizePixel = 0
@@ -601,25 +605,27 @@ function VRSLibV2:CreateWindow(config)
     TabList.Padding = UDim.new(0, 6)
     TabList.Parent = TabScroll
 
-    -- Bottom User Profile Card
+    -- Bottom User Profile Capsule (2-line Avatar footer matching screenshot!)
     local UserProfileBar = Instance.new("Frame")
     UserProfileBar.Name = "UserProfileBar"
-    UserProfileBar.Size = UDim2.new(1, 0, 0, 64)
-    UserProfileBar.Position = UDim2.new(0, 0, 1, -64)
+    UserProfileBar.Size = UDim2.new(1, 0, 0, 74)
+    UserProfileBar.Position = UDim2.new(0, 0, 1, -74)
     UserProfileBar.BackgroundColor3 = VRSLibV2.Theme.Sidebar
+    UserProfileBar.BackgroundTransparency = 0.4
     UserProfileBar.BorderSizePixel = 0
     UserProfileBar.Parent = Sidebar
 
     local UPBorder = Instance.new("Frame")
     UPBorder.Size = UDim2.new(1, 0, 0, 1)
     UPBorder.BackgroundColor3 = VRSLibV2.Theme.CardStroke
+    UPBorder.BackgroundTransparency = VRSLibV2.Theme.CardStrokeTrans
     UPBorder.BorderSizePixel = 0
     UPBorder.Parent = UserProfileBar
 
     local AvatarBox = Instance.new("Frame")
-    AvatarBox.Size = UDim2.fromOffset(34, 34)
-    AvatarBox.Position = UDim2.new(0.5, -17, 0, 8)
-    AvatarBox.BackgroundColor3 = VRSLibV2.Theme.Card
+    AvatarBox.Size = UDim2.fromOffset(36, 36)
+    AvatarBox.Position = UDim2.new(0.5, -18, 0, 6)
+    AvatarBox.BackgroundColor3 = Color3.fromRGB(24, 26, 36)
     AvatarBox.BorderSizePixel = 0
     AvatarBox.Parent = UserProfileBar
 
@@ -628,7 +634,8 @@ function VRSLibV2:CreateWindow(config)
     ABCorner.Parent = AvatarBox
 
     local ABStroke = Instance.new("UIStroke")
-    ABStroke.Color = VRSLibV2.Theme.CardStroke
+    ABStroke.Color = Color3.fromRGB(55, 60, 80)
+    ABStroke.Transparency = 0.5
     ABStroke.Thickness = 1
     ABStroke.Parent = AvatarBox
 
@@ -649,6 +656,7 @@ function VRSLibV2:CreateWindow(config)
     OnlineDot.Position = UDim2.new(1, 1, 1, 1)
     OnlineDot.BackgroundColor3 = VRSLibV2.Theme.OnlineGreen
     OnlineDot.BorderSizePixel = 0
+    OnlineDot.ZIndex = 2
     OnlineDot.Parent = AvatarBox
 
     local ODCorner = Instance.new("UICorner")
@@ -660,28 +668,45 @@ function VRSLibV2:CreateWindow(config)
     ODStroke.Thickness = 1.5
     ODStroke.Parent = OnlineDot
 
+    -- Line 1: Username Truncated (e.g. "NcangRowe...")
     local UNameLbl = Instance.new("TextLabel")
-    UNameLbl.Size = UDim2.new(1, -6, 0, 12)
-    UNameLbl.Position = UDim2.new(0, 3, 0, 46)
+    UNameLbl.Size = UDim2.new(1, -4, 0, 13)
+    UNameLbl.Position = UDim2.new(0, 2, 0, 44)
     UNameLbl.BackgroundTransparency = 1
     local rawName = tostring(LocalPlayer.DisplayName or LocalPlayer.Name)
-    UNameLbl.Text = (#rawName > 7) and (rawName:sub(1, 6) .. "..") or rawName
+    UNameLbl.Text = (#rawName > 9) and (rawName:sub(1, 8) .. "..") or rawName
     UNameLbl.Font = Enum.Font.GothamBold
-    UNameLbl.TextSize = 10
+    UNameLbl.TextSize = 9.5
     UNameLbl.TextColor3 = VRSLibV2.Theme.TextPrimary
     UNameLbl.TextXAlignment = Enum.TextXAlignment.Center
     UNameLbl.Parent = UserProfileBar
     ProtectLocalization(UNameLbl)
+
+    -- Line 2: Game Name Subtitle (e.g. "Slayers 2")
+    local UGameLbl = Instance.new("TextLabel")
+    UGameLbl.Size = UDim2.new(1, -4, 0, 11)
+    UGameLbl.Position = UDim2.new(0, 2, 0, 58)
+    UGameLbl.BackgroundTransparency = 1
+    UGameLbl.Text = self.GameName
+    UGameLbl.Font = Enum.Font.GothamMedium
+    UGameLbl.TextSize = 8.5
+    UGameLbl.TextColor3 = VRSLibV2.Theme.TextMuted
+    UGameLbl.TextXAlignment = Enum.TextXAlignment.Center
+    UGameLbl.TextTruncate = Enum.TextTruncate.AtEnd
+    UGameLbl.Parent = UserProfileBar
+    ProtectLocalization(UGameLbl)
 
     -- ==============================================================================
     -- TOP HEADER BAR (Matching Screenshot 1 & 2)
     -- ==============================================================================
     local Topbar = Instance.new("Frame")
     Topbar.Name = "Topbar"
-    Topbar.Size = UDim2.new(1, -76, 0, 52)
-    Topbar.Position = UDim2.new(0, 76, 0, 0)
+    Topbar.Size = UDim2.new(1, -70, 0, 52)
+    Topbar.Position = UDim2.new(0, 70, 0, 0)
     Topbar.BackgroundColor3 = VRSLibV2.Theme.Header
+    Topbar.BackgroundTransparency = VRSLibV2.Theme.HeaderTrans
     Topbar.BorderSizePixel = 0
+    Topbar.ZIndex = 3
     Topbar.Parent = Main
     self.Topbar = Topbar
 
@@ -689,6 +714,7 @@ function VRSLibV2:CreateWindow(config)
     TopbarBorder.Size = UDim2.new(1, 0, 0, 1)
     TopbarBorder.Position = UDim2.new(0, 0, 1, -1)
     TopbarBorder.BackgroundColor3 = VRSLibV2.Theme.CardStroke
+    TopbarBorder.BackgroundTransparency = VRSLibV2.Theme.CardStrokeTrans
     TopbarBorder.BorderSizePixel = 0
     TopbarBorder.Parent = Topbar
 
@@ -731,7 +757,7 @@ function VRSLibV2:CreateWindow(config)
     ProtectLocalization(HeaderTitle)
     self.HeaderTitle = HeaderTitle
 
-    -- Sub-Tab Horizontal Pills (e.g. [ ⊞ Overview ] [ ▷ Main Menu ])
+    -- Sub-Nav Horizontal Pills (e.g. [ ⊞ Overview ] [ ▷ Main Menu ])
     local SubNavPills = Instance.new("Frame")
     SubNavPills.Name = "SubNavPills"
     SubNavPills.Size = UDim2.new(0, 0, 1, 0)
@@ -741,6 +767,7 @@ function VRSLibV2:CreateWindow(config)
     self.SubNavPills = SubNavPills
 
     local SNPList = Instance.new("UIListLayout")
+    SNPList.SortOrder = Enum.SortOrder.LayoutOrder
     SNPList.FillDirection = Enum.FillDirection.Horizontal
     SNPList.VerticalAlignment = Enum.VerticalAlignment.Center
     SNPList.Padding = UDim.new(0, 8)
@@ -758,18 +785,19 @@ function VRSLibV2:CreateWindow(config)
     HRList.FillDirection = Enum.FillDirection.Horizontal
     HRList.HorizontalAlignment = Enum.HorizontalAlignment.Right
     HRList.VerticalAlignment = Enum.VerticalAlignment.Center
-    HRList.Padding = UDim.new(0, 12)
+    HRList.Padding = UDim.new(0, 14)
     HRList.Parent = HeaderRight
 
     local HRPadding = Instance.new("UIPadding")
-    HRPadding.PaddingRight = UDim.new(0, 16)
+    HRPadding.PaddingRight = UDim.new(0, 18)
     HRPadding.Parent = HeaderRight
 
     -- Search Input Capsule
     local SearchBox = Instance.new("Frame")
     SearchBox.Name = "SearchBox"
-    SearchBox.Size = UDim2.new(0, 140, 0, 28)
+    SearchBox.Size = UDim2.new(0, 150, 0, 28)
     SearchBox.BackgroundColor3 = VRSLibV2.Theme.InputBackground
+    SearchBox.BackgroundTransparency = VRSLibV2.Theme.InputTrans
     SearchBox.BorderSizePixel = 0
     SearchBox.Parent = HeaderRight
 
@@ -784,18 +812,18 @@ function VRSLibV2:CreateWindow(config)
 
     local SearchIcon = Instance.new("ImageLabel")
     SearchIcon.Size = UDim2.fromOffset(13, 13)
-    SearchIcon.Position = UDim2.new(0, 8, 0.5, -6.5)
+    SearchIcon.Position = UDim2.new(0, 10, 0.5, -6.5)
     SearchIcon.BackgroundTransparency = 1
     SearchIcon.Image = VRSLibV2.Icons.Get("search")
     SearchIcon.ImageColor3 = VRSLibV2.Theme.TextMuted
     SearchIcon.Parent = SearchBox
 
     local SearchInput = Instance.new("TextBox")
-    SearchInput.Size = UDim2.new(1, -30, 1, 0)
-    SearchInput.Position = UDim2.new(0, 26, 0, 0)
+    SearchInput.Size = UDim2.new(1, -34, 1, 0)
+    SearchInput.Position = UDim2.new(0, 28, 0, 0)
     SearchInput.BackgroundTransparency = 1
     SearchInput.Font = Enum.Font.GothamMedium
-    SearchInput.PlaceholderText = "Search..."
+    SearchInput.PlaceholderText = "Search"
     SearchInput.PlaceholderColor3 = VRSLibV2.Theme.TextMuted
     SearchInput.Text = ""
     SearchInput.TextColor3 = VRSLibV2.Theme.TextPrimary
@@ -818,54 +846,40 @@ function VRSLibV2:CreateWindow(config)
         self:FilterCards(SearchInput.Text)
     end)
 
-    -- Window Minimize & Close Controls
-    local Controls = Instance.new("Frame")
-    Controls.Size = UDim2.new(0, 56, 1, 0)
-    Controls.BackgroundTransparency = 1
-    Controls.Parent = HeaderRight
+    -- Window Minimize Button
+    local MinimizeBtn = Instance.new("TextButton")
+    MinimizeBtn.Size = UDim2.fromOffset(26, 26)
+    MinimizeBtn.BackgroundTransparency = 1
+    MinimizeBtn.Text = ""
+    MinimizeBtn.Parent = HeaderRight
 
-    local CList = Instance.new("UIListLayout")
-    CList.FillDirection = Enum.FillDirection.Horizontal
-    CList.VerticalAlignment = Enum.VerticalAlignment.Center
-    CList.Padding = UDim.new(0, 4)
-    CList.Parent = Controls
+    local MinIcon = Instance.new("ImageLabel")
+    MinIcon.Size = UDim2.fromOffset(13, 13)
+    MinIcon.Position = UDim2.new(0.5, -6.5, 0.5, -6.5)
+    MinIcon.BackgroundTransparency = 1
+    MinIcon.Image = VRSLibV2.Icons.Get("minus")
+    MinIcon.ImageColor3 = VRSLibV2.Theme.TextMuted
+    MinIcon.Parent = MinimizeBtn
 
-    local function MakeControlBtn(iconKey, onClick)
-        local btn = Instance.new("TextButton")
-        btn.Size = UDim2.fromOffset(26, 26)
-        btn.BackgroundTransparency = 1
-        btn.Text = ""
-        btn.Parent = Controls
-
-        local ic = Instance.new("ImageLabel")
-        ic.Size = UDim2.fromOffset(13, 13)
-        ic.Position = UDim2.new(0.5, -6.5, 0.5, -6.5)
-        ic.BackgroundTransparency = 1
-        ic.Image = VRSLibV2.Icons.Get(iconKey)
-        ic.ImageColor3 = VRSLibV2.Theme.TextMuted
-        ic.Parent = btn
-
-        btn.MouseEnter:Connect(function()
-            TweenService:Create(ic, TweenInfo.new(0.15), { ImageColor3 = VRSLibV2.Theme.TextPrimary }):Play()
-        end)
-        btn.MouseLeave:Connect(function()
-            TweenService:Create(ic, TweenInfo.new(0.15), { ImageColor3 = VRSLibV2.Theme.TextMuted }):Play()
-        end)
-        btn.MouseButton1Click:Connect(onClick)
-        return btn
-    end
-
-    MakeControlBtn("minus", function() self:Toggle() end)
-    MakeControlBtn("close", function() self:Unload() end)
+    MinimizeBtn.MouseEnter:Connect(function()
+        TweenService:Create(MinIcon, TweenInfo.new(0.15), { ImageColor3 = VRSLibV2.Theme.TextPrimary }):Play()
+    end)
+    MinimizeBtn.MouseLeave:Connect(function()
+        TweenService:Create(MinIcon, TweenInfo.new(0.15), { ImageColor3 = VRSLibV2.Theme.TextMuted }):Play()
+    end)
+    MinimizeBtn.MouseButton1Click:Connect(function()
+        self:Toggle()
+    end)
 
     -- ==============================================================================
     -- MAIN CONTENT CONTAINER
     -- ==============================================================================
     local Content = Instance.new("Frame")
     Content.Name = "Content"
-    Content.Size = UDim2.new(1, -76, 1, -52)
-    Content.Position = UDim2.new(0, 76, 0, 52)
+    Content.Size = UDim2.new(1, -70, 1, -52)
+    Content.Position = UDim2.new(0, 70, 0, 52)
     Content.BackgroundTransparency = 1
+    Content.ZIndex = 3
     Content.Parent = Main
     self.Content = Content
 
@@ -898,18 +912,18 @@ function Window:FilterCards(query)
 end
 
 -- ==============================================================================
--- TAB BUILDER & NAVIGATION
+-- TAB BUILDER & NAVIGATION (1:1 SCREENSHOT NAVIGATION ENGINE)
 -- ==============================================================================
 function Window:AddTab(config)
     config = config or {}
     local tabName = config.Name or "Tab"
     local iconId  = VRSLibV2.Icons.Get(config.Icon or "home")
 
-    -- Tab Button in 76px Sidebar
+    -- Tab Button in 70px Sidebar (54x50px)
     local TabBtn = Instance.new("TextButton")
     TabBtn.Name = "TabBtn_" .. tabName
-    TabBtn.Size = UDim2.new(0, 60, 0, 50)
-    TabBtn.BackgroundColor3 = VRSLibV2.Theme.Sidebar
+    TabBtn.Size = UDim2.new(0, 54, 0, 50)
+    TabBtn.BackgroundColor3 = VRSLibV2.Theme.SidebarActiveBtn
     TabBtn.BackgroundTransparency = 1
     TabBtn.BorderSizePixel = 0
     TabBtn.Text = ""
@@ -917,15 +931,21 @@ function Window:AddTab(config)
     TabBtn.Parent = self.TabScroll
 
     local TBCorner = Instance.new("UICorner")
-    TBCorner.CornerRadius = UDim.new(0, 8)
+    TBCorner.CornerRadius = UDim.new(0, 10)
     TBCorner.Parent = TabBtn
 
-    -- Signature Left Pink Glow Indicator Pill (Identical to Screenshot!)
+    local TBStroke = Instance.new("UIStroke")
+    TBStroke.Color = Color3.fromRGB(50, 55, 75)
+    TBStroke.Transparency = 1
+    TBStroke.Thickness = 1
+    TBStroke.Parent = TabBtn
+
+    -- 1:1 RECREATION: White/Neon Pink Vertical Pill Indicator on the FAR LEFT EDGE!
     local Indicator = Instance.new("Frame")
     Indicator.Name = "ActiveIndicator"
-    Indicator.Size = UDim2.new(0, 3, 0, 22)
-    Indicator.Position = UDim2.new(0, 2, 0.5, -11)
-    Indicator.BackgroundColor3 = VRSLibV2.Theme.Accent
+    Indicator.Size = UDim2.new(0, 3.5, 0, 22)
+    Indicator.Position = UDim2.new(0, -6, 0.5, -11)
+    Indicator.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Indicator.BorderSizePixel = 0
     Indicator.Visible = false
     Indicator.Parent = TabBtn
@@ -943,8 +963,8 @@ function Window:AddTab(config)
     TabIcon.Parent = TabBtn
 
     local TabLabel = Instance.new("TextLabel")
-    TabLabel.Size = UDim2.new(1, -4, 0, 14)
-    TabLabel.Position = UDim2.new(0, 2, 0, 29)
+    TabLabel.Size = UDim2.new(1, 0, 0, 14)
+    TabLabel.Position = UDim2.new(0, 0, 0, 29)
     TabLabel.BackgroundTransparency = 1
     TabLabel.Text = tabName
     TabLabel.Font = Enum.Font.GothamMedium
@@ -961,17 +981,17 @@ function Window:AddTab(config)
     TabPage.BackgroundTransparency = 1
     TabPage.BorderSizePixel = 0
     TabPage.ScrollBarThickness = 3
-    TabPage.ScrollBarImageColor3 = VRSLibV2.Theme.CardStroke
+    TabPage.ScrollBarImageColor3 = Color3.fromRGB(60, 65, 85)
     TabPage.CanvasSize = UDim2.new(0, 0, 0, 0)
     TabPage.AutomaticCanvasSize = Enum.AutomaticSize.Y
     TabPage.Visible = false
     TabPage.Parent = self.Content
 
     local TPPadding = Instance.new("UIPadding")
-    TPPadding.PaddingLeft = UDim.new(0, 18)
-    TPPadding.PaddingRight = UDim.new(0, 18)
-    TPPadding.PaddingTop = UDim.new(0, 14)
-    TPPadding.PaddingBottom = UDim.new(0, 24)
+    TPPadding.PaddingLeft = UDim.new(0, 20)
+    TPPadding.PaddingRight = UDim.new(0, 20)
+    TPPadding.PaddingTop = UDim.new(0, 16)
+    TPPadding.PaddingBottom = UDim.new(0, 26)
     TPPadding.Parent = TabPage
 
     local TPLayout = Instance.new("UIListLayout")
@@ -984,6 +1004,7 @@ function Window:AddTab(config)
         Name      = tabName,
         IconId    = iconId,
         Button    = TabBtn,
+        Stroke    = TBStroke,
         Icon      = TabIcon,
         Label     = TabLabel,
         Indicator = Indicator,
@@ -993,7 +1014,7 @@ function Window:AddTab(config)
 
     TabBtn.MouseEnter:Connect(function()
         if self.ActiveTab ~= TabObj then
-            TweenService:Create(TabBtn, TweenInfo.new(0.15), { BackgroundTransparency = 0.5, BackgroundColor3 = VRSLibV2.Theme.SidebarHover }):Play()
+            TweenService:Create(TabBtn, TweenInfo.new(0.15), { BackgroundTransparency = 0.6, BackgroundColor3 = Color3.fromRGB(28, 30, 42) }):Play()
             TweenService:Create(TabIcon, TweenInfo.new(0.15), { ImageColor3 = Color3.fromRGB(220, 225, 240) }):Play()
             TweenService:Create(TabLabel, TweenInfo.new(0.15), { TextColor3 = Color3.fromRGB(220, 225, 240) }):Play()
         end
@@ -1009,7 +1030,6 @@ function Window:AddTab(config)
         self:SelectTab(TabObj)
     end)
 
-    -- Attach Modules
     self:BindTabMethods(TabObj)
     table.insert(self.Tabs, TabObj)
 
@@ -1030,18 +1050,19 @@ function Window:SelectTab(targetTab)
         t.Indicator.Visible = isActive
 
         if isActive then
-            TweenService:Create(t.Button, TweenInfo.new(0.15), { BackgroundTransparency = 0.3, BackgroundColor3 = VRSLibV2.Theme.SidebarActive }):Play()
+            TweenService:Create(t.Button, TweenInfo.new(0.15), { BackgroundTransparency = VRSLibV2.Theme.SidebarActiveTrans, BackgroundColor3 = VRSLibV2.Theme.SidebarActiveBtn }):Play()
+            TweenService:Create(t.Stroke, TweenInfo.new(0.15), { Transparency = 0.55 }):Play()
             TweenService:Create(t.Icon, TweenInfo.new(0.15), { ImageColor3 = Color3.fromRGB(255, 255, 255) }):Play()
             TweenService:Create(t.Label, TweenInfo.new(0.15), { TextColor3 = Color3.fromRGB(255, 255, 255) }):Play()
             self.HeaderIcon.Image = t.IconId
         else
             TweenService:Create(t.Button, TweenInfo.new(0.15), { BackgroundTransparency = 1 }):Play()
+            TweenService:Create(t.Stroke, TweenInfo.new(0.15), { Transparency = 1 }):Play()
             TweenService:Create(t.Icon, TweenInfo.new(0.15), { ImageColor3 = VRSLibV2.Theme.TextMuted }):Play()
             TweenService:Create(t.Label, TweenInfo.new(0.15), { TextColor3 = VRSLibV2.Theme.TextMuted }):Play()
         end
     end
 
-    -- Render Sub-Nav Horizontal Pills if this tab has subtabs
     self:RenderSubNavPills(targetTab)
 end
 
@@ -1052,15 +1073,17 @@ function Window:RenderSubNavPills(tabObj)
     end
 
     if #tabObj.SubTabs > 0 then
-        for _, sub in ipairs(tabObj.SubTabs) do
+        for idx, sub in ipairs(tabObj.SubTabs) do
             local pill = Instance.new("TextButton")
             pill.Name = "Pill_" .. sub.Name
             pill.Size = UDim2.new(0, 0, 0, 26)
             pill.AutomaticSize = Enum.AutomaticSize.X
-            pill.BackgroundColor3 = (sub.Active and Color3.fromRGB(28, 30, 42) or Color3.fromRGB(18, 19, 25))
+            pill.BackgroundColor3 = (sub.Active and Color3.fromRGB(30, 33, 46) or Color3.fromRGB(20, 22, 30))
+            pill.BackgroundTransparency = (sub.Active and 0.25 or 0.7)
             pill.BorderSizePixel = 0
             pill.Text = ""
             pill.AutoButtonColor = false
+            pill.LayoutOrder = sub.LayoutOrder or idx
             pill.Parent = self.SubNavPills
 
             local pCorner = Instance.new("UICorner")
@@ -1068,7 +1091,8 @@ function Window:RenderSubNavPills(tabObj)
             pCorner.Parent = pill
 
             local pStroke = Instance.new("UIStroke")
-            pStroke.Color = (sub.Active and VRSLibV2.Theme.Accent or VRSLibV2.Theme.CardStroke)
+            pStroke.Color = (sub.Active and Color3.fromRGB(70, 75, 100) or Color3.fromRGB(44, 48, 64))
+            pStroke.Transparency = (sub.Active and 0.4 or 0.7)
             pStroke.Thickness = 1
             pStroke.Parent = pill
 
@@ -1121,11 +1145,11 @@ end
 function Window:BindTabMethods(TabObj)
     local targetPage = TabObj.Page
 
-    -- Add SubTab Pill helper
     function TabObj:AddSubTab(cfg)
         cfg = cfg or {}
         local subName = cfg.Name or "SubTab"
         local isFirst = (#self.SubTabs == 0)
+        local order = cfg.LayoutOrder or (#self.SubTabs + 1)
 
         local subContainer = Instance.new("Frame")
         subContainer.Name = "SubPage_" .. subName
@@ -1144,13 +1168,13 @@ function Window:BindTabMethods(TabObj)
             Name = subName,
             Icon = cfg.Icon,
             Active = isFirst,
+            LayoutOrder = order,
             Container = subContainer,
             Callback = cfg.Callback,
         }
         table.insert(self.SubTabs, subObj)
         self.Window:RenderSubNavPills(self)
 
-        -- Allow building UI inside SubContainer
         local subBuilder = {}
         for k, v in pairs(self) do
             if type(v) == "function" and k ~= "AddSubTab" then
@@ -1163,7 +1187,7 @@ function Window:BindTabMethods(TabObj)
     end
 
     -- ==========================================================================
-    -- 1. USER WELCOME CARD (Screenshot 1 Identical Recreation)
+    -- 1. USER WELCOME CARD (Exact Screenshot Match with Liquid Glass)
     -- ==========================================================================
     function TabObj:AddUserCard(config)
         config = config or {}
@@ -1173,6 +1197,7 @@ function Window:BindTabMethods(TabObj)
         Card.Name = "UserCard"
         Card.Size = UDim2.new(1, 0, 0, 84)
         Card.BackgroundColor3 = VRSLibV2.Theme.Card
+        Card.BackgroundTransparency = VRSLibV2.Theme.CardTrans
         Card.BorderSizePixel = 0
         Card.LayoutOrder = config.LayoutOrder or 1
         Card.Parent = parentFrame
@@ -1183,8 +1208,11 @@ function Window:BindTabMethods(TabObj)
 
         local CStroke = Instance.new("UIStroke")
         CStroke.Color = VRSLibV2.Theme.CardStroke
+        CStroke.Transparency = VRSLibV2.Theme.CardStrokeTrans
         CStroke.Thickness = 1
         CStroke.Parent = Card
+
+        ApplyGlassSpecular(Card)
 
         local CPadding = Instance.new("UIPadding")
         CPadding.PaddingLeft = UDim.new(0, 16)
@@ -1207,7 +1235,8 @@ function Window:BindTabMethods(TabObj)
         ACorner.Parent = Avatar
 
         local AStroke = Instance.new("UIStroke")
-        AStroke.Color = VRSLibV2.Theme.CardStroke
+        AStroke.Color = Color3.fromRGB(55, 60, 80)
+        AStroke.Transparency = 0.5
         AStroke.Thickness = 1
         AStroke.Parent = Avatar
 
@@ -1265,6 +1294,7 @@ function Window:BindTabMethods(TabObj)
         VerPill.Size = UDim2.new(0, 0, 0, 26)
         VerPill.AutomaticSize = Enum.AutomaticSize.X
         VerPill.BackgroundColor3 = Color3.fromRGB(26, 28, 38)
+        VerPill.BackgroundTransparency = 0.4
         VerPill.BorderSizePixel = 0
         VerPill.Parent = Card
 
@@ -1273,7 +1303,8 @@ function Window:BindTabMethods(TabObj)
         VPCorner.Parent = VerPill
 
         local VPStroke = Instance.new("UIStroke")
-        VPStroke.Color = Color3.fromRGB(42, 45, 60)
+        VPStroke.Color = Color3.fromRGB(50, 55, 75)
+        VPStroke.Transparency = 0.5
         VPStroke.Thickness = 1
         VPStroke.Parent = VerPill
 
@@ -1410,7 +1441,7 @@ function Window:BindTabMethods(TabObj)
     end
 
     -- ==========================================================================
-    -- 2. STAT GRID (6 Equal-width horizontal cards with live tracking)
+    -- 2. STAT GRID (STRICT ORDER: Players, Friends, Execs, Session, FPS, Ping)
     -- ==========================================================================
     function TabObj:AddStatGrid(config)
         config = config or {}
@@ -1424,6 +1455,7 @@ function Window:BindTabMethods(TabObj)
         GridFrame.Parent = parentFrame
 
         local GLayout = Instance.new("UIListLayout")
+        GLayout.SortOrder = Enum.SortOrder.LayoutOrder
         GLayout.FillDirection = Enum.FillDirection.Horizontal
         GLayout.VerticalAlignment = Enum.VerticalAlignment.Center
         GLayout.Padding = UDim.new(0, 8)
@@ -1431,12 +1463,12 @@ function Window:BindTabMethods(TabObj)
 
         local statCards = {}
         local defaultStats = {
-            { Key = "Players", Label = "Players", Icon = "users", Value = tostring(#Players:GetPlayers()) .. "/" .. tostring(Players.MaxPlayers > 0 and Players.MaxPlayers or 20) },
-            { Key = "Friends", Label = "Friends", Icon = "user", Value = "0" },
-            { Key = "Execs", Label = "Execs", Icon = "zap", Value = "2" },
-            { Key = "Session", Label = "Session", Icon = "clock", Value = "0s" },
-            { Key = "FPS", Label = "FPS", Icon = "activity", Value = "60" },
-            { Key = "Ping", Label = "Ping", Icon = "wifi", Value = "0ms" },
+            { Order = 1, Key = "Players", Label = "Players", Icon = "users", Value = tostring(#Players:GetPlayers()) .. "/" .. tostring(Players.MaxPlayers > 0 and Players.MaxPlayers or 20) },
+            { Order = 2, Key = "Friends", Label = "Friends", Icon = "user", Value = "0" },
+            { Order = 3, Key = "Execs", Label = "Execs", Icon = "zap", Value = "2" },
+            { Order = 4, Key = "Session", Label = "Session", Icon = "clock", Value = "0s" },
+            { Order = 5, Key = "FPS", Label = "FPS", Icon = "activity", Value = "60" },
+            { Order = 6, Key = "Ping", Label = "Ping", Icon = "wifi", Value = "0ms" },
         }
 
         for _, item in ipairs(defaultStats) do
@@ -1444,7 +1476,9 @@ function Window:BindTabMethods(TabObj)
             Card.Name = "Stat_" .. item.Key
             Card.Size = UDim2.new(1 / 6, -7, 1, 0)
             Card.BackgroundColor3 = VRSLibV2.Theme.Card
+            Card.BackgroundTransparency = VRSLibV2.Theme.CardTrans
             Card.BorderSizePixel = 0
+            Card.LayoutOrder = item.Order
             Card.Parent = GridFrame
 
             local CCorner = Instance.new("UICorner")
@@ -1453,8 +1487,11 @@ function Window:BindTabMethods(TabObj)
 
             local CStroke = Instance.new("UIStroke")
             CStroke.Color = VRSLibV2.Theme.CardStroke
+            CStroke.Transparency = VRSLibV2.Theme.CardStrokeTrans
             CStroke.Thickness = 1
             CStroke.Parent = Card
+
+            ApplyGlassSpecular(Card)
 
             local CPadding = Instance.new("UIPadding")
             CPadding.PaddingLeft = UDim.new(0, 10)
@@ -1463,7 +1500,6 @@ function Window:BindTabMethods(TabObj)
             CPadding.PaddingBottom = UDim.new(0, 8)
             CPadding.Parent = Card
 
-            -- Top Row (Icon + Label)
             local HRow = Instance.new("Frame")
             HRow.Size = UDim2.new(1, 0, 0, 16)
             HRow.BackgroundTransparency = 1
@@ -1493,7 +1529,6 @@ function Window:BindTabMethods(TabObj)
             Lbl.Parent = HRow
             ProtectLocalization(Lbl)
 
-            -- Bottom Value
             local Val = Instance.new("TextLabel")
             Val.Name = "ValLbl"
             Val.Size = UDim2.new(1, 0, 0, 22)
@@ -1510,7 +1545,6 @@ function Window:BindTabMethods(TabObj)
             statCards[item.Key] = Val
         end
 
-        -- Live FPS, Ping, Session Timers
         local startTime = tick()
         local frameCount = 0
         local lastFpsTime = tick()
@@ -1553,7 +1587,7 @@ function Window:BindTabMethods(TabObj)
     end
 
     -- ==========================================================================
-    -- 3. GAME INFO CARD & SERVER ACTIONS
+    -- 3. GAME INFO CARD & SERVER ACTIONS (Liquid Glass Refinement)
     -- ==========================================================================
     function TabObj:AddGameCard(config)
         config = config or {}
@@ -1563,6 +1597,7 @@ function Window:BindTabMethods(TabObj)
         Card.Name = "GameCard"
         Card.Size = UDim2.new(1, 0, 0, 118)
         Card.BackgroundColor3 = VRSLibV2.Theme.Card
+        Card.BackgroundTransparency = VRSLibV2.Theme.CardTrans
         Card.BorderSizePixel = 0
         Card.LayoutOrder = config.LayoutOrder or 3
         Card.Parent = parentFrame
@@ -1573,8 +1608,11 @@ function Window:BindTabMethods(TabObj)
 
         local CStroke = Instance.new("UIStroke")
         CStroke.Color = VRSLibV2.Theme.CardStroke
+        CStroke.Transparency = VRSLibV2.Theme.CardStrokeTrans
         CStroke.Thickness = 1
         CStroke.Parent = Card
+
+        ApplyGlassSpecular(Card)
 
         local CPadding = Instance.new("UIPadding")
         CPadding.PaddingLeft = UDim.new(0, 14)
@@ -1597,7 +1635,7 @@ function Window:BindTabMethods(TabObj)
         TCorner.Parent = Thumb
 
         local placeId = game.PlaceId
-        local jobId = (game.JobId ~= "" and game.JobId or "97a448b9-87a2-4a90-b1c2-a909")
+        local jobId = (game.JobId ~= "" and game.JobId or "2888eb48-3c99-4d0b-a909-000000000000")
         local universeId = (game.GameId ~= 0 and game.GameId or 5595353122)
         local gameName = config.GameName or self.Window.GameName or "Roblox Game"
         local creatorName = config.Creator or "Ouw Productions"
@@ -1687,7 +1725,8 @@ function Window:BindTabMethods(TabObj)
             local btn = Instance.new("TextButton")
             btn.Size = size
             btn.Position = pos
-            btn.BackgroundColor3 = Color3.fromRGB(24, 26, 36)
+            btn.BackgroundColor3 = Color3.fromRGB(26, 28, 40)
+            btn.BackgroundTransparency = 0.35
             btn.BorderSizePixel = 0
             btn.Text = title
             btn.Font = Enum.Font.GothamBold
@@ -1701,17 +1740,18 @@ function Window:BindTabMethods(TabObj)
             bCorner.Parent = btn
 
             local bStroke = Instance.new("UIStroke")
-            bStroke.Color = Color3.fromRGB(42, 45, 60)
+            bStroke.Color = Color3.fromRGB(48, 52, 70)
+            bStroke.Transparency = 0.5
             bStroke.Thickness = 1
             bStroke.Parent = btn
 
             btn.MouseEnter:Connect(function()
-                TweenService:Create(btn, TweenInfo.new(0.12), { BackgroundColor3 = Color3.fromRGB(32, 35, 48) }):Play()
-                TweenService:Create(bStroke, TweenInfo.new(0.12), { Color = VRSLibV2.Theme.Accent }):Play()
+                TweenService:Create(btn, TweenInfo.new(0.12), { BackgroundColor3 = Color3.fromRGB(36, 40, 58), BackgroundTransparency = 0.2 }):Play()
+                TweenService:Create(bStroke, TweenInfo.new(0.12), { Color = VRSLibV2.Theme.Accent, Transparency = 0.2 }):Play()
             end)
             btn.MouseLeave:Connect(function()
-                TweenService:Create(btn, TweenInfo.new(0.12), { BackgroundColor3 = Color3.fromRGB(24, 26, 36) }):Play()
-                TweenService:Create(bStroke, TweenInfo.new(0.12), { Color = Color3.fromRGB(42, 45, 60) }):Play()
+                TweenService:Create(btn, TweenInfo.new(0.12), { BackgroundColor3 = Color3.fromRGB(26, 28, 40), BackgroundTransparency = 0.35 }):Play()
+                TweenService:Create(bStroke, TweenInfo.new(0.12), { Color = Color3.fromRGB(48, 52, 70), Transparency = 0.5 }):Play()
             end)
             btn.MouseButton1Click:Connect(function()
                 if onClick then onClick() end
@@ -1741,7 +1781,7 @@ function Window:BindTabMethods(TabObj)
     end
 
     -- ==========================================================================
-    -- 4. WARNING & STATUS BANNER (Screenshot 1 Identical)
+    -- 4. WARNING & STATUS BANNER
     -- ==========================================================================
     function TabObj:AddBanner(config)
         config = config or {}
@@ -1751,6 +1791,7 @@ function Window:BindTabMethods(TabObj)
         Banner.Name = "Banner"
         Banner.Size = UDim2.new(1, 0, 0, 48)
         Banner.BackgroundColor3 = VRSLibV2.Theme.Card
+        Banner.BackgroundTransparency = VRSLibV2.Theme.CardTrans
         Banner.BorderSizePixel = 0
         Banner.LayoutOrder = config.LayoutOrder or 4
         Banner.Parent = parentFrame
@@ -1761,8 +1802,11 @@ function Window:BindTabMethods(TabObj)
 
         local BStroke = Instance.new("UIStroke")
         BStroke.Color = VRSLibV2.Theme.CardStroke
+        BStroke.Transparency = VRSLibV2.Theme.CardStrokeTrans
         BStroke.Thickness = 1
         BStroke.Parent = Banner
+
+        ApplyGlassSpecular(Banner)
 
         local BPadding = Instance.new("UIPadding")
         BPadding.PaddingLeft = UDim.new(0, 14)
@@ -1814,11 +1858,11 @@ function Window:BindTabMethods(TabObj)
         DescLbl.Parent = TextStack
         ProtectLocalization(DescLbl)
 
-        -- Right Badge Pill
         local Pill = Instance.new("Frame")
         Pill.Size = UDim2.new(0, 0, 0, 24)
         Pill.AutomaticSize = Enum.AutomaticSize.X
         Pill.BackgroundColor3 = Color3.fromRGB(26, 28, 38)
+        Pill.BackgroundTransparency = 0.4
         Pill.BorderSizePixel = 0
         Pill.Parent = Banner
 
@@ -1827,7 +1871,8 @@ function Window:BindTabMethods(TabObj)
         PCorner.Parent = Pill
 
         local PStroke = Instance.new("UIStroke")
-        PStroke.Color = Color3.fromRGB(42, 45, 60)
+        PStroke.Color = Color3.fromRGB(48, 52, 70)
+        PStroke.Transparency = 0.5
         PStroke.Thickness = 1
         PStroke.Parent = Pill
 
@@ -1851,7 +1896,7 @@ function Window:BindTabMethods(TabObj)
     end
 
     -- ==========================================================================
-    -- 5. QUICK LINKS ROW (Two Equal Columns)
+    -- 5. QUICK LINKS ROW
     -- ==========================================================================
     function TabObj:AddLinksRow(config)
         config = config or {}
@@ -1874,6 +1919,7 @@ function Window:BindTabMethods(TabObj)
             local Card = Instance.new("Frame")
             Card.Size = UDim2.new(0.5, -5, 1, 0)
             Card.BackgroundColor3 = VRSLibV2.Theme.Card
+            Card.BackgroundTransparency = VRSLibV2.Theme.CardTrans
             Card.BorderSizePixel = 0
             Card.Parent = Row
 
@@ -1883,8 +1929,11 @@ function Window:BindTabMethods(TabObj)
 
             local CStroke = Instance.new("UIStroke")
             CStroke.Color = VRSLibV2.Theme.CardStroke
+            CStroke.Transparency = VRSLibV2.Theme.CardStrokeTrans
             CStroke.Thickness = 1
             CStroke.Parent = Card
+
+            ApplyGlassSpecular(Card)
 
             local CPadding = Instance.new("UIPadding")
             CPadding.PaddingLeft = UDim.new(0, 14)
@@ -1937,7 +1986,8 @@ function Window:BindTabMethods(TabObj)
             Btn.AnchorPoint = Vector2.new(1, 0.5)
             Btn.Position = UDim2.new(1, 0, 0.5, 0)
             Btn.Size = UDim2.new(0, 105, 0, 28)
-            Btn.BackgroundColor3 = Color3.fromRGB(24, 26, 36)
+            Btn.BackgroundColor3 = Color3.fromRGB(26, 28, 40)
+            Btn.BackgroundTransparency = 0.35
             Btn.BorderSizePixel = 0
             Btn.Text = cardCfg.ButtonText or "Copy"
             Btn.Font = Enum.Font.GothamBold
@@ -1951,17 +2001,18 @@ function Window:BindTabMethods(TabObj)
             BCorner.Parent = Btn
 
             local BStroke = Instance.new("UIStroke")
-            BStroke.Color = Color3.fromRGB(42, 45, 60)
+            BStroke.Color = Color3.fromRGB(48, 52, 70)
+            BStroke.Transparency = 0.5
             BStroke.Thickness = 1
             BStroke.Parent = Btn
 
             Btn.MouseEnter:Connect(function()
-                TweenService:Create(Btn, TweenInfo.new(0.12), { BackgroundColor3 = Color3.fromRGB(32, 35, 48) }):Play()
-                TweenService:Create(BStroke, TweenInfo.new(0.12), { Color = VRSLibV2.Theme.Accent }):Play()
+                TweenService:Create(Btn, TweenInfo.new(0.12), { BackgroundColor3 = Color3.fromRGB(36, 40, 58), BackgroundTransparency = 0.2 }):Play()
+                TweenService:Create(BStroke, TweenInfo.new(0.12), { Color = VRSLibV2.Theme.Accent, Transparency = 0.2 }):Play()
             end)
             Btn.MouseLeave:Connect(function()
-                TweenService:Create(Btn, TweenInfo.new(0.12), { BackgroundColor3 = Color3.fromRGB(24, 26, 36) }):Play()
-                TweenService:Create(BStroke, TweenInfo.new(0.12), { Color = Color3.fromRGB(42, 45, 60) }):Play()
+                TweenService:Create(Btn, TweenInfo.new(0.12), { BackgroundColor3 = Color3.fromRGB(26, 28, 40), BackgroundTransparency = 0.35 }):Play()
+                TweenService:Create(BStroke, TweenInfo.new(0.12), { Color = Color3.fromRGB(48, 52, 70), Transparency = 0.5 }):Play()
             end)
             Btn.MouseButton1Click:Connect(function()
                 if cardCfg.Callback then
@@ -1992,6 +2043,7 @@ function Window:BindTabMethods(TabObj)
         Card.Name = "FeatureListCard"
         Card.Size = UDim2.new(1, 0, 0, 50)
         Card.BackgroundColor3 = VRSLibV2.Theme.Card
+        Card.BackgroundTransparency = VRSLibV2.Theme.CardTrans
         Card.BorderSizePixel = 0
         Card.LayoutOrder = config.LayoutOrder or 6
         Card.Parent = parentFrame
@@ -2002,8 +2054,11 @@ function Window:BindTabMethods(TabObj)
 
         local CStroke = Instance.new("UIStroke")
         CStroke.Color = VRSLibV2.Theme.CardStroke
+        CStroke.Transparency = VRSLibV2.Theme.CardStrokeTrans
         CStroke.Thickness = 1
         CStroke.Parent = Card
+
+        ApplyGlassSpecular(Card)
 
         local CPadding = Instance.new("UIPadding")
         CPadding.PaddingLeft = UDim.new(0, 14)
@@ -2055,7 +2110,8 @@ function Window:BindTabMethods(TabObj)
         Btn.AnchorPoint = Vector2.new(1, 0.5)
         Btn.Position = UDim2.new(1, 0, 0.5, 0)
         Btn.Size = UDim2.new(0, 115, 0, 28)
-        Btn.BackgroundColor3 = Color3.fromRGB(24, 26, 36)
+        Btn.BackgroundColor3 = Color3.fromRGB(26, 28, 40)
+        Btn.BackgroundTransparency = 0.35
         Btn.BorderSizePixel = 0
         Btn.Text = config.ButtonText or "View Features"
         Btn.Font = Enum.Font.GothamBold
@@ -2069,17 +2125,18 @@ function Window:BindTabMethods(TabObj)
         BCorner.Parent = Btn
 
         local BStroke = Instance.new("UIStroke")
-        BStroke.Color = Color3.fromRGB(42, 45, 60)
+        BStroke.Color = Color3.fromRGB(48, 52, 70)
+        BStroke.Transparency = 0.5
         BStroke.Thickness = 1
         BStroke.Parent = Btn
 
         Btn.MouseEnter:Connect(function()
-            TweenService:Create(Btn, TweenInfo.new(0.12), { BackgroundColor3 = Color3.fromRGB(32, 35, 48) }):Play()
-            TweenService:Create(BStroke, TweenInfo.new(0.12), { Color = VRSLibV2.Theme.Accent }):Play()
+            TweenService:Create(Btn, TweenInfo.new(0.12), { BackgroundColor3 = Color3.fromRGB(36, 40, 58), BackgroundTransparency = 0.2 }):Play()
+            TweenService:Create(BStroke, TweenInfo.new(0.12), { Color = VRSLibV2.Theme.Accent, Transparency = 0.2 }):Play()
         end)
         Btn.MouseLeave:Connect(function()
-            TweenService:Create(Btn, TweenInfo.new(0.12), { BackgroundColor3 = Color3.fromRGB(24, 26, 36) }):Play()
-            TweenService:Create(BStroke, TweenInfo.new(0.12), { Color = Color3.fromRGB(42, 45, 60) }):Play()
+            TweenService:Create(Btn, TweenInfo.new(0.12), { BackgroundColor3 = Color3.fromRGB(26, 28, 40), BackgroundTransparency = 0.35 }):Play()
+            TweenService:Create(BStroke, TweenInfo.new(0.12), { Color = Color3.fromRGB(48, 52, 70), Transparency = 0.5 }):Play()
         end)
         Btn.MouseButton1Click:Connect(function()
             if config.Callback then config.Callback() end
@@ -2089,7 +2146,7 @@ function Window:BindTabMethods(TabObj)
     end
 
     -- ==========================================================================
-    -- 7. DUAL-COLUMN SECTION ENGINE (For Standard Hub Tabs like Farm, Combat, etc.)
+    -- 7. DUAL-COLUMN SECTION ENGINE
     -- ==========================================================================
     function TabObj:AddColumns()
         local parentFrame = (self.Container or targetPage)
@@ -2143,6 +2200,7 @@ function Window:BindTabMethods(TabObj)
         Box.Size = UDim2.new(1, 0, 0, 0)
         Box.AutomaticSize = Enum.AutomaticSize.Y
         Box.BackgroundColor3 = VRSLibV2.Theme.Card
+        Box.BackgroundTransparency = VRSLibV2.Theme.CardTrans
         Box.BorderSizePixel = 0
         Box.ClipsDescendants = true
         Box.Parent = parentCol
@@ -2153,10 +2211,12 @@ function Window:BindTabMethods(TabObj)
 
         local BStroke = Instance.new("UIStroke")
         BStroke.Color = VRSLibV2.Theme.CardStroke
+        BStroke.Transparency = VRSLibV2.Theme.CardStrokeTrans
         BStroke.Thickness = 1
         BStroke.Parent = Box
 
-        -- Title Bar
+        ApplyGlassSpecular(Box)
+
         local TitleBar = Instance.new("TextButton")
         TitleBar.Name = "TitleBar"
         TitleBar.Size = UDim2.new(1, 0, 0, 38)
@@ -2202,7 +2262,6 @@ function Window:BindTabMethods(TabObj)
         CollapseLbl.Parent = TitleBar
         ProtectLocalization(CollapseLbl)
 
-        -- Elements Container
         local Container = Instance.new("Frame")
         Container.Name = "Elements"
         Container.Size = UDim2.new(1, 0, 0, 0)
@@ -2238,9 +2297,6 @@ function Window:BindTabMethods(TabObj)
             Window = self.Window
         }
 
-        -- ======================================================================
-        -- ELEMENT: TOGGLE (Sleek Neon Pink Pill Switch)
-        -- ======================================================================
         function GroupObj:AddToggle(elemCfg)
             elemCfg = elemCfg or {}
             local name = elemCfg.Name or "Toggle"
@@ -2320,9 +2376,6 @@ function Window:BindTabMethods(TabObj)
             }
         end
 
-        -- ======================================================================
-        -- ELEMENT: SLIDER (Neon Pink Draggable Bar)
-        -- ======================================================================
         function GroupObj:AddSlider(elemCfg)
             elemCfg = elemCfg or {}
             local name      = elemCfg.Name or "Slider"
@@ -2369,11 +2422,10 @@ function Window:BindTabMethods(TabObj)
             ValLbl.Parent = TopRow
             ProtectLocalization(ValLbl)
 
-            -- Track
             local Track = Instance.new("TextButton")
             Track.Size = UDim2.new(1, 0, 0, 8)
             Track.Position = UDim2.new(0, 0, 0, 24)
-            Track.BackgroundColor3 = Color3.fromRGB(28, 30, 40)
+            Track.BackgroundColor3 = Color3.fromRGB(28, 30, 42)
             Track.BorderSizePixel = 0
             Track.Text = ""
             Track.AutoButtonColor = false
@@ -2454,9 +2506,6 @@ function Window:BindTabMethods(TabObj)
             }
         end
 
-        -- ======================================================================
-        -- ELEMENT: BUTTON (Interactive Action Button)
-        -- ======================================================================
         function GroupObj:AddButton(elemCfg)
             elemCfg = elemCfg or {}
             local name     = elemCfg.Name or "Button"
@@ -2466,7 +2515,8 @@ function Window:BindTabMethods(TabObj)
             local Btn = Instance.new("TextButton")
             Btn.Name = "Button_" .. name
             Btn.Size = UDim2.new(1, 0, 0, 32)
-            Btn.BackgroundColor3 = Color3.fromRGB(24, 26, 36)
+            Btn.BackgroundColor3 = Color3.fromRGB(26, 28, 40)
+            Btn.BackgroundTransparency = 0.35
             Btn.BorderSizePixel = 0
             Btn.Text = ""
             Btn.AutoButtonColor = false
@@ -2477,7 +2527,8 @@ function Window:BindTabMethods(TabObj)
             BCorner.Parent = Btn
 
             local BStroke = Instance.new("UIStroke")
-            BStroke.Color = Color3.fromRGB(40, 44, 58)
+            BStroke.Color = Color3.fromRGB(48, 52, 70)
+            BStroke.Transparency = 0.5
             BStroke.Thickness = 1
             BStroke.Parent = Btn
 
@@ -2509,12 +2560,12 @@ function Window:BindTabMethods(TabObj)
             ProtectLocalization(Lbl)
 
             Btn.MouseEnter:Connect(function()
-                TweenService:Create(Btn, TweenInfo.new(0.12), { BackgroundColor3 = Color3.fromRGB(32, 35, 48) }):Play()
-                TweenService:Create(BStroke, TweenInfo.new(0.12), { Color = VRSLibV2.Theme.Accent }):Play()
+                TweenService:Create(Btn, TweenInfo.new(0.12), { BackgroundColor3 = Color3.fromRGB(36, 40, 58), BackgroundTransparency = 0.2 }):Play()
+                TweenService:Create(BStroke, TweenInfo.new(0.12), { Color = VRSLibV2.Theme.Accent, Transparency = 0.2 }):Play()
             end)
             Btn.MouseLeave:Connect(function()
-                TweenService:Create(Btn, TweenInfo.new(0.12), { BackgroundColor3 = Color3.fromRGB(24, 26, 36) }):Play()
-                TweenService:Create(BStroke, TweenInfo.new(0.12), { Color = Color3.fromRGB(40, 44, 58) }):Play()
+                TweenService:Create(Btn, TweenInfo.new(0.12), { BackgroundColor3 = Color3.fromRGB(26, 28, 40), BackgroundTransparency = 0.35 }):Play()
+                TweenService:Create(BStroke, TweenInfo.new(0.12), { Color = Color3.fromRGB(48, 52, 70), Transparency = 0.5 }):Play()
             end)
             Btn.MouseButton1Click:Connect(function()
                 TweenService:Create(Btn, TweenInfo.new(0.08), { Size = UDim2.new(0.98, 0, 0, 30) }):Play()
@@ -2528,9 +2579,6 @@ function Window:BindTabMethods(TabObj)
             return Btn
         end
 
-        -- ======================================================================
-        -- ELEMENT: DROPDOWN (Modern Inline Drop Bar)
-        -- ======================================================================
         function GroupObj:AddDropdown(elemCfg)
             elemCfg = elemCfg or {}
             local name     = elemCfg.Name or "Dropdown"
@@ -2562,7 +2610,8 @@ function Window:BindTabMethods(TabObj)
             Trigger.AnchorPoint = Vector2.new(1, 0.5)
             Trigger.Position = UDim2.new(1, 0, 0.5, 0)
             Trigger.Size = UDim2.new(0.5, 0, 0, 28)
-            Trigger.BackgroundColor3 = Color3.fromRGB(24, 26, 36)
+            Trigger.BackgroundColor3 = Color3.fromRGB(26, 28, 40)
+            Trigger.BackgroundTransparency = 0.35
             Trigger.BorderSizePixel = 0
             Trigger.Text = ""
             Trigger.AutoButtonColor = false
@@ -2573,7 +2622,8 @@ function Window:BindTabMethods(TabObj)
             TCorner.Parent = Trigger
 
             local TStroke = Instance.new("UIStroke")
-            TStroke.Color = Color3.fromRGB(42, 45, 60)
+            TStroke.Color = Color3.fromRGB(48, 52, 70)
+            TStroke.Transparency = 0.5
             TStroke.Thickness = 1
             TStroke.Parent = Trigger
 
@@ -2615,11 +2665,11 @@ function Window:BindTabMethods(TabObj)
             end
             TLbl.Text = FormatDisplayText()
 
-            -- Dropdown Floating Menu
             local DropMenu = Instance.new("Frame")
             DropMenu.Name = "DropMenu"
             DropMenu.Size = UDim2.new(0.5, 0, 0, 0)
-            DropMenu.BackgroundColor3 = Color3.fromRGB(22, 24, 32)
+            DropMenu.BackgroundColor3 = Color3.fromRGB(20, 22, 32)
+            DropMenu.BackgroundTransparency = 0.15
             DropMenu.BorderSizePixel = 0
             DropMenu.ClipsDescendants = true
             DropMenu.Visible = false

@@ -2,8 +2,8 @@
     ==============================================================================
     🌸 VRSLib V2 SHOWCASE — 1:1 RECREATION OF TARGET SCREENSHOT
     ==============================================================================
-    Execute this script in your favorite executor or test environment.
-    Features signature Matte Obsidian (#0F1015) + Neon Pink (#FF408C) theme!
+    Execute this script in your executor.
+    Features signature Liquid Frosted Glass + Matte Obsidian (#0F1015) + Neon Pink!
     ==============================================================================
 ]]
 
@@ -32,7 +32,7 @@ end
 
 -- 2. Create Window
 local Window = VRSLibV2:CreateWindow({
-    Title    = "auto", -- Otomatis menjadi "Welcome to <GameName>!"
+    Title    = "auto", -- Otomatis menjadi "Welcome to <GameName>!" (e.g. Welcome to Slayer 2!)
     SubTitle = "v0.141",
     Size     = UDim2.fromOffset(1020, 620),
     Accent   = Color3.fromRGB(255, 64, 140), -- VRS Signature Neon Pink (#FF408C)
@@ -47,22 +47,21 @@ _G.VRSV2_UNLOAD = Window.OnUnload
 _G.VRSV2_ACTIVE = true
 
 -- ==============================================================================
--- 3. SIDEBAR TABS (Matching Screenshot 1 & 2)
+-- 3. SIDEBAR NAVIGATION TABS (1:1 Matching Screenshot)
 -- ==============================================================================
 local TabHome     = Window:AddTab({ Name = "Home",     Icon = "home",     LayoutOrder = 1 })
-local TabClan     = Window:AddTab({ Name = "Clan",     Icon = "users",    LayoutOrder = 2 })
-local TabFarm     = Window:AddTab({ Name = "Farm",     Icon = "swords",   LayoutOrder = 3 })
-local TabSettings = Window:AddTab({ Name = "Settings", Icon = "settings", LayoutOrder = 4 })
+local TabClan     = Window:AddTab({ Name = "Clan",     Icon = "shield",   LayoutOrder = 2 })
+local TabSettings = Window:AddTab({ Name = "Settings", Icon = "settings", LayoutOrder = 3 })
 
 -- ==============================================================================
 -- 4. HOME TAB (Screenshot 1: 100% Identical Recreation)
 -- ==============================================================================
 
--- Horizontal Sub-Nav Pills in Topbar
-local SubOverview = TabHome:AddSubTab({ Name = "Overview", Icon = "grid" })
-local SubMainMenu = TabHome:AddSubTab({ Name = "Main Menu", Icon = "play" })
+-- Horizontal Sub-Nav Pills in Topbar (Overview is first and active, Main Menu is second)
+local SubOverview = TabHome:AddSubTab({ Name = "Overview",  Icon = "grid", LayoutOrder = 1 })
+local SubMainMenu = TabHome:AddSubTab({ Name = "Main Menu", Icon = "play", LayoutOrder = 2 })
 
--- 1. User Banner Card (Avatar headshot, greetings, streamer mode)
+-- 1. User Banner Card (Avatar headshot, greetings, display name, handle, streamer mode)
 SubOverview:AddUserCard({
     Greeting    = "Welcome back,",
     DisplayName = game:GetService("Players").LocalPlayer.DisplayName,
@@ -71,7 +70,7 @@ SubOverview:AddUserCard({
     LayoutOrder = 1
 })
 
--- 2. 6-Box Stat Grid (Live Players, Friends, Execs, Session, FPS, Ping)
+-- 2. 6-Box Stat Grid (Strict Order: Players, Friends, Execs, Session, FPS, Ping)
 SubOverview:AddStatGrid({
     LayoutOrder = 2
 })
@@ -121,7 +120,7 @@ SubOverview:AddFeatureList({
     Callback    = function()
         Window:Notify({
             Title = "Features",
-            Description = "Showing active features for " .. Window.GameName,
+            Description = "Showing 7 active features for " .. Window.GameName,
             Duration = 3,
             Icon = "list"
         })
@@ -129,7 +128,7 @@ SubOverview:AddFeatureList({
     LayoutOrder = 6
 })
 
--- SubMainMenu content
+-- SubMainMenu content (Quick Actions)
 local mmLeft, mmRight = SubMainMenu:AddColumns()
 local mmGeneral = mmLeft:AddGroupbox({ Title = "Quick Actions", Icon = "zap" })
 mmGeneral:AddButton({
@@ -148,74 +147,52 @@ mmGeneral:AddButton({
 })
 
 -- ==============================================================================
--- 5. FARM TAB (Dual-Column Sections with Toggles, Sliders, Dropdowns)
+-- 5. CLAN TAB (Dual-Column Sections with Toggles, Sliders, Dropdowns)
 -- ==============================================================================
-local SubQuests = TabFarm:AddSubTab({ Name = "Quests & Mobs", Icon = "swords" })
-local SubBosses = TabFarm:AddSubTab({ Name = "Bosses", Icon = "shield" })
+local clanLeft, clanRight = TabClan:AddColumns()
 
-local farmLeft, farmRight = SubQuests:AddColumns()
-
--- Left Column: Leveling & Auto Farm
-local boxLeveling = farmLeft:AddGroupbox({ Title = "Auto Leveling", Icon = "swords" })
-boxLeveling:AddToggle({
-    Name = "Auto Quest Farm",
+local boxReroll = clanLeft:AddGroupbox({ Title = "Clan Spin & Reroll", Icon = "swords" })
+boxReroll:AddToggle({
+    Name = "Auto Spin Rare Clan",
     Default = false,
     Callback = function(val)
-        print("Auto Quest:", val)
+        print("Auto Spin:", val)
     end
 })
-boxLeveling:AddToggle({
-    Name = "Auto Mob Aura",
-    Default = false,
-    Callback = function(val)
-        print("Auto Mob Aura:", val)
-    end
-})
-boxLeveling:AddDropdown({
-    Name = "Target Mob",
-    Options = { "Low Level Bandit", "Forest Demon", "Elite Slayer", "Shadow Assassin" },
-    Default = "Low Level Bandit",
+boxReroll:AddDropdown({
+    Name = "Target Clans",
+    Options = { "Kamado", "Tsugikuni", "Rengoku", "Tomioka", "Hashibira", "Agatsuma" },
+    Default = { ["Kamado"] = true, ["Tsugikuni"] = true },
+    Multi = true,
     Callback = function(selected)
-        print("Target Mob selected:", selected)
+        print("Target clans updated.")
     end
 })
-boxLeveling:AddSlider({
-    Name = "Attack Distance",
-    Min = 2,
-    Max = 30,
-    Default = 12,
-    Suffix = " studs",
+boxReroll:AddSlider({
+    Name = "Spin Delay",
+    Min = 0.1,
+    Max = 2.0,
+    Default = 0.5,
+    Precision = 1,
+    Suffix = "s",
     Callback = function(val)
-        print("Attack Distance:", val)
+        print("Spin Delay:", val)
     end
 })
 
--- Right Column: Pickups & Modifiers
-local boxPickups = farmRight:AddGroupbox({ Title = "Pickups & Gourds", Icon = "folder" })
-boxPickups:AddToggle({
-    Name = "Auto Collect Chests",
+local boxBuffs = clanRight:AddGroupbox({ Title = "Clan Passive Buffs", Icon = "shield" })
+boxBuffs:AddToggle({
+    Name = "Auto Activate Sun Breathing",
     Default = true,
     Callback = function(val)
-        print("Auto Collect:", val)
+        print("Sun Breathing:", val)
     end
 })
-boxPickups:AddDropdown({
-    Name = "Filter Rarities",
-    Options = { "Common", "Rare", "Epic", "Legendary", "Mythic" },
-    Default = { ["Legendary"] = true, ["Mythic"] = true },
-    Multi = true,
-    Callback = function(tableVal)
-        print("Selected rarities updated.")
-    end
-})
-boxPickups:AddSlider({
-    Name = "Collect Speed",
-    Min = 1,
-    Max = 5,
-    Default = 2,
-    Suffix = "x",
-    Callback = function(val)
-        print("Collect Speed:", val)
+boxBuffs:AddButton({
+    Name = "Check Clan Pity Counter",
+    Icon = "activity",
+    Callback = function()
+        Window:Notify({ Title = "Clan System", Description = "Current Pity: 48/50 Spins (Guaranteed Mythic next!)", Duration = 3 })
     end
 })
 
@@ -225,6 +202,13 @@ boxPickups:AddSlider({
 local setLeft, setRight = TabSettings:AddColumns()
 
 local boxSettings = setLeft:AddGroupbox({ Title = "Hub Configuration", Icon = "settings" })
+boxSettings:AddToggle({
+    Name = "Frosted Liquid Glass Blur",
+    Default = true,
+    Callback = function(val)
+        print("Glass blur:", val)
+    end
+})
 boxSettings:AddToggle({
     Name = "Show Floating Logo When Hidden",
     Default = true,
@@ -238,9 +222,9 @@ boxSettings:AddButton({
     Callback = function()
         Window:Notify({
             Title = "Notification Test",
-            Description = "VRSLib V2 Obsidian & Neon Pink is running flawlessly!",
+            Description = "VRSLib V2 Liquid Glass & Obsidian Neon Pink is active!",
             Duration = 3,
-            Icon = "Wings"
+            Icon = "home"
         })
     end
 })
@@ -248,7 +232,7 @@ boxSettings:AddButton({
 -- Initial Notification
 VRSLibV2:Notify({
     Title = "VRS Artelier V2",
-    Description = "Loaded successfully with Obsidian & Neon Pink aesthetic!",
+    Description = "Loaded successfully with Liquid Glass & Obsidian aesthetic!",
     Duration = 3.5,
-    Icon = "Wings"
+    Icon = "home"
 })
