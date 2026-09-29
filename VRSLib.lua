@@ -28,29 +28,29 @@ local LocalPlayer      = Players.LocalPlayer or Players.PlayerAdded:Wait()
 local VRSLib = {
     Version = "1.3.0",
     Theme = {
-        Background      = Color3.fromRGB(13, 14, 19),
-        Sidebar         = Color3.fromRGB(16, 17, 24),
-        Header          = Color3.fromRGB(13, 14, 19),
-        Card            = Color3.fromRGB(20, 21, 30),
-        CardHover       = Color3.fromRGB(28, 30, 44),
-        CardStroke      = Color3.fromRGB(30, 32, 46),
-        CardStrokeHover = Color3.fromRGB(255, 64, 140),
-        InputBackground = Color3.fromRGB(18, 19, 28),
-        InputStroke     = Color3.fromRGB(34, 36, 52),
+        Background      = Color3.fromRGB(15, 16, 20),   -- Modern Matte Obsidian (#0F1014)
+        Sidebar         = Color3.fromRGB(12, 13, 16),   -- Deep Navy Obsidian (#0C0D10)
+        Header          = Color3.fromRGB(15, 16, 20),
+        Card            = Color3.fromRGB(21, 22, 28),   -- Sleek Card background (#15161C)
+        CardHover       = Color3.fromRGB(28, 30, 40),
+        CardStroke      = Color3.fromRGB(32, 34, 44),   -- Subtle dark border
+        CardStrokeHover = Color3.fromRGB(255, 64, 140), -- VRS Signature Pink Stroke
+        InputBackground = Color3.fromRGB(16, 17, 22),   -- Inner input background
+        InputStroke     = Color3.fromRGB(34, 36, 48),
         Accent          = Color3.fromRGB(255, 64, 140), -- VRS Signature Neon Magenta Pink (#FF408C)
         AccentHover     = Color3.fromRGB(255, 96, 160),
         AccentGlow      = Color3.fromRGB(255, 64, 140),
-        Outline         = Color3.fromRGB(28, 30, 44),
+        Outline         = Color3.fromRGB(28, 30, 38),
         TextPrimary     = Color3.fromRGB(255, 255, 255),
-        TextMuted       = Color3.fromRGB(228, 234, 248),
-        BadgeBackground = Color3.fromRGB(24, 25, 38),
-        BadgeText       = Color3.fromRGB(255, 255, 255),
-        SwitchOff       = Color3.fromRGB(34, 36, 50),
-        SwitchOffKnob   = Color3.fromRGB(115, 120, 140),
+        TextMuted       = Color3.fromRGB(140, 145, 165),
+        BadgeBackground = Color3.fromRGB(32, 20, 30),
+        BadgeText       = Color3.fromRGB(255, 140, 190),
+        SwitchOff       = Color3.fromRGB(36, 38, 48),
+        SwitchOffKnob   = Color3.fromRGB(130, 135, 150),
         SwitchOnKnob    = Color3.fromRGB(255, 255, 255),
-        ActionBtn       = Color3.fromRGB(46, 18, 34),
-        ActionBtnHover  = Color3.fromRGB(70, 26, 52),
-        ActionBtnIcon   = Color3.fromRGB(255, 64, 140),
+        ActionBtn       = Color3.fromRGB(28, 30, 38),   -- Action button background
+        ActionBtnHover  = Color3.fromRGB(38, 40, 52),
+        ActionBtnIcon   = Color3.fromRGB(255, 64, 140), -- Pink Action Icon
         ResizeGrip      = Color3.fromRGB(120, 125, 150),
     },
     -- Injected Lucide Icon Engine
@@ -480,8 +480,22 @@ function VRSLib:CreateWindow(config)
     config = config or {}
     local self = setmetatable({}, Window)
 
-    self.Title          = config.Title or "VRS Artelier"
-    self.SubTitle       = config.SubTitle or "v1.1.9 Pro"
+    local detectedGameName = "Roblox"
+    pcall(function()
+        local info = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
+        if info and info.Name and info.Name ~= "" then
+            detectedGameName = info.Name
+        end
+    end)
+    self.GameName = config.GameName or detectedGameName
+
+    local rawTitle = config.Title
+    if not rawTitle or rawTitle == "" or rawTitle == "auto" then
+        self.Title = "Welcome to " .. self.GameName .. "!"
+    else
+        self.Title = string.gsub(tostring(rawTitle), "{game}", self.GameName)
+    end
+    self.SubTitle       = config.SubTitle or "v0.141"
     self.DefaultSize    = config.Size or UDim2.fromOffset(1020, 620)
     self.MaximizedSize  = UDim2.fromOffset(1240, 740)
     self.Keybind        = config.Keybind or Enum.KeyCode.RightControl
@@ -589,37 +603,78 @@ function VRSLib:CreateWindow(config)
     TopbarDivider.BorderSizePixel = 0
     TopbarDivider.Parent = Topbar
 
-    -- Brand Box with Prominent Big Wings Logo (Centered in 220px Sidebar Header Column, Massive & Crisp)
+    -- Brand Box with Wings Logo (Centered in compact 72px Sidebar Header Column)
     local BrandBox = Instance.new("Frame")
     BrandBox.Name = "BrandBox"
-    BrandBox.Size = UDim2.new(0, 220, 1, 0)
+    BrandBox.Size = UDim2.new(0, 72, 1, 0)
     BrandBox.Position = UDim2.new(0, 0, 0, 0)
     BrandBox.BackgroundTransparency = 1
     BrandBox.Parent = Topbar
 
     local WingsLogo = Instance.new("ImageLabel")
     WingsLogo.Name = "WingsLogo"
-    WingsLogo.Size = UDim2.fromOffset(54, 40)
+    WingsLogo.Size = UDim2.fromOffset(36, 28)
     WingsLogo.AnchorPoint = Vector2.new(0.5, 0.5)
     WingsLogo.Position = UDim2.new(0.5, 0, 0.5, 0)
     WingsLogo.BackgroundTransparency = 1
-    WingsLogo.ScaleType = Enum.ScaleType.Stretch
+    WingsLogo.ScaleType = Enum.ScaleType.Fit
     ApplyBrandLogo(WingsLogo)
     WingsLogo.Parent = BrandBox
 
     BrandBox.MouseEnter:Connect(function()
-        TweenService:Create(WingsLogo, TweenInfo.new(0.2), { Size = UDim2.fromOffset(58, 43) }):Play()
+        TweenService:Create(WingsLogo, TweenInfo.new(0.2), { Size = UDim2.fromOffset(40, 31) }):Play()
     end)
     BrandBox.MouseLeave:Connect(function()
-        TweenService:Create(WingsLogo, TweenInfo.new(0.2), { Size = UDim2.fromOffset(54, 40) }):Play()
+        TweenService:Create(WingsLogo, TweenInfo.new(0.2), { Size = UDim2.fromOffset(36, 28) }):Play()
     end)
 
-    -- Live Search Input Box: Left-aligned in Content Area (Position 236px, perfectly anchored)
+    -- Dynamic Header Tab Info (Icon, Title, Subtitle ala Modern Hubs)
+    local HeaderIcon = Instance.new("ImageLabel")
+    HeaderIcon.Name = "HeaderIcon"
+    HeaderIcon.Size = UDim2.fromOffset(20, 20)
+    HeaderIcon.Position = UDim2.new(0, 84, 0.5, -10)
+    HeaderIcon.BackgroundTransparency = 1
+    HeaderIcon.Image = VRSLib.Icons.Get("home")
+    HeaderIcon.ImageColor3 = Color3.fromRGB(255, 255, 255)
+    HeaderIcon.Parent = Topbar
+    self.HeaderIcon = HeaderIcon
+
+    local HeaderTitle = Instance.new("TextLabel")
+    HeaderTitle.Name = "HeaderTitle"
+    HeaderTitle.Size = UDim2.new(0, 0, 0, 18)
+    HeaderTitle.AutomaticSize = Enum.AutomaticSize.X
+    HeaderTitle.Position = UDim2.new(0, 110, 0, 9)
+    HeaderTitle.BackgroundTransparency = 1
+    HeaderTitle.Text = self.Title
+    HeaderTitle.Font = Enum.Font.GothamBold
+    HeaderTitle.TextSize = 14.5
+    HeaderTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    HeaderTitle.TextXAlignment = Enum.TextXAlignment.Left
+    HeaderTitle.Parent = Topbar
+    ProtectLocalization(HeaderTitle)
+    self.HeaderTitle = HeaderTitle
+
+    local HeaderSubtitle = Instance.new("TextLabel")
+    HeaderSubtitle.Name = "HeaderSubtitle"
+    HeaderSubtitle.Size = UDim2.new(0, 0, 0, 14)
+    HeaderSubtitle.AutomaticSize = Enum.AutomaticSize.X
+    HeaderSubtitle.Position = UDim2.new(0, 110, 0, 28)
+    HeaderSubtitle.BackgroundTransparency = 1
+    HeaderSubtitle.Text = self.SubTitle
+    HeaderSubtitle.Font = Enum.Font.Gotham
+    HeaderSubtitle.TextSize = 10.5
+    HeaderSubtitle.TextColor3 = VRSLib.Theme.TextMuted
+    HeaderSubtitle.TextXAlignment = Enum.TextXAlignment.Left
+    HeaderSubtitle.Parent = Topbar
+    ProtectLocalization(HeaderSubtitle)
+    self.HeaderSubtitle = HeaderSubtitle
+
+    -- Live Search Input Box: Sleek rounded compact search bar
     local SearchFrame = Instance.new("Frame")
     SearchFrame.Name = "SearchBox"
     SearchFrame.AnchorPoint = Vector2.new(0, 0.5)
-    SearchFrame.Position = UDim2.new(0, 236, 0.5, 0)
-    SearchFrame.Size = UDim2.new(0, 285, 0, 30)
+    SearchFrame.Position = UDim2.new(1, -260, 0.5, 0)
+    SearchFrame.Size = UDim2.new(0, 150, 0, 28)
     SearchFrame.BackgroundColor3 = VRSLib.Theme.InputBackground
     SearchFrame.BorderSizePixel = 0
     SearchFrame.Parent = Topbar
@@ -773,14 +828,12 @@ function VRSLib:CreateWindow(config)
     Body.Size = UDim2.new(1, 0, 1, -72)
     Body.Position = UDim2.new(0, 0, 0, 50)
     Body.BackgroundTransparency = 1
-    Body.Parent = Main
-
     -- ==============================================================================
-    -- LEFT SIDEBAR
+    -- LEFT SIDEBAR (Compact 72px Vertical Navigation)
     -- ==============================================================================
     local Sidebar = Instance.new("Frame")
     Sidebar.Name = "Sidebar"
-    Sidebar.Size = UDim2.new(0, 220, 1, 0)
+    Sidebar.Size = UDim2.new(0, 72, 1, 0)
     Sidebar.ClipsDescendants = true
     self.Sidebar = Sidebar
     self.SidebarCollapsed = false
@@ -797,7 +850,7 @@ function VRSLib:CreateWindow(config)
     SidebarDivider.Parent = Sidebar
 
     local SidebarScroll = Instance.new("ScrollingFrame")
-    SidebarScroll.Size = UDim2.new(1, 0, 1, -50)
+    SidebarScroll.Size = UDim2.new(1, 0, 1, -56)
     SidebarScroll.Position = UDim2.new(0, 0, 0, 4)
     SidebarScroll.BackgroundTransparency = 1
     SidebarScroll.BorderSizePixel = 0
@@ -809,25 +862,28 @@ function VRSLib:CreateWindow(config)
 
     local SidebarList = Instance.new("UIListLayout")
     SidebarList.SortOrder = Enum.SortOrder.LayoutOrder
-    SidebarList.Padding = UDim.new(0, 2)
+    SidebarList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    SidebarList.Padding = UDim.new(0, 4)
     SidebarList.Parent = SidebarScroll
 
     local SidebarPadding = Instance.new("UIPadding")
-    SidebarPadding.PaddingLeft = UDim.new(0, 8)
-    SidebarPadding.PaddingRight = UDim.new(0, 8)
+    SidebarPadding.PaddingLeft = UDim.new(0, 4)
+    SidebarPadding.PaddingRight = UDim.new(0, 4)
     SidebarPadding.PaddingTop = UDim.new(0, 4)
     SidebarPadding.PaddingBottom = UDim.new(0, 8)
     SidebarPadding.Parent = SidebarScroll
     self.SidebarScroll = SidebarScroll
 
-    -- Profile Bar (Bottom Left)
-    local ProfileBar = Instance.new("Frame")
+    -- Profile Bar (Bottom of 72px Sidebar ala Modern Hubs)
+    local ProfileBar = Instance.new("TextButton")
     ProfileBar.Name = "ProfileBar"
-    ProfileBar.Size = UDim2.new(1, 0, 0, 50)
-    ProfileBar.Position = UDim2.new(0, 0, 1, -50)
+    ProfileBar.Size = UDim2.new(1, 0, 0, 54)
+    ProfileBar.Position = UDim2.new(0, 0, 1, -54)
     ProfileBar.BackgroundColor3 = VRSLib.Theme.Sidebar
     ProfileBar.BackgroundTransparency = 0.3
     ProfileBar.BorderSizePixel = 0
+    ProfileBar.Text = ""
+    ProfileBar.AutoButtonColor = false
     ProfileBar.Parent = Sidebar
 
     local ProfileDivider = Instance.new("Frame")
@@ -837,8 +893,8 @@ function VRSLib:CreateWindow(config)
     ProfileDivider.Parent = ProfileBar
 
     local AvatarFrame = Instance.new("Frame")
-    AvatarFrame.Size = UDim2.fromOffset(28, 28)
-    AvatarFrame.Position = UDim2.new(0, 10, 0.5, -14)
+    AvatarFrame.Size = UDim2.fromOffset(26, 26)
+    AvatarFrame.Position = UDim2.new(0.5, -13, 0, 4)
     AvatarFrame.BackgroundColor3 = VRSLib.Theme.Card
     AvatarFrame.BorderSizePixel = 0
     AvatarFrame.Parent = ProfileBar
@@ -858,57 +914,48 @@ function VRSLib:CreateWindow(config)
     AvImgCorner.Parent = AvatarImg
 
     local UserNameLbl = Instance.new("TextLabel")
-    UserNameLbl.Size = UDim2.new(1, -85, 0, 16)
-    UserNameLbl.Position = UDim2.new(0, 46, 0.5, -8)
+    UserNameLbl.Size = UDim2.new(1, -4, 0, 12)
+    UserNameLbl.Position = UDim2.new(0, 2, 0, 31)
     UserNameLbl.BackgroundTransparency = 1
     local rawName = tostring(LocalPlayer and LocalPlayer.Name or "User")
-    UserNameLbl.Text = (#rawName > 3) and (rawName:sub(1, 3) .. "***") or (rawName .. "***")
+    UserNameLbl.Text = (#rawName > 6) and (rawName:sub(1, 5) .. "..") or rawName
     UserNameLbl.Font = Enum.Font.GothamBold
-    UserNameLbl.TextSize = 12.5
+    UserNameLbl.TextSize = 9.5
     UserNameLbl.TextColor3 = VRSLib.Theme.TextPrimary
-    UserNameLbl.TextXAlignment = Enum.TextXAlignment.Left
+    UserNameLbl.TextXAlignment = Enum.TextXAlignment.Center
     UserNameLbl.TextTruncate = Enum.TextTruncate.AtEnd
     UserNameLbl.Parent = ProfileBar
+    ProtectLocalization(UserNameLbl)
 
-    local SettingsBtn = Instance.new("TextButton")
-    SettingsBtn.Size = UDim2.fromOffset(24, 24)
-    SettingsBtn.Position = UDim2.new(1, -32, 0.5, -12)
-    SettingsBtn.BackgroundTransparency = 1
-    SettingsBtn.Text = ""
-    SettingsBtn.Parent = ProfileBar
+    local GameSubLbl = Instance.new("TextLabel")
+    GameSubLbl.Size = UDim2.new(1, -4, 0, 10)
+    GameSubLbl.Position = UDim2.new(0, 2, 0, 42)
+    GameSubLbl.BackgroundTransparency = 1
+    GameSubLbl.Text = "Active"
+    GameSubLbl.Font = Enum.Font.Gotham
+    GameSubLbl.TextSize = 8.5
+    GameSubLbl.TextColor3 = VRSLib.Theme.TextMuted
+    GameSubLbl.TextXAlignment = Enum.TextXAlignment.Center
+    GameSubLbl.TextTruncate = Enum.TextTruncate.AtEnd
+    GameSubLbl.Parent = ProfileBar
+    ProtectLocalization(GameSubLbl)
 
-    local GearIcon = Instance.new("ImageLabel")
-    GearIcon.Size = UDim2.fromOffset(15, 15)
-    GearIcon.Position = UDim2.new(0.5, -7.5, 0.5, -7.5)
-    GearIcon.BackgroundTransparency = 1
-    GearIcon.Image = VRSLib.Icons.Get("settings")
-    GearIcon.ImageColor3 = VRSLib.Theme.TextMuted
-    GearIcon.Parent = SettingsBtn
-
-    SettingsBtn.MouseEnter:Connect(function()
-        TweenService:Create(GearIcon, TweenInfo.new(0.15), { ImageColor3 = VRSLib.Theme.Accent, Rotation = 45 }):Play()
-    end)
-    SettingsBtn.MouseLeave:Connect(function()
-        TweenService:Create(GearIcon, TweenInfo.new(0.15), { ImageColor3 = VRSLib.Theme.TextMuted, Rotation = 0 }):Play()
-    end)
-    SettingsBtn.MouseButton1Click:Connect(function()
+    ProfileBar.MouseButton1Click:Connect(function()
         VRSLib:Notify({
-            Title = "VRS Artelier",
-            Description = "Framework: VRS Artelier v1.1.4 Pro\nGame: " .. (self.DetectedGame or "Detecting...") .. "\nToggle Key: RightControl",
-            Duration = 3,
+            Title = "User Profile",
+            Description = "Player: " .. LocalPlayer.Name .. " (@" .. LocalPlayer.DisplayName .. ")\nStatus: Active & Protected",
+            Duration = 2.5,
             Icon = VRSLib.Icons.Wings
         })
     end)
-
-
 
     -- ==============================================================================
     -- MAIN CONTENT AREA
     -- ==============================================================================
     local ContentArea = Instance.new("Frame")
     ContentArea.Name = "ContentArea"
-    ContentArea.Size = UDim2.new(1, -221, 1, 0)
-    ContentArea.Position = UDim2.new(0, 221, 0, 0)
+    ContentArea.Size = UDim2.new(1, -73, 1, 0)
+    ContentArea.Position = UDim2.new(0, 73, 0, 0)
     ContentArea.BackgroundTransparency = 1
     ContentArea.Parent = Body
     self.ContentArea = ContentArea
@@ -1489,40 +1536,57 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
     -- Title Bar
     local TitleBar = Instance.new("TextButton")
     TitleBar.Name = "TitleBar"
-    TitleBar.Size = UDim2.new(1, 0, 0, 38)
+    TitleBar.Size = UDim2.new(1, 0, 0, 36)
     TitleBar.BackgroundTransparency = 1
     TitleBar.Text = ""
     TitleBar.AutoButtonColor = false
     TitleBar.Parent = GroupCard
 
-    local GIcon = Instance.new("ImageLabel")
-    GIcon.Size = UDim2.fromOffset(16, 16)
-    GIcon.Position = UDim2.new(0, 10, 0.5, -7)
-    GIcon.BackgroundTransparency = 1
-    GIcon.Image = iconId
-    GIcon.ImageColor3 = VRSLib.Theme.Accent
-    GIcon.Parent = TitleBar
-
     local GTitle = Instance.new("TextLabel")
-    GTitle.Size = UDim2.new(1, -56, 1, 0)
-    GTitle.Position = UDim2.new(0, 30, 0, 0)
+    GTitle.Name = "SectionTitle"
+    GTitle.Size = UDim2.new(1, -75, 1, 0)
+    GTitle.Position = UDim2.new(0, 12, 0, 0)
     GTitle.BackgroundTransparency = 1
     GTitle.Text = title
     GTitle.Font = Enum.Font.GothamBold
-    GTitle.TextSize = 13.5
+    GTitle.TextSize = 13
     GTitle.TextColor3 = VRSLib.Theme.TextPrimary
     GTitle.TextXAlignment = Enum.TextXAlignment.Left
     GTitle.Parent = TitleBar
     ProtectLocalization(GTitle)
 
-    local GChevron = Instance.new("ImageLabel")
-    GChevron.Size = UDim2.fromOffset(14, 14)
-    GChevron.Position = UDim2.new(1, -22, 0.5, -6)
-    GChevron.BackgroundTransparency = 1
-    GChevron.Image = VRSLib.Icons.Get("chevron-down")
-    GChevron.ImageColor3 = VRSLib.Theme.TextMuted
-    GChevron.Rotation = collapsed and -90 or 0
-    GChevron.Parent = TitleBar
+    local RightBar = Instance.new("Frame")
+    RightBar.Name = "RightBar"
+    RightBar.Size = UDim2.new(0, 56, 1, 0)
+    RightBar.Position = UDim2.new(1, -10, 0, 0)
+    RightBar.AnchorPoint = Vector2.new(1, 0)
+    RightBar.BackgroundTransparency = 1
+    RightBar.Parent = TitleBar
+
+    local RLayout = Instance.new("UIListLayout")
+    RLayout.FillDirection = Enum.FillDirection.Horizontal
+    RLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+    RLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+    RLayout.Padding = UDim.new(0, 8)
+    RLayout.Parent = RightBar
+
+    local GCollapse = Instance.new("TextLabel")
+    GCollapse.Name = "CollapseIndicator"
+    GCollapse.Size = UDim2.fromOffset(16, 16)
+    GCollapse.BackgroundTransparency = 1
+    GCollapse.Text = collapsed and "+" or "—"
+    GCollapse.Font = Enum.Font.GothamBold
+    GCollapse.TextSize = 13
+    GCollapse.TextColor3 = VRSLib.Theme.TextMuted
+    GCollapse.Parent = RightBar
+
+    local GIcon = Instance.new("ImageLabel")
+    GIcon.Name = "SectionIcon"
+    GIcon.Size = UDim2.fromOffset(15, 15)
+    GIcon.BackgroundTransparency = 1
+    GIcon.Image = iconId
+    GIcon.ImageColor3 = VRSLib.Theme.TextMuted
+    GIcon.Parent = RightBar
 
     -- Content Frame
     local Content = Instance.new("Frame")
@@ -1542,7 +1606,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
     local CPadding = Instance.new("UIPadding")
     CPadding.PaddingLeft = UDim.new(0, 10)
     CPadding.PaddingRight = UDim.new(0, 10)
-    CPadding.PaddingTop = UDim.new(0, 18)
+    CPadding.PaddingTop = UDim.new(0, 14)
     CPadding.PaddingBottom = UDim.new(0, 12)
     CPadding.Parent = Content
 
@@ -1550,7 +1614,8 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         Frame = GroupCard,
         Content = Content,
         Container = Content,
-        Chevron = GChevron,
+        CollapseLabel = GCollapse,
+        IconLabel = GIcon,
         Window = self,
         IsCollapsed = collapsed,
         Title = title,
@@ -1561,13 +1626,16 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
     TitleBar.MouseButton1Click:Connect(function()
         BoxObj.IsCollapsed = not BoxObj.IsCollapsed
         Content.Visible = not BoxObj.IsCollapsed
+        GCollapse.Text = BoxObj.IsCollapsed and "+" or "—"
+        TweenService:Create(GCollapse, TweenInfo.new(0.15), {
+            TextColor3 = BoxObj.IsCollapsed and VRSLib.Theme.TextMuted or VRSLib.Theme.Accent
+        }):Play()
+        TweenService:Create(GIcon, TweenInfo.new(0.15), {
+            ImageColor3 = BoxObj.IsCollapsed and VRSLib.Theme.TextMuted or VRSLib.Theme.Accent
+        }):Play()
         if BoxObj.LockOverlay then
             BoxObj.LockOverlay.Visible = (not BoxObj.IsCollapsed) and (BoxObj.IsLocked == true)
         end
-        TweenService:Create(GChevron, TweenInfo.new(0.2), {
-            Rotation = BoxObj.IsCollapsed and -90 or 0,
-            ImageColor3 = BoxObj.IsCollapsed and VRSLib.Theme.TextMuted or VRSLib.Theme.Accent
-        }):Play()
     end)
 
     -- Native Groupbox Locking & VIP Badge
@@ -2253,7 +2321,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
 
         local DFrame = Instance.new("Frame")
         DFrame.Name = "Dropdown_" .. tostring(id)
-        DFrame.Size = UDim2.new(1, 0, 0, 56)
+        DFrame.Size = UDim2.new(1, 0, 0, 32)
         DFrame.BackgroundTransparency = 1
         DFrame.ZIndex = 15
         DFrame.ClipsDescendants = false
@@ -2261,20 +2329,23 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
 
         local Lbl = Instance.new("TextLabel")
         Lbl.Name = "Label"
-        Lbl.Size = UDim2.new(1, 0, 0, 20)
+        Lbl.Size = UDim2.new(1, -165, 1, 0)
+        Lbl.Position = UDim2.new(0, 0, 0, 0)
         Lbl.BackgroundTransparency = 1
         Lbl.Text = cTitle
         Lbl.Font = Enum.Font.GothamMedium
-        Lbl.TextSize = 13
+        Lbl.TextSize = 12.5
         Lbl.TextColor3 = VRSLib.Theme.TextPrimary
         Lbl.TextXAlignment = Enum.TextXAlignment.Left
+        Lbl.TextTruncate = Enum.TextTruncate.AtEnd
         Lbl.Parent = DFrame
         ProtectLocalization(Lbl)
 
         local MainBtn = Instance.new("TextButton")
         MainBtn.Name = "Trigger"
-        MainBtn.Size = UDim2.new(1, 0, 0, 32)
-        MainBtn.Position = UDim2.new(0, 0, 0, 18)
+        MainBtn.AnchorPoint = Vector2.new(1, 0.5)
+        MainBtn.Size = UDim2.new(0, 155, 0, 26)
+        MainBtn.Position = UDim2.new(1, 0, 0.5, 0)
         MainBtn.BackgroundColor3 = VRSLib.Theme.InputBackground
         MainBtn.BorderSizePixel = 0
         MainBtn.Text = ""
@@ -2292,7 +2363,10 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         DStroke.Parent = MainBtn
 
         local function getSummary()
-            if not isMulti then return tostring(curSel or "Select...") end
+            if not isMulti then
+                if curSel == nil or curSel == "" or curSel == "None" then return "None" end
+                return tostring(curSel)
+            end
             local active = {}
             for _, v in ipairs(values) do
                 if curSel[v] then
@@ -2305,13 +2379,14 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
 
         local SelText = Instance.new("TextLabel")
         SelText.Name = "Summary"
-        SelText.Size = UDim2.new(1, -28, 1, 0)
+        SelText.Size = UDim2.new(1, -26, 1, 0)
         SelText.Position = UDim2.new(0, 8, 0, 0)
         SelText.BackgroundTransparency = 1
-        SelText.Text = getSummary()
+        local initSummary = getSummary()
+        SelText.Text = initSummary
         SelText.Font = Enum.Font.GothamMedium
-        SelText.TextSize = 12.5
-        SelText.TextColor3 = VRSLib.Theme.TextPrimary
+        SelText.TextSize = 12
+        SelText.TextColor3 = (initSummary == "None" or initSummary == "Select...") and VRSLib.Theme.TextMuted or VRSLib.Theme.TextPrimary
         SelText.TextXAlignment = Enum.TextXAlignment.Left
         SelText.TextTruncate = Enum.TextTruncate.AtEnd
         SelText.ZIndex = 17
@@ -2320,19 +2395,28 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
 
         local Chevron = Instance.new("ImageLabel")
         Chevron.Name = "Chevron"
-        Chevron.Size = UDim2.fromOffset(14, 14)
-        Chevron.Position = UDim2.new(1, -22, 0.5, -7)
+        Chevron.Size = UDim2.fromOffset(12, 12)
+        Chevron.Position = UDim2.new(1, -18, 0.5, -6)
         Chevron.BackgroundTransparency = 1
         Chevron.Image = VRSLib.Icons.Get("chevron-down")
         Chevron.ImageColor3 = VRSLib.Theme.TextMuted
         Chevron.ZIndex = 17
         Chevron.Parent = MainBtn
 
+        MainBtn.MouseEnter:Connect(function()
+            TweenService:Create(DStroke, TweenInfo.new(0.15), { Color = VRSLib.Theme.Accent }):Play()
+        end)
+        MainBtn.MouseLeave:Connect(function()
+            if not isOpen then
+                TweenService:Create(DStroke, TweenInfo.new(0.15), { Color = VRSLib.Theme.CardStroke }):Play()
+            end
+        end)
+
         -- Dropdown Popup Menu (Clean card style with search & options)
         local DropMenu = Instance.new("Frame")
         DropMenu.Name = "DropMenu"
         DropMenu.Size = UDim2.new(1, 0, 0, 0)
-        DropMenu.Position = UDim2.new(0, 0, 0, 48)
+        DropMenu.Position = UDim2.new(0, 0, 0, 32)
         DropMenu.BackgroundColor3 = VRSLib.Theme.Card
         DropMenu.BorderSizePixel = 0
         DropMenu.Visible = false
@@ -2453,7 +2537,7 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
             local visibleH = math.min(math.max(count, 1) * 26 + 4, 150)
             DropScroll.Size = UDim2.new(1, 0, 0, visibleH)
             DropMenu.Size = UDim2.new(1, 0, 0, 36 + visibleH + 4)
-            DFrame.Size = UDim2.new(1, 0, 0, 56 + 38 + visibleH + 8)
+            DFrame.Size = UDim2.new(1, 0, 0, 32 + 36 + visibleH + 8)
         end
 
         local function filterOptions(query)
@@ -2477,10 +2561,12 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                 filterOptions("")
                 DropScroll.CanvasPosition = Vector2.new(0, 0)
                 updateMenuHeight()
-                TweenService:Create(Chevron, TweenInfo.new(0.15), { Rotation = 180 }):Play()
+                TweenService:Create(Chevron, TweenInfo.new(0.15), { Rotation = 180, ImageColor3 = VRSLib.Theme.Accent }):Play()
+                TweenService:Create(DStroke, TweenInfo.new(0.15), { Color = VRSLib.Theme.Accent }):Play()
             else
-                DFrame.Size = UDim2.new(1, 0, 0, 56)
-                TweenService:Create(Chevron, TweenInfo.new(0.15), { Rotation = 0 }):Play()
+                DFrame.Size = UDim2.new(1, 0, 0, 32)
+                TweenService:Create(Chevron, TweenInfo.new(0.15), { Rotation = 0, ImageColor3 = VRSLib.Theme.TextMuted }):Play()
+                TweenService:Create(DStroke, TweenInfo.new(0.15), { Color = VRSLib.Theme.CardStroke }):Play()
             end
         end
 
@@ -2506,7 +2592,9 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
                     if curSel["All Items"] ~= nil then curSel["All Items"] = allActive end
                 end
                 if dropObj then dropObj.Value = curSel end
-                SelText.Text = getSummary()
+                local sum = getSummary()
+                SelText.Text = sum
+                SelText.TextColor3 = (sum == "None" or sum == "Select...") and VRSLib.Theme.TextMuted or VRSLib.Theme.TextPrimary
                 refreshItems()
                 for _, fn in ipairs(dropCallbacks) do
                     task.spawn(fn, curSel)
@@ -2514,7 +2602,9 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
             else
                 curSel = val
                 if dropObj then dropObj.Value = val end
-                SelText.Text = tostring(val)
+                local sum = tostring(val or "None")
+                SelText.Text = sum
+                SelText.TextColor3 = (sum == "None" or sum == "Select...") and VRSLib.Theme.TextMuted or VRSLib.Theme.TextPrimary
                 refreshItems()
                 ToggleDrop(false)
                 for _, fn in ipairs(dropCallbacks) do
@@ -2669,60 +2759,80 @@ function Window:CreateGroupbox(parentFrame, configOrTitle, optionalIcon, optiona
         return dropObj
     end
 
-    -- 5. AddStatus (Glowing status row)
-    function BoxObj:AddStatus(ctrlConfig)
-        ctrlConfig = ctrlConfig or {}
-        local cLabel = ctrlConfig.Label or "Status:"
-        local cStatus = ctrlConfig.Status or "INACTIVE"
-        local cColor = ctrlConfig.Color or Color3.fromRGB(255, 75, 75)
+    -- 5. AddStatus (Key-value status row matching Screenshot 2)
+    function BoxObj:AddStatus(labelOrConfig, optionalValue, optionalColor)
+        local cLabel, cStatus, cColor, hasDot
+        if type(labelOrConfig) == "string" then
+            cLabel = labelOrConfig
+            cStatus = tostring(optionalValue or "Off")
+            cColor = (typeof(optionalColor) == "Color3" and optionalColor) or nil
+            hasDot = false
+        else
+            local cfg = labelOrConfig or {}
+            cLabel = cfg.Label or cfg.Title or "Status:"
+            cStatus = tostring(cfg.Status or cfg.Value or "Off")
+            cColor = cfg.Color
+            hasDot = (cfg.Dot == true)
+        end
 
         local Row = Instance.new("Frame")
-        Row.Size = UDim2.new(1, 0, 0, 22)
+        Row.Size = UDim2.new(1, 0, 0, 24)
         Row.BackgroundTransparency = 1
         Row.Parent = Content
 
         local Lbl = Instance.new("TextLabel")
-        Lbl.Size = UDim2.new(0, 0, 1, 0)
-        Lbl.AutomaticSize = Enum.AutomaticSize.X
+        Lbl.Size = UDim2.new(0.45, 0, 1, 0)
+        Lbl.Position = UDim2.new(0, 0, 0, 0)
         Lbl.BackgroundTransparency = 1
         Lbl.Text = cLabel
         Lbl.Font = Enum.Font.GothamMedium
-        Lbl.TextSize = 11
+        Lbl.TextSize = 12
         Lbl.TextColor3 = VRSLib.Theme.TextMuted
         Lbl.TextXAlignment = Enum.TextXAlignment.Left
+        Lbl.TextTruncate = Enum.TextTruncate.AtEnd
         Lbl.Parent = Row
         ProtectLocalization(Lbl)
 
-        local Dot = Instance.new("Frame")
-        Dot.Size = UDim2.fromOffset(8, 8)
-        Dot.Position = UDim2.new(0, 56, 0.5, -4)
-        Dot.BackgroundColor3 = cColor
-        Dot.BorderSizePixel = 0
-        Dot.Parent = Row
-
-        local DCorner = Instance.new("UICorner")
-        DCorner.CornerRadius = UDim.new(1, 0)
-        DCorner.Parent = Dot
-
         local StatLbl = Instance.new("TextLabel")
-        StatLbl.Size = UDim2.new(1, -70, 1, 0)
-        StatLbl.Position = UDim2.new(0, 70, 0, 0)
+        StatLbl.Size = UDim2.new(0.55, 0, 1, 0)
+        StatLbl.Position = UDim2.new(0.45, 0, 0, 0)
         StatLbl.BackgroundTransparency = 1
         StatLbl.Text = cStatus
-        StatLbl.Font = Enum.Font.GothamBold
-        StatLbl.TextSize = 10.5
-        StatLbl.TextColor3 = cColor
-        StatLbl.TextXAlignment = Enum.TextXAlignment.Left
+        StatLbl.Font = Enum.Font.GothamMedium
+        StatLbl.TextSize = 12
+        StatLbl.TextColor3 = cColor or ((cStatus == "Off" or cStatus == "-") and VRSLib.Theme.TextMuted or VRSLib.Theme.TextPrimary)
+        StatLbl.TextXAlignment = Enum.TextXAlignment.Right
+        StatLbl.TextTruncate = Enum.TextTruncate.AtEnd
         StatLbl.Parent = Row
         ProtectLocalization(StatLbl)
 
+        local Dot = nil
+        if hasDot then
+            Dot = Instance.new("Frame")
+            Dot.Size = UDim2.fromOffset(6, 6)
+            Dot.Position = UDim2.new(0.45, -12, 0.5, -3)
+            Dot.BackgroundColor3 = cColor or VRSLib.Theme.Accent
+            Dot.BorderSizePixel = 0
+            Dot.Parent = Row
+            local DCorner = Instance.new("UICorner")
+            DCorner.CornerRadius = UDim.new(1, 0)
+            DCorner.Parent = Dot
+        end
+
         return {
             Set = function(newStatus, newColor)
-                StatLbl.Text = newStatus
+                StatLbl.Text = tostring(newStatus)
                 if newColor then
-                    Dot.BackgroundColor3 = newColor
                     StatLbl.TextColor3 = newColor
+                    if Dot then Dot.BackgroundColor3 = newColor end
+                else
+                    StatLbl.TextColor3 = (tostring(newStatus) == "Off" or tostring(newStatus) == "-") and VRSLib.Theme.TextMuted or VRSLib.Theme.TextPrimary
                 end
+            end,
+            SetValue = function(selfOrStatus, maybeStatus)
+                local s = maybeStatus or selfOrStatus
+                StatLbl.Text = tostring(s)
+                StatLbl.TextColor3 = (tostring(s) == "Off" or tostring(s) == "-") and VRSLib.Theme.TextMuted or VRSLib.Theme.TextPrimary
             end,
             Frame = Row
         }
@@ -3473,7 +3583,7 @@ function Window:CreateSidebarTab(config)
 
     local TabBtn = Instance.new("TextButton")
     TabBtn.Name = "Tab_" .. tabName
-    TabBtn.Size = UDim2.new(1, 0, 0, 36)
+    TabBtn.Size = UDim2.new(0, 56, 0, 50)
     TabBtn.BackgroundColor3 = VRSLib.Theme.Sidebar
     TabBtn.BackgroundTransparency = 1
     TabBtn.BorderSizePixel = 0
@@ -3482,13 +3592,13 @@ function Window:CreateSidebarTab(config)
     TabBtn.Parent = self.SidebarScroll
 
     local TabCorner = Instance.new("UICorner")
-    TabCorner.CornerRadius = UDim.new(0, 7)
+    TabCorner.CornerRadius = UDim.new(0, 8)
     TabCorner.Parent = TabBtn
 
     -- Left Accent Bar (Pink when active)
     local ActiveIndicator = Instance.new("Frame")
-    ActiveIndicator.Size = UDim2.new(0, 3.5, 0, 20)
-    ActiveIndicator.Position = UDim2.new(0, 3, 0.5, -10)
+    ActiveIndicator.Size = UDim2.new(0, 3, 0, 20)
+    ActiveIndicator.Position = UDim2.new(0, 2, 0.5, -10)
     ActiveIndicator.BackgroundColor3 = VRSLib.Theme.Accent
     ActiveIndicator.BorderSizePixel = 0
     ActiveIndicator.Visible = false
@@ -3499,22 +3609,23 @@ function Window:CreateSidebarTab(config)
     IndCorner.Parent = ActiveIndicator
 
     local TabIcon = Instance.new("ImageLabel")
-    TabIcon.Size = UDim2.fromOffset(18, 18)
-    TabIcon.Position = UDim2.new(0, 12, 0.5, -9)
+    TabIcon.Size = UDim2.fromOffset(20, 20)
+    TabIcon.Position = UDim2.new(0.5, -10, 0, 7)
     TabIcon.BackgroundTransparency = 1
     TabIcon.Image = iconId
     TabIcon.ImageColor3 = VRSLib.Theme.TextMuted
     TabIcon.Parent = TabBtn
 
     local TabLabel = Instance.new("TextLabel")
-    TabLabel.Size = UDim2.new(1, -54, 1, 0)
-    TabLabel.Position = UDim2.new(0, 38, 0, 0)
+    TabLabel.Size = UDim2.new(1, -4, 0, 16)
+    TabLabel.Position = UDim2.new(0, 2, 0, 29)
     TabLabel.BackgroundTransparency = 1
     TabLabel.Text = tabName
     TabLabel.Font = Enum.Font.GothamMedium
-    TabLabel.TextSize = 13.5
-    TabLabel.TextColor3 = Color3.fromRGB(240, 244, 255)
-    TabLabel.TextXAlignment = Enum.TextXAlignment.Left
+    TabLabel.TextSize = 10.5
+    TabLabel.TextColor3 = VRSLib.Theme.TextMuted
+    TabLabel.TextXAlignment = Enum.TextXAlignment.Center
+    TabLabel.TextTruncate = Enum.TextTruncate.AtEnd
     TabLabel.Parent = TabBtn
     ProtectLocalization(TabLabel)
 
@@ -3559,27 +3670,38 @@ function Window:CreateSidebarTab(config)
     BadgeText.Parent = Badge
     ProtectLocalization(BadgeText)
 
+    local resolvedHeaderTitle = config.HeaderTitle or config.Title
+    if not resolvedHeaderTitle then
+        if tabName == "Home" then
+            resolvedHeaderTitle = self.Title
+        else
+            resolvedHeaderTitle = tabName
+        end
+    end
+
     local TabObj = {
-        Window      = self,
-        Name        = tabName,
-        Category    = category,
-        Button      = TabBtn,
-        Icon        = TabIcon,
-        Label       = TabLabel,
-        Badge       = Badge,
-        BadgeText   = BadgeText,
-        BadgeStroke = BadgeStroke,
-        Indicator   = ActiveIndicator,
-        IsQuickTab  = config.IsQuickTab or false,
-        QuickFilter = config.QuickFilter,
-        Cards       = {},
+        Window         = self,
+        Name           = tabName,
+        HeaderTitle    = resolvedHeaderTitle,
+        HeaderSubtitle = config.Subtitle or config.HeaderSubtitle or "",
+        Category       = category,
+        Button         = TabBtn,
+        Icon           = TabIcon,
+        Label          = TabLabel,
+        Badge          = Badge,
+        BadgeText      = BadgeText,
+        BadgeStroke    = BadgeStroke,
+        Indicator      = ActiveIndicator,
+        IsQuickTab     = config.IsQuickTab or false,
+        QuickFilter    = config.QuickFilter,
+        Cards          = {},
     }
 
     function TabObj:SetBadge(text, bgColor, textColor, strokeColor)
         if not text or text == "" then
             Badge.Visible = false
             BadgeText.Visible = false
-            TabLabel.Size = UDim2.new(1, -54, 1, 0)
+            TabLabel.Size = UDim2.new(1, -4, 0, 16)
             return
         end
         Badge.Visible = true
@@ -3588,7 +3710,6 @@ function Window:CreateSidebarTab(config)
         if bgColor then Badge.BackgroundColor3 = bgColor end
         if textColor then BadgeText.TextColor3 = textColor end
         if strokeColor then BadgeStroke.Color = strokeColor end
-        TabLabel.Size = UDim2.new(1, -85, 1, 0)
     end
 
     function TabObj:SetLocked(isLocked, badgeText)
@@ -3623,16 +3744,856 @@ function Window:CreateSidebarTab(config)
         return self.RightCol:AddGroupbox(titleOrCfg, optionalIcon)
     end
 
+    function TabObj:SetupDashboard()
+        if self.DashboardContainer then return self.DashboardContainer end
+        self.LayoutType = "Dashboard"
+
+        local DashContainer = Instance.new("Frame")
+        DashContainer.Name = "DashContainer_" .. self.Name
+        DashContainer.Size = UDim2.new(1, 0, 0, 0)
+        DashContainer.AutomaticSize = Enum.AutomaticSize.Y
+        DashContainer.BackgroundTransparency = 1
+        DashContainer.Visible = (self.Window.ActiveTab == self)
+        DashContainer.Parent = self.Window.CardsScroll
+        self.DashboardContainer = DashContainer
+
+        local DPadding = Instance.new("UIPadding")
+        DPadding.PaddingLeft = UDim.new(0, 16)
+        DPadding.PaddingRight = UDim.new(0, 16)
+        DPadding.PaddingTop = UDim.new(0, 12)
+        DPadding.PaddingBottom = UDim.new(0, 24)
+        DPadding.Parent = DashContainer
+
+        local DLayout = Instance.new("UIListLayout")
+        DLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        DLayout.Padding = UDim.new(0, 10)
+        DLayout.Parent = DashContainer
+
+        return DashContainer
+    end
+
+    function TabObj:AddUserCard(config)
+        local container = self.DashboardContainer or self:SetupDashboard()
+        config = config or {}
+
+        local UserCard = Instance.new("Frame")
+        UserCard.Name = "UserCard"
+        UserCard.Size = UDim2.new(1, 0, 0, 80)
+        UserCard.BackgroundColor3 = VRSLib.Theme.Card
+        UserCard.BorderSizePixel = 0
+        UserCard.LayoutOrder = config.LayoutOrder or 1
+        UserCard.Parent = container
+
+        local UCorner = Instance.new("UICorner")
+        UCorner.CornerRadius = UDim.new(0, 8)
+        UCorner.Parent = UserCard
+
+        local UStroke = Instance.new("UIStroke")
+        UStroke.Color = VRSLib.Theme.CardStroke
+        UStroke.Thickness = 1
+        UStroke.Parent = UserCard
+
+        local UPadding = Instance.new("UIPadding")
+        UPadding.PaddingLeft = UDim.new(0, 14)
+        UPadding.PaddingRight = UDim.new(0, 14)
+        UPadding.PaddingTop = UDim.new(0, 12)
+        UPadding.PaddingBottom = UDim.new(0, 12)
+        UPadding.Parent = UserCard
+
+        local Avatar = Instance.new("ImageLabel")
+        Avatar.Name = "Avatar"
+        Avatar.Size = UDim2.fromOffset(54, 54)
+        Avatar.Position = UDim2.new(0, 0, 0.5, -27)
+        Avatar.BackgroundColor3 = Color3.fromRGB(24, 26, 34)
+        Avatar.BorderSizePixel = 0
+        Avatar.Parent = UserCard
+
+        local ACorner = Instance.new("UICorner")
+        ACorner.CornerRadius = UDim.new(1, 0)
+        ACorner.Parent = Avatar
+
+        local AStroke = Instance.new("UIStroke")
+        AStroke.Color = VRSLib.Theme.CardStroke
+        AStroke.Thickness = 1
+        AStroke.Parent = Avatar
+
+        local realAvatarUrl = "rbxassetid://0"
+        pcall(function()
+            realAvatarUrl = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
+            Avatar.Image = realAvatarUrl
+        end)
+
+        local InfoStack = Instance.new("Frame")
+        InfoStack.Name = "InfoStack"
+        InfoStack.Size = UDim2.new(1, -280, 1, 0)
+        InfoStack.Position = UDim2.new(0, 66, 0, 0)
+        InfoStack.BackgroundTransparency = 1
+        InfoStack.Parent = UserCard
+
+        local WelcomeLbl = Instance.new("TextLabel")
+        WelcomeLbl.Name = "Welcome"
+        WelcomeLbl.Size = UDim2.new(1, 0, 0, 14)
+        WelcomeLbl.BackgroundTransparency = 1
+        WelcomeLbl.Text = config.Greeting or "Welcome back,"
+        WelcomeLbl.Font = Enum.Font.GothamMedium
+        WelcomeLbl.TextSize = 11
+        WelcomeLbl.TextColor3 = VRSLib.Theme.TextMuted
+        WelcomeLbl.TextXAlignment = Enum.TextXAlignment.Left
+        WelcomeLbl.Parent = InfoStack
+        ProtectLocalization(WelcomeLbl)
+
+        local NameLbl = Instance.new("TextLabel")
+        NameLbl.Name = "DisplayName"
+        NameLbl.Size = UDim2.new(1, 0, 0, 22)
+        NameLbl.Position = UDim2.new(0, 0, 0, 14)
+        NameLbl.BackgroundTransparency = 1
+        local realDisplayName = config.DisplayName or LocalPlayer.DisplayName
+        NameLbl.Text = realDisplayName
+        NameLbl.Font = Enum.Font.GothamBold
+        NameLbl.TextSize = 16.5
+        NameLbl.TextColor3 = Color3.fromRGB(245, 247, 255)
+        NameLbl.TextXAlignment = Enum.TextXAlignment.Left
+        NameLbl.Parent = InfoStack
+        ProtectLocalization(NameLbl)
+
+        local HandleLbl = Instance.new("TextLabel")
+        HandleLbl.Name = "Handle"
+        HandleLbl.Size = UDim2.new(1, 0, 0, 14)
+        HandleLbl.Position = UDim2.new(0, 0, 0, 38)
+        HandleLbl.BackgroundTransparency = 1
+        local realHandle = "@" .. (config.Username or LocalPlayer.Name)
+        HandleLbl.Text = realHandle
+        HandleLbl.Font = Enum.Font.GothamMedium
+        HandleLbl.TextSize = 11
+        HandleLbl.TextColor3 = VRSLib.Theme.TextMuted
+        HandleLbl.TextXAlignment = Enum.TextXAlignment.Left
+        HandleLbl.Parent = InfoStack
+        ProtectLocalization(HandleLbl)
+
+        local VerPill = Instance.new("Frame")
+        VerPill.Name = "VersionBadge"
+        VerPill.AnchorPoint = Vector2.new(1, 0)
+        VerPill.Position = UDim2.new(1, 0, 0, 0)
+        VerPill.Size = UDim2.new(0, 0, 0, 24)
+        VerPill.AutomaticSize = Enum.AutomaticSize.X
+        VerPill.BackgroundColor3 = Color3.fromRGB(26, 28, 38)
+        VerPill.BorderSizePixel = 0
+        VerPill.Parent = UserCard
+
+        local VCorner = Instance.new("UICorner")
+        VCorner.CornerRadius = UDim.new(1, 0)
+        VCorner.Parent = VerPill
+
+        local VStroke = Instance.new("UIStroke")
+        VStroke.Color = Color3.fromRGB(42, 46, 62)
+        VStroke.Thickness = 1
+        VStroke.Parent = VerPill
+
+        local VPadding = Instance.new("UIPadding")
+        VPadding.PaddingLeft = UDim.new(0, 8)
+        VPadding.PaddingRight = UDim.new(0, 8)
+        VPadding.Parent = VerPill
+
+        local VLayout = Instance.new("UIListLayout")
+        VLayout.FillDirection = Enum.FillDirection.Horizontal
+        VLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+        VLayout.Padding = UDim.new(0, 5)
+        VLayout.Parent = VerPill
+
+        local VIcon = Instance.new("ImageLabel")
+        VIcon.Size = UDim2.fromOffset(12, 12)
+        VIcon.BackgroundTransparency = 1
+        VIcon.Image = VRSLib.Icons.Get("wrench")
+        VIcon.ImageColor3 = VRSLib.Theme.TextMuted
+        VIcon.Parent = VerPill
+
+        local VLbl = Instance.new("TextLabel")
+        VLbl.Size = UDim2.new(0, 0, 1, 0)
+        VLbl.AutomaticSize = Enum.AutomaticSize.X
+        VLbl.BackgroundTransparency = 1
+        VLbl.Text = config.Version or "v0.141"
+        VLbl.Font = Enum.Font.GothamBold
+        VLbl.TextSize = 10.5
+        VLbl.TextColor3 = Color3.fromRGB(210, 215, 230)
+        VLbl.Parent = VerPill
+        ProtectLocalization(VLbl)
+
+        local StreamerBar = Instance.new("Frame")
+        StreamerBar.Name = "StreamerBar"
+        StreamerBar.AnchorPoint = Vector2.new(1, 1)
+        StreamerBar.Position = UDim2.new(1, 0, 1, 0)
+        StreamerBar.Size = UDim2.new(0, 0, 0, 24)
+        StreamerBar.AutomaticSize = Enum.AutomaticSize.X
+        StreamerBar.BackgroundTransparency = 1
+        StreamerBar.Parent = UserCard
+
+        local SBLayout = Instance.new("UIListLayout")
+        SBLayout.FillDirection = Enum.FillDirection.Horizontal
+        SBLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+        SBLayout.Padding = UDim.new(0, 14)
+        SBLayout.Parent = StreamerBar
+
+        local function makeMiniToggle(labelName, iconKey, onToggle)
+            local Box = Instance.new("Frame")
+            Box.Size = UDim2.new(0, 0, 1, 0)
+            Box.AutomaticSize = Enum.AutomaticSize.X
+            Box.BackgroundTransparency = 1
+            Box.Parent = StreamerBar
+
+            local BLayout = Instance.new("UIListLayout")
+            BLayout.FillDirection = Enum.FillDirection.Horizontal
+            BLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+            BLayout.Padding = UDim.new(0, 6)
+            BLayout.Parent = Box
+
+            local Icon = Instance.new("ImageLabel")
+            Icon.Size = UDim2.fromOffset(13, 13)
+            Icon.BackgroundTransparency = 1
+            Icon.Image = VRSLib.Icons.Get(iconKey)
+            Icon.ImageColor3 = VRSLib.Theme.TextMuted
+            Icon.Parent = Box
+
+            local TText = Instance.new("TextLabel")
+            TText.Size = UDim2.new(0, 0, 1, 0)
+            TText.AutomaticSize = Enum.AutomaticSize.X
+            TText.BackgroundTransparency = 1
+            TText.Text = labelName
+            TText.Font = Enum.Font.GothamMedium
+            TText.TextSize = 11.5
+            TText.TextColor3 = VRSLib.Theme.TextMuted
+            TText.Parent = Box
+            ProtectLocalization(TText)
+
+            local Sw = Instance.new("TextButton")
+            Sw.Size = UDim2.fromOffset(28, 16)
+            Sw.BackgroundColor3 = VRSLib.Theme.SwitchOff
+            Sw.BorderSizePixel = 0
+            Sw.Text = ""
+            Sw.Parent = Box
+
+            local SCorner = Instance.new("UICorner")
+            SCorner.CornerRadius = UDim.new(1, 0)
+            SCorner.Parent = Sw
+
+            local Knob = Instance.new("Frame")
+            Knob.Size = UDim2.fromOffset(10, 10)
+            Knob.Position = UDim2.new(0, 2, 0.5, -5)
+            Knob.BackgroundColor3 = Color3.fromRGB(180, 185, 200)
+            Knob.BorderSizePixel = 0
+            Knob.Parent = Sw
+
+            local KCorner = Instance.new("UICorner")
+            KCorner.CornerRadius = UDim.new(1, 0)
+            KCorner.Parent = Knob
+
+            local state = false
+            Sw.MouseButton1Click:Connect(function()
+                state = not state
+                TweenService:Create(Sw, TweenInfo.new(0.15), {
+                    BackgroundColor3 = state and VRSLib.Theme.Accent or VRSLib.Theme.SwitchOff
+                }):Play()
+                TweenService:Create(Knob, TweenInfo.new(0.15), {
+                    Position = state and UDim2.new(1, -12, 0.5, -5) or UDim2.new(0, 2, 0.5, -5),
+                    BackgroundColor3 = state and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(180, 185, 200)
+                }):Play()
+                onToggle(state)
+            end)
+        end
+
+        makeMiniToggle("Name", "eye", function(active)
+            if active then
+                NameLbl.Text = "Streamer_" .. string.sub(tostring(LocalPlayer.UserId), 1, 4)
+                HandleLbl.Text = "@Anonymous"
+            else
+                NameLbl.Text = realDisplayName
+                HandleLbl.Text = realHandle
+            end
+        end)
+
+        makeMiniToggle("Profile", "user", function(active)
+            if active then
+                Avatar.Image = VRSLib.Icons.Get("user")
+            else
+                Avatar.Image = realAvatarUrl
+            end
+        end)
+
+        return UserCard
+    end
+
+    function TabObj:AddStatGrid(statsConfig)
+        local container = self.DashboardContainer or self:SetupDashboard()
+        statsConfig = statsConfig or {}
+
+        local GridFrame = Instance.new("Frame")
+        GridFrame.Name = "StatGrid"
+        GridFrame.Size = UDim2.new(1, 0, 0, 56)
+        GridFrame.BackgroundTransparency = 1
+        GridFrame.LayoutOrder = statsConfig.LayoutOrder or 2
+        GridFrame.Parent = container
+
+        local GLayout = Instance.new("UIListLayout")
+        GLayout.FillDirection = Enum.FillDirection.Horizontal
+        GLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+        GLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+        GLayout.Padding = UDim.new(0, 8)
+        GLayout.Parent = GridFrame
+
+        local defaultStats = {
+            { Key = "Players", Label = "Players", Icon = "users", Value = tostring(#Players:GetPlayers()) .. "/" .. tostring(Players.MaxPlayers > 0 and Players.MaxPlayers or 20) },
+            { Key = "Friends", Label = "Friends", Icon = "user", Value = "0" },
+            { Key = "Execs", Label = "Execs", Icon = "zap", Value = "1" },
+            { Key = "Session", Label = "Session", Icon = "clock", Value = "0s" },
+            { Key = "FPS", Label = "FPS", Icon = "activity", Value = "60" },
+            { Key = "Ping", Label = "Ping", Icon = "wifi", Value = "0ms" },
+        }
+
+        local statCards = {}
+        for idx, item in ipairs(defaultStats) do
+            local SCard = Instance.new("Frame")
+            SCard.Name = "StatBox_" .. item.Key
+            SCard.Size = UDim2.new(1 / 6, -7, 1, 0)
+            SCard.BackgroundColor3 = VRSLib.Theme.Card
+            SCard.BorderSizePixel = 0
+            SCard.Parent = GridFrame
+
+            local SCorner = Instance.new("UICorner")
+            SCorner.CornerRadius = UDim.new(0, 6)
+            SCorner.Parent = SCard
+
+            local SStroke = Instance.new("UIStroke")
+            SStroke.Color = VRSLib.Theme.CardStroke
+            SStroke.Thickness = 1
+            SStroke.Parent = SCard
+
+            local SPadding = Instance.new("UIPadding")
+            SPadding.PaddingLeft = UDim.new(0, 10)
+            SPadding.PaddingRight = UDim.new(0, 10)
+            SPadding.PaddingTop = UDim.new(0, 8)
+            SPadding.PaddingBottom = UDim.new(0, 8)
+            SPadding.Parent = SCard
+
+            local HeaderRow = Instance.new("Frame")
+            HeaderRow.Size = UDim2.new(1, 0, 0, 14)
+            HeaderRow.BackgroundTransparency = 1
+            HeaderRow.Parent = SCard
+
+            local HLayout = Instance.new("UIListLayout")
+            HLayout.FillDirection = Enum.FillDirection.Horizontal
+            HLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+            HLayout.Padding = UDim.new(0, 4)
+            HLayout.Parent = HeaderRow
+
+            local Icon = Instance.new("ImageLabel")
+            Icon.Size = UDim2.fromOffset(12, 12)
+            Icon.BackgroundTransparency = 1
+            Icon.Image = VRSLib.Icons.Get(item.Icon)
+            Icon.ImageColor3 = VRSLib.Theme.TextMuted
+            Icon.Parent = HeaderRow
+
+            local SLbl = Instance.new("TextLabel")
+            SLbl.Size = UDim2.new(0, 0, 1, 0)
+            SLbl.AutomaticSize = Enum.AutomaticSize.X
+            SLbl.BackgroundTransparency = 1
+            SLbl.Text = item.Label
+            SLbl.Font = Enum.Font.GothamMedium
+            SLbl.TextSize = 10.5
+            SLbl.TextColor3 = VRSLib.Theme.TextMuted
+            SLbl.Parent = HeaderRow
+            ProtectLocalization(SLbl)
+
+            local ValLbl = Instance.new("TextLabel")
+            ValLbl.Name = "ValLbl"
+            ValLbl.Size = UDim2.new(1, 0, 0, 20)
+            ValLbl.Position = UDim2.new(0, 0, 1, -20)
+            ValLbl.BackgroundTransparency = 1
+            ValLbl.Text = item.Value
+            ValLbl.Font = Enum.Font.GothamBold
+            ValLbl.TextSize = 14.5
+            ValLbl.TextColor3 = Color3.fromRGB(245, 247, 255)
+            ValLbl.TextXAlignment = Enum.TextXAlignment.Left
+            ValLbl.Parent = SCard
+            ProtectLocalization(ValLbl)
+
+            statCards[item.Key] = ValLbl
+        end
+
+        local startTime = tick()
+        local frameCount = 0
+        local lastFpsTime = tick()
+        local currentFps = 60
+
+        local conn = RunService.RenderStepped:Connect(function()
+            frameCount = frameCount + 1
+            local now = tick()
+            if now - lastFpsTime >= 0.5 then
+                currentFps = math.floor(frameCount / (now - lastFpsTime) + 0.5)
+                frameCount = 0
+                lastFpsTime = now
+                if statCards["FPS"] then
+                    statCards["FPS"].Text = tostring(currentFps)
+                end
+            end
+        end)
+
+        task.spawn(function()
+            while GridFrame.Parent do
+                task.wait(1)
+                local elapsed = math.floor(tick() - startTime)
+                local m = math.floor(elapsed / 60)
+                local s = elapsed % 60
+                local sessionStr = (m > 0 and (tostring(m) .. "m ") or "") .. tostring(s) .. "s"
+                if statCards["Session"] then statCards["Session"].Text = sessionStr end
+
+                pcall(function()
+                    local pingVal = math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue() + 0.5)
+                    if statCards["Ping"] then statCards["Ping"].Text = tostring(pingVal) .. "ms" end
+                end)
+
+                if statCards["Players"] then
+                    local maxP = Players.MaxPlayers > 0 and Players.MaxPlayers or 20
+                    statCards["Players"].Text = tostring(#Players:GetPlayers()) .. "/" .. tostring(maxP)
+                end
+            end
+            if conn then conn:Disconnect() end
+        end)
+
+        return {
+            Frame = GridFrame,
+            SetStat = function(key, val)
+                if statCards[key] then statCards[key].Text = tostring(val) end
+            end
+        }
+    end
+
+    function TabObj:AddGameCard(config)
+        local container = self.DashboardContainer or self:SetupDashboard()
+        config = config or {}
+
+        local GameCard = Instance.new("Frame")
+        GameCard.Name = "GameCard"
+        GameCard.Size = UDim2.new(1, 0, 0, 115)
+        GameCard.BackgroundColor3 = VRSLib.Theme.Card
+        GameCard.BorderSizePixel = 0
+        GameCard.LayoutOrder = config.LayoutOrder or 3
+        GameCard.Parent = container
+
+        local GCorner = Instance.new("UICorner")
+        GCorner.CornerRadius = UDim.new(0, 8)
+        GCorner.Parent = GameCard
+
+        local GStroke = Instance.new("UIStroke")
+        GStroke.Color = VRSLib.Theme.CardStroke
+        GStroke.Thickness = 1
+        GStroke.Parent = GameCard
+
+        local GPadding = Instance.new("UIPadding")
+        GPadding.PaddingLeft = UDim.new(0, 14)
+        GPadding.PaddingRight = UDim.new(0, 14)
+        GPadding.PaddingTop = UDim.new(0, 12)
+        GPadding.PaddingBottom = UDim.new(0, 12)
+        GPadding.Parent = GameCard
+
+        local Thumb = Instance.new("ImageLabel")
+        Thumb.Name = "GameThumb"
+        Thumb.Size = UDim2.fromOffset(50, 50)
+        Thumb.Position = UDim2.new(0, 0, 0, 0)
+        Thumb.BackgroundColor3 = Color3.fromRGB(24, 26, 34)
+        Thumb.BorderSizePixel = 0
+        Thumb.Parent = GameCard
+
+        local TCorner = Instance.new("UICorner")
+        TCorner.CornerRadius = UDim.new(0, 6)
+        TCorner.Parent = Thumb
+
+        local placeId = game.PlaceId
+        local jobId = game.JobId ~= "" and game.JobId or "53a06f1a-b32c-49aa-b541-3656"
+        local universeId = game.GameId ~= 0 and game.GameId or 5595353122
+        local gameName = config.GameName or "Ouwland"
+        local creatorName = config.Creator or "Ouw Productions"
+
+        pcall(function()
+            local info = game:GetService("MarketplaceService"):GetProductInfo(placeId)
+            if info then
+                if info.IconImageAssetId and info.IconImageAssetId ~= 0 then
+                    Thumb.Image = "rbxassetid://" .. tostring(info.IconImageAssetId)
+                end
+                if not config.GameName and info.Name then gameName = info.Name end
+            end
+        end)
+
+        local MetaStack = Instance.new("Frame")
+        MetaStack.Name = "MetaStack"
+        MetaStack.Size = UDim2.new(0.5, 0, 1, 0)
+        MetaStack.Position = UDim2.new(0, 62, 0, 0)
+        MetaStack.BackgroundTransparency = 1
+        MetaStack.Parent = GameCard
+
+        local TitleLbl = Instance.new("TextLabel")
+        TitleLbl.Size = UDim2.new(1, 0, 0, 18)
+        TitleLbl.BackgroundTransparency = 1
+        TitleLbl.Text = gameName
+        TitleLbl.Font = Enum.Font.GothamBold
+        TitleLbl.TextSize = 14
+        TitleLbl.TextColor3 = Color3.fromRGB(245, 247, 255)
+        TitleLbl.TextXAlignment = Enum.TextXAlignment.Left
+        TitleLbl.Parent = MetaStack
+        ProtectLocalization(TitleLbl)
+
+        local SubLbl = Instance.new("TextLabel")
+        SubLbl.Size = UDim2.new(1, 0, 0, 14)
+        SubLbl.Position = UDim2.new(0, 0, 0, 18)
+        SubLbl.BackgroundTransparency = 1
+        SubLbl.Text = "by " .. creatorName
+        SubLbl.Font = Enum.Font.GothamMedium
+        SubLbl.TextSize = 11
+        SubLbl.TextColor3 = VRSLib.Theme.TextMuted
+        SubLbl.TextXAlignment = Enum.TextXAlignment.Left
+        SubLbl.Parent = MetaStack
+        ProtectLocalization(SubLbl)
+
+        local JobLbl = Instance.new("TextLabel")
+        JobLbl.Size = UDim2.new(1, 0, 0, 13)
+        JobLbl.Position = UDim2.new(0, 0, 0, 36)
+        JobLbl.BackgroundTransparency = 1
+        JobLbl.Text = "Job  " .. string.sub(jobId, 1, 10) .. "..." .. string.sub(jobId, -4)
+        JobLbl.Font = Enum.Font.Gotham
+        JobLbl.TextSize = 10.5
+        JobLbl.TextColor3 = Color3.fromRGB(110, 115, 135)
+        JobLbl.TextXAlignment = Enum.TextXAlignment.Left
+        JobLbl.Parent = MetaStack
+        ProtectLocalization(JobLbl)
+
+        local PlaceLbl = Instance.new("TextLabel")
+        PlaceLbl.Size = UDim2.new(1, 0, 0, 13)
+        PlaceLbl.Position = UDim2.new(0, 0, 0, 51)
+        PlaceLbl.BackgroundTransparency = 1
+        PlaceLbl.Text = "Place  " .. tostring(placeId)
+        PlaceLbl.Font = Enum.Font.Gotham
+        PlaceLbl.TextSize = 10.5
+        PlaceLbl.TextColor3 = Color3.fromRGB(110, 115, 135)
+        PlaceLbl.TextXAlignment = Enum.TextXAlignment.Left
+        PlaceLbl.Parent = MetaStack
+        ProtectLocalization(PlaceLbl)
+
+        local UniLbl = Instance.new("TextLabel")
+        UniLbl.Size = UDim2.new(1, 0, 0, 13)
+        UniLbl.Position = UDim2.new(0, 0, 0, 66)
+        UniLbl.BackgroundTransparency = 1
+        UniLbl.Text = "Universe  " .. tostring(universeId)
+        UniLbl.Font = Enum.Font.Gotham
+        UniLbl.TextSize = 10.5
+        UniLbl.TextColor3 = Color3.fromRGB(110, 115, 135)
+        UniLbl.TextXAlignment = Enum.TextXAlignment.Left
+        UniLbl.Parent = MetaStack
+        ProtectLocalization(UniLbl)
+
+        local BtnContainer = Instance.new("Frame")
+        BtnContainer.Name = "BtnContainer"
+        BtnContainer.AnchorPoint = Vector2.new(1, 0.5)
+        BtnContainer.Position = UDim2.new(1, 0, 0.5, 0)
+        BtnContainer.Size = UDim2.new(0, 240, 0, 92)
+        BtnContainer.BackgroundTransparency = 1
+        BtnContainer.Parent = GameCard
+
+        local function makeActionBtn(title, pos, size, onClick)
+            local Btn = Instance.new("TextButton")
+            Btn.Size = size
+            Btn.Position = pos
+            Btn.BackgroundColor3 = Color3.fromRGB(24, 26, 36)
+            Btn.BorderSizePixel = 0
+            Btn.Text = title
+            Btn.Font = Enum.Font.GothamBold
+            Btn.TextSize = 11
+            Btn.TextColor3 = Color3.fromRGB(225, 230, 245)
+            Btn.AutoButtonColor = false
+            Btn.Parent = BtnContainer
+
+            local BCorner = Instance.new("UICorner")
+            BCorner.CornerRadius = UDim.new(0, 5)
+            BCorner.Parent = Btn
+
+            local BStroke = Instance.new("UIStroke")
+            BStroke.Color = Color3.fromRGB(42, 46, 62)
+            BStroke.Thickness = 1
+            BStroke.Parent = Btn
+
+            Btn.MouseEnter:Connect(function()
+                TweenService:Create(Btn, TweenInfo.new(0.12), { BackgroundColor3 = Color3.fromRGB(32, 35, 48) }):Play()
+                TweenService:Create(BStroke, TweenInfo.new(0.12), { Color = VRSLib.Theme.Accent }):Play()
+            end)
+            Btn.MouseLeave:Connect(function()
+                TweenService:Create(Btn, TweenInfo.new(0.12), { BackgroundColor3 = Color3.fromRGB(24, 26, 36) }):Play()
+                TweenService:Create(BStroke, TweenInfo.new(0.12), { Color = Color3.fromRGB(42, 46, 62) }):Play()
+            end)
+            Btn.MouseButton1Click:Connect(function()
+                if onClick then onClick() end
+            end)
+            return Btn
+        end
+
+        makeActionBtn("Rejoin", UDim2.new(0, 0, 0, 0), UDim2.new(0.48, 0, 0, 26), function()
+            local ts = game:GetService("TeleportService")
+            ts:TeleportToPlaceInstance(placeId, jobId, LocalPlayer)
+        end)
+        makeActionBtn("Server Hop", UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 0, 26), function()
+            if self.Window.Notify then
+                self.Window:Notify({ Title = "Server Hop", Description = "Finding optimal server...", Duration = 3 })
+            end
+        end)
+
+        makeActionBtn("Copy Job ID", UDim2.new(0, 0, 0, 32), UDim2.new(0.48, 0, 0, 26), function()
+            if setclipboard then setclipboard(jobId) end
+            if self.Window.Notify then
+                self.Window:Notify({ Title = "Copied", Description = "Job ID copied to clipboard!", Duration = 2.5 })
+            end
+        end)
+        makeActionBtn("Copy Universe", UDim2.new(0.52, 0, 0, 32), UDim2.new(0.48, 0, 0, 26), function()
+            if setclipboard then setclipboard(tostring(universeId)) end
+            if self.Window.Notify then
+                self.Window:Notify({ Title = "Copied", Description = "Universe ID copied to clipboard!", Duration = 2.5 })
+            end
+        end)
+
+        makeActionBtn("Join Lowest Server", UDim2.new(0, 0, 0, 64), UDim2.new(1, 0, 0, 26), function()
+            if self.Window.Notify then
+                self.Window:Notify({ Title = "Matchmaking", Description = "Searching lowest population server...", Duration = 3 })
+            end
+        end)
+
+        return GameCard
+    end
+
+    function TabObj:AddBanner(config)
+        local container = self.DashboardContainer or self:SetupDashboard()
+        config = config or {}
+
+        local Banner = Instance.new("Frame")
+        Banner.Name = "Banner"
+        Banner.Size = UDim2.new(1, 0, 0, 44)
+        Banner.BackgroundColor3 = Color3.fromRGB(20, 22, 30)
+        Banner.BorderSizePixel = 0
+        Banner.LayoutOrder = config.LayoutOrder or 4
+        Banner.Parent = container
+
+        local BCorner = Instance.new("UICorner")
+        BCorner.CornerRadius = UDim.new(0, 6)
+        BCorner.Parent = Banner
+
+        local BStroke = Instance.new("UIStroke")
+        BStroke.Color = Color3.fromRGB(42, 45, 60)
+        BStroke.Thickness = 1
+        BStroke.Parent = Banner
+
+        local BPadding = Instance.new("UIPadding")
+        BPadding.PaddingLeft = UDim.new(0, 14)
+        BPadding.PaddingRight = UDim.new(0, 14)
+        BPadding.Parent = Banner
+
+        local BLayout = Instance.new("UIListLayout")
+        BLayout.FillDirection = Enum.FillDirection.Horizontal
+        BLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+        BLayout.Padding = UDim.new(0, 10)
+        BLayout.Parent = Banner
+
+        local Icon = Instance.new("ImageLabel")
+        Icon.Size = UDim2.fromOffset(18, 18)
+        Icon.BackgroundTransparency = 1
+        Icon.Image = VRSLib.Icons.Get(config.Icon or "shield")
+        Icon.ImageColor3 = config.Color or Color3.fromRGB(255, 175, 60)
+        Icon.Parent = Banner
+
+        local TextStack = Instance.new("Frame")
+        TextStack.Size = UDim2.new(1, -160, 1, 0)
+        TextStack.BackgroundTransparency = 1
+        TextStack.Parent = Banner
+
+        local TLayout = Instance.new("UIListLayout")
+        TLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        TLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+        TLayout.Padding = UDim.new(0, 2)
+        TLayout.Parent = TextStack
+
+        local TitleLbl = Instance.new("TextLabel")
+        TitleLbl.Size = UDim2.new(1, 0, 0, 15)
+        TitleLbl.BackgroundTransparency = 1
+        TitleLbl.Text = config.Title or "Madium"
+        TitleLbl.Font = Enum.Font.GothamBold
+        TitleLbl.TextSize = 12.5
+        TitleLbl.TextColor3 = config.Color or Color3.fromRGB(255, 185, 75)
+        TitleLbl.TextXAlignment = Enum.TextXAlignment.Left
+        TitleLbl.Parent = TextStack
+        ProtectLocalization(TitleLbl)
+
+        local DescLbl = Instance.new("TextLabel")
+        DescLbl.Size = UDim2.new(1, 0, 0, 13)
+        DescLbl.BackgroundTransparency = 1
+        DescLbl.Text = config.Description or "Not on the supported list. Some features may not work."
+        DescLbl.Font = Enum.Font.GothamMedium
+        DescLbl.TextSize = 11
+        DescLbl.TextColor3 = VRSLib.Theme.TextMuted
+        DescLbl.TextXAlignment = Enum.TextXAlignment.Left
+        DescLbl.Parent = TextStack
+        ProtectLocalization(DescLbl)
+
+        local Pill = Instance.new("Frame")
+        Pill.Size = UDim2.new(0, 0, 0, 22)
+        Pill.AutomaticSize = Enum.AutomaticSize.X
+        Pill.BackgroundColor3 = Color3.fromRGB(26, 28, 38)
+        Pill.BorderSizePixel = 0
+        Pill.Parent = Banner
+
+        local PCorner = Instance.new("UICorner")
+        PCorner.CornerRadius = UDim.new(0, 5)
+        PCorner.Parent = Pill
+
+        local PStroke = Instance.new("UIStroke")
+        PStroke.Color = Color3.fromRGB(45, 48, 65)
+        PStroke.Thickness = 1
+        PStroke.Parent = Pill
+
+        local PPadding = Instance.new("UIPadding")
+        PPadding.PaddingLeft = UDim.new(0, 8)
+        PPadding.PaddingRight = UDim.new(0, 8)
+        PPadding.Parent = Pill
+
+        local PLbl = Instance.new("TextLabel")
+        PLbl.Size = UDim2.new(0, 0, 1, 0)
+        PLbl.AutomaticSize = Enum.AutomaticSize.X
+        PLbl.BackgroundTransparency = 1
+        PLbl.Text = config.Badge or "RCtrl  to hide"
+        PLbl.Font = Enum.Font.GothamBold
+        PLbl.TextSize = 10
+        PLbl.TextColor3 = Color3.fromRGB(150, 155, 175)
+        PLbl.Parent = Pill
+        ProtectLocalization(PLbl)
+
+        return Banner
+    end
+
+    function TabObj:AddLinkRow(config)
+        local container = self.DashboardContainer or self:SetupDashboard()
+        config = config or {}
+
+        local Row = Instance.new("Frame")
+        Row.Name = "LinkRow_" .. (config.Title or "Link")
+        Row.Size = UDim2.new(1, 0, 0, 48)
+        Row.BackgroundColor3 = VRSLib.Theme.Card
+        Row.BorderSizePixel = 0
+        Row.LayoutOrder = config.LayoutOrder or 5
+        Row.Parent = container
+
+        local RCorner = Instance.new("UICorner")
+        RCorner.CornerRadius = UDim.new(0, 6)
+        RCorner.Parent = Row
+
+        local RStroke = Instance.new("UIStroke")
+        RStroke.Color = VRSLib.Theme.CardStroke
+        RStroke.Thickness = 1
+        RStroke.Parent = Row
+
+        local RPadding = Instance.new("UIPadding")
+        RPadding.PaddingLeft = UDim.new(0, 14)
+        RPadding.PaddingRight = UDim.new(0, 14)
+        RPadding.Parent = Row
+
+        local Icon = Instance.new("ImageLabel")
+        Icon.Size = UDim2.fromOffset(18, 18)
+        Icon.Position = UDim2.new(0, 0, 0.5, -9)
+        Icon.BackgroundTransparency = 1
+        Icon.Image = VRSLib.Icons.Get(config.Icon or "message-square")
+        Icon.ImageColor3 = VRSLib.Theme.TextMuted
+        Icon.Parent = Row
+
+        local TextStack = Instance.new("Frame")
+        TextStack.Size = UDim2.new(1, -160, 1, 0)
+        TextStack.Position = UDim2.new(0, 30, 0, 0)
+        TextStack.BackgroundTransparency = 1
+        TextStack.Parent = Row
+
+        local TLayout = Instance.new("UIListLayout")
+        TLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+        TLayout.Padding = UDim.new(0, 2)
+        TLayout.Parent = TextStack
+
+        local TitleLbl = Instance.new("TextLabel")
+        TitleLbl.Size = UDim2.new(1, 0, 0, 16)
+        TitleLbl.BackgroundTransparency = 1
+        TitleLbl.Text = config.Title or "Join the community"
+        TitleLbl.Font = Enum.Font.GothamBold
+        TitleLbl.TextSize = 12.5
+        TitleLbl.TextColor3 = Color3.fromRGB(240, 244, 255)
+        TitleLbl.TextXAlignment = Enum.TextXAlignment.Left
+        TitleLbl.Parent = TextStack
+        ProtectLocalization(TitleLbl)
+
+        local SubLbl = Instance.new("TextLabel")
+        SubLbl.Size = UDim2.new(1, 0, 0, 13)
+        SubLbl.BackgroundTransparency = 1
+        SubLbl.Text = config.Subtitle or config.Url or ""
+        SubLbl.Font = Enum.Font.Gotham
+        SubLbl.TextSize = 10.5
+        SubLbl.TextColor3 = Color3.fromRGB(115, 120, 140)
+        SubLbl.TextXAlignment = Enum.TextXAlignment.Left
+        SubLbl.Parent = TextStack
+        ProtectLocalization(SubLbl)
+
+        local Btn = Instance.new("TextButton")
+        Btn.AnchorPoint = Vector2.new(1, 0.5)
+        Btn.Position = UDim2.new(1, 0, 0.5, 0)
+        Btn.Size = UDim2.new(0, 110, 0, 26)
+        Btn.BackgroundColor3 = Color3.fromRGB(24, 26, 36)
+        Btn.BorderSizePixel = 0
+        Btn.Text = config.ButtonText or "Copy"
+        Btn.Font = Enum.Font.GothamBold
+        Btn.TextSize = 11
+        Btn.TextColor3 = Color3.fromRGB(225, 230, 245)
+        Btn.AutoButtonColor = false
+        Btn.Parent = Row
+
+        local BCorner = Instance.new("UICorner")
+        BCorner.CornerRadius = UDim.new(0, 5)
+        BCorner.Parent = Btn
+
+        local BStroke = Instance.new("UIStroke")
+        BStroke.Color = Color3.fromRGB(42, 46, 62)
+        BStroke.Thickness = 1
+        BStroke.Parent = Btn
+
+        Btn.MouseEnter:Connect(function()
+            TweenService:Create(Btn, TweenInfo.new(0.12), { BackgroundColor3 = Color3.fromRGB(32, 35, 48) }):Play()
+            TweenService:Create(BStroke, TweenInfo.new(0.12), { Color = VRSLib.Theme.Accent }):Play()
+        end)
+        Btn.MouseLeave:Connect(function()
+            TweenService:Create(Btn, TweenInfo.new(0.12), { BackgroundColor3 = Color3.fromRGB(24, 26, 36) }):Play()
+            TweenService:Create(BStroke, TweenInfo.new(0.12), { Color = Color3.fromRGB(42, 46, 62) }):Play()
+        end)
+        Btn.MouseButton1Click:Connect(function()
+            if config.Callback then
+                config.Callback()
+            elseif config.Url and setclipboard then
+                setclipboard(config.Url)
+                if self.Window.Notify then
+                    self.Window:Notify({ Title = "Copied", Description = "Link copied to clipboard!", Duration = 2.5 })
+                end
+            end
+        end)
+
+        return Row
+    end
+
     TabBtn.MouseEnter:Connect(function()
         if self.ActiveTab ~= TabObj then
-            TweenService:Create(TabBtn, TweenInfo.new(0.15), { BackgroundTransparency = 0.6, BackgroundColor3 = VRSLib.Theme.CardHover }):Play()
-            TweenService:Create(TabLabel, TweenInfo.new(0.15), { TextColor3 = VRSLib.Theme.TextPrimary }):Play()
+            TweenService:Create(TabBtn, TweenInfo.new(0.15), { BackgroundTransparency = 0.5, BackgroundColor3 = VRSLib.Theme.CardHover }):Play()
+            TweenService:Create(TabLabel, TweenInfo.new(0.15), { TextColor3 = Color3.fromRGB(220, 225, 240) }):Play()
+            TweenService:Create(TabIcon, TweenInfo.new(0.15), { ImageColor3 = Color3.fromRGB(220, 225, 240) }):Play()
         end
     end)
     TabBtn.MouseLeave:Connect(function()
         if self.ActiveTab ~= TabObj then
             TweenService:Create(TabBtn, TweenInfo.new(0.15), { BackgroundTransparency = 1 }):Play()
-            TweenService:Create(TabLabel, TweenInfo.new(0.15), { TextColor3 = Color3.fromRGB(240, 244, 255) }):Play()
+            TweenService:Create(TabLabel, TweenInfo.new(0.15), { TextColor3 = VRSLib.Theme.TextMuted }):Play()
+            TweenService:Create(TabIcon, TweenInfo.new(0.15), { ImageColor3 = VRSLib.Theme.TextMuted }):Play()
         end
     end)
 
@@ -3827,6 +4788,12 @@ function Window:CreateSidebarTab(config)
             if not self.RightCol then self:AddColumns() end
             return self.RightCol:AddGroupbox(titleOrCfg, optionalIcon)
         end
+        SubTabObj.SetupDashboard = self.SetupDashboard
+        SubTabObj.AddUserCard    = self.AddUserCard
+        SubTabObj.AddStatGrid    = self.AddStatGrid
+        SubTabObj.AddGameCard    = self.AddGameCard
+        SubTabObj.AddBanner      = self.AddBanner
+        SubTabObj.AddLinkRow     = self.AddLinkRow
 
         SubBtn.MouseEnter:Connect(function()
             if self.Window.ActiveTab ~= SubTabObj then
@@ -3889,13 +4856,33 @@ function Window:SelectTab(tabObj)
     self.ActiveTab = tabObj
     self.CurrentCategory = tabObj.Category
 
+    -- Update Dynamic Topbar Header (Screenshot 1 & Screenshot 2)
+    if self.HeaderTitle then
+        self.HeaderTitle.Text = tabObj.HeaderTitle or tabObj.Name or "Welcome"
+    end
+    if self.HeaderIcon and tabObj.Icon then
+        self.HeaderIcon.Image = tabObj.Icon.Image
+    end
+    if self.HeaderSubtitle then
+        local sub = tabObj.HeaderSubtitle or ""
+        if tabObj.IsSubTab and (not sub or sub == "") and tabObj.ParentTab then
+            sub = tabObj.ParentTab.HeaderSubtitle or ""
+        end
+        if sub and sub ~= "" then
+            self.HeaderSubtitle.Text = sub
+            self.HeaderSubtitle.Visible = true
+        else
+            self.HeaderSubtitle.Visible = false
+        end
+    end
+
     local parentOfCurrent = tabObj.IsSubTab and tabObj.ParentTab or (tabObj.HasSubTabs and tabObj or nil)
 
-    -- Manage Top Horizontal SubNavBar
+    -- Manage Top Horizontal SubNavBar (Pills matching Screenshot 2)
     if parentOfCurrent and #parentOfCurrent.SubTabs > 0 then
         self.SubNavBar.Visible = true
-        self.CardsScroll.Position = UDim2.new(0, 0, 0, 56)
-        self.CardsScroll.Size = UDim2.new(1, 0, 1, -56)
+        self.CardsScroll.Position = UDim2.new(0, 0, 0, 48)
+        self.CardsScroll.Size = UDim2.new(1, 0, 1, -48)
 
         -- Clear old subnav buttons
         for _, ch in ipairs(self.SubNavScroll:GetChildren()) do
@@ -3905,12 +4892,25 @@ function Window:SelectTab(tabObj)
         for _, sub in ipairs(parentOfCurrent.SubTabs) do
             local isActive = (sub == tabObj)
             local SBtn = Instance.new("TextButton")
-            SBtn.Size = UDim2.new(0, 0, 1, 0)
+            SBtn.Name = "SubTabPill_" .. sub.Name
+            SBtn.Size = UDim2.new(0, 0, 0, 28)
             SBtn.AutomaticSize = Enum.AutomaticSize.X
-            SBtn.BackgroundTransparency = 1
+            SBtn.BackgroundColor3 = isActive and Color3.fromRGB(30, 32, 44) or Color3.fromRGB(20, 22, 30)
+            SBtn.BackgroundTransparency = isActive and 0 or 1
+            SBtn.BorderSizePixel = 0
             SBtn.Text = ""
             SBtn.AutoButtonColor = false
             SBtn.Parent = self.SubNavScroll
+
+            local SCorner = Instance.new("UICorner")
+            SCorner.CornerRadius = UDim.new(0, 6)
+            SCorner.Parent = SBtn
+
+            local SStroke = Instance.new("UIStroke")
+            SStroke.Color = isActive and VRSLib.Theme.Accent or Color3.fromRGB(38, 42, 56)
+            SStroke.Thickness = 1
+            SStroke.Transparency = isActive and 0.2 or 0.8
+            SStroke.Parent = SBtn
 
             local SBox = Instance.new("Frame")
             SBox.Size = UDim2.new(0, 0, 1, 0)
@@ -3919,8 +4919,8 @@ function Window:SelectTab(tabObj)
             SBox.Parent = SBtn
 
             local SPadding = Instance.new("UIPadding")
-            SPadding.PaddingLeft = UDim.new(0, 8)
-            SPadding.PaddingRight = UDim.new(0, 8)
+            SPadding.PaddingLeft = UDim.new(0, 10)
+            SPadding.PaddingRight = UDim.new(0, 10)
             SPadding.Parent = SBox
 
             local SLayout = Instance.new("UIListLayout")
@@ -3930,10 +4930,10 @@ function Window:SelectTab(tabObj)
             SLayout.Parent = SBox
 
             local SIcon = Instance.new("ImageLabel")
-            SIcon.Size = UDim2.fromOffset(16, 16)
+            SIcon.Size = UDim2.fromOffset(14, 14)
             SIcon.BackgroundTransparency = 1
             SIcon.Image = sub.Icon.Image
-            SIcon.ImageColor3 = isActive and VRSLib.Theme.Accent or VRSLib.Theme.TextMuted
+            SIcon.ImageColor3 = isActive and Color3.fromRGB(255, 255, 255) or VRSLib.Theme.TextMuted
             SIcon.Parent = SBox
 
             local SLbl = Instance.new("TextLabel")
@@ -3942,29 +4942,21 @@ function Window:SelectTab(tabObj)
             SLbl.BackgroundTransparency = 1
             SLbl.Text = sub.Name
             SLbl.Font = Enum.Font.GothamBold
-            SLbl.TextSize = 12.5
-            SLbl.TextColor3 = isActive and VRSLib.Theme.TextPrimary or VRSLib.Theme.TextMuted
+            SLbl.TextSize = 11.5
+            SLbl.TextColor3 = isActive and Color3.fromRGB(255, 255, 255) or VRSLib.Theme.TextMuted
             SLbl.Parent = SBox
             ProtectLocalization(SLbl)
 
-            -- Active glowing underline
-            if isActive then
-                local ULine = Instance.new("Frame")
-                ULine.Size = UDim2.new(1, 0, 0, 2)
-                ULine.Position = UDim2.new(0, 0, 1, -2)
-                ULine.BackgroundColor3 = VRSLib.Theme.Accent
-                ULine.BorderSizePixel = 0
-                ULine.Parent = SBtn
-            end
-
             SBtn.MouseEnter:Connect(function()
                 if not (sub == self.ActiveTab) then
+                    TweenService:Create(SBtn, TweenInfo.new(0.15), { BackgroundTransparency = 0.5, BackgroundColor3 = Color3.fromRGB(26, 28, 38) }):Play()
                     TweenService:Create(SLbl, TweenInfo.new(0.15), { TextColor3 = VRSLib.Theme.TextPrimary }):Play()
-                    TweenService:Create(SIcon, TweenInfo.new(0.15), { ImageColor3 = Color3.fromRGB(220, 220, 230) }):Play()
+                    TweenService:Create(SIcon, TweenInfo.new(0.15), { ImageColor3 = Color3.fromRGB(220, 220, 235) }):Play()
                 end
             end)
             SBtn.MouseLeave:Connect(function()
                 if not (sub == self.ActiveTab) then
+                    TweenService:Create(SBtn, TweenInfo.new(0.15), { BackgroundTransparency = 1 }):Play()
                     TweenService:Create(SLbl, TweenInfo.new(0.15), { TextColor3 = VRSLib.Theme.TextMuted }):Play()
                     TweenService:Create(SIcon, TweenInfo.new(0.15), { ImageColor3 = VRSLib.Theme.TextMuted }):Play()
                 end
@@ -3980,11 +4972,25 @@ function Window:SelectTab(tabObj)
         self.CardsScroll.Size = UDim2.new(1, 0, 1, -18)
     end
 
-    -- Switch between Grid Mode and Columns Mode
-    if tabObj.LayoutType == "Columns" then
+    -- Switch between Dashboard, Columns, and Grid Mode
+    if tabObj.LayoutType == "Dashboard" then
         self.GridContainer.Visible = false
         if self.ViewSwitchers then self.ViewSwitchers.Visible = false end
         for _, t in ipairs(self.Tabs) do
+            if t.DashboardContainer then
+                t.DashboardContainer.Visible = (t == tabObj)
+            end
+            if t.ColumnsContainer then
+                t.ColumnsContainer.Visible = false
+            end
+        end
+    elseif tabObj.LayoutType == "Columns" then
+        self.GridContainer.Visible = false
+        if self.ViewSwitchers then self.ViewSwitchers.Visible = false end
+        for _, t in ipairs(self.Tabs) do
+            if t.DashboardContainer then
+                t.DashboardContainer.Visible = false
+            end
             if t.ColumnsContainer then
                 t.ColumnsContainer.Visible = (t == tabObj)
             end
@@ -3993,6 +4999,9 @@ function Window:SelectTab(tabObj)
         self.GridContainer.Visible = true
         if self.ViewSwitchers then self.ViewSwitchers.Visible = true end
         for _, t in ipairs(self.Tabs) do
+            if t.DashboardContainer then
+                t.DashboardContainer.Visible = false
+            end
             if t.ColumnsContainer then
                 t.ColumnsContainer.Visible = false
             end
@@ -4006,8 +5015,12 @@ function Window:SelectTab(tabObj)
         self.BreadcrumbBadge.Visible = false
 
         if tabObj.ParentTab then
-            TweenService:Create(tabObj.ParentTab.Button, TweenInfo.new(0.2), { BackgroundTransparency = 0.5, BackgroundColor3 = VRSLib.Theme.Card }):Play()
-            TweenService:Create(tabObj.ParentTab.Label, TweenInfo.new(0.2), { TextColor3 = VRSLib.Theme.TextPrimary }):Play()
+            TweenService:Create(tabObj.ParentTab.Button, TweenInfo.new(0.2), { BackgroundTransparency = 0, BackgroundColor3 = Color3.fromRGB(28, 30, 40) }):Play()
+            TweenService:Create(tabObj.ParentTab.Label, TweenInfo.new(0.2), { TextColor3 = Color3.fromRGB(255, 255, 255) }):Play()
+            TweenService:Create(tabObj.ParentTab.Icon, TweenInfo.new(0.2), { ImageColor3 = Color3.fromRGB(255, 255, 255) }):Play()
+            if tabObj.ParentTab.Indicator then
+                tabObj.ParentTab.Indicator.Visible = true
+            end
             if tabObj.ParentTab.Chevron then
                 TweenService:Create(tabObj.ParentTab.Chevron, TweenInfo.new(0.2), { Rotation = 90, ImageColor3 = VRSLib.Theme.Accent }):Play()
             end
@@ -4023,26 +5036,20 @@ function Window:SelectTab(tabObj)
     end
 
     for _, t in ipairs(self.Tabs) do
-        if t == tabObj then
-            TweenService:Create(t.Button, TweenInfo.new(0.2), { BackgroundTransparency = 0, BackgroundColor3 = VRSLib.Theme.Card }):Play()
-            TweenService:Create(t.Label, TweenInfo.new(0.2), { TextColor3 = VRSLib.Theme.TextPrimary }):Play()
-            TweenService:Create(t.Icon, TweenInfo.new(0.2), { ImageColor3 = VRSLib.Theme.Accent }):Play()
-            if t.IsSubTab then
-                TweenService:Create(t.Indicator, TweenInfo.new(0.2), { BackgroundColor3 = VRSLib.Theme.Accent }):Play()
-            else
+        local isCurrentOrSubParent = (t == tabObj) or (tabObj.IsSubTab and t == tabObj.ParentTab)
+        if isCurrentOrSubParent then
+            TweenService:Create(t.Button, TweenInfo.new(0.2), { BackgroundTransparency = 0, BackgroundColor3 = Color3.fromRGB(28, 30, 40) }):Play()
+            TweenService:Create(t.Label, TweenInfo.new(0.2), { TextColor3 = Color3.fromRGB(255, 255, 255) }):Play()
+            TweenService:Create(t.Icon, TweenInfo.new(0.2), { ImageColor3 = Color3.fromRGB(255, 255, 255) }):Play()
+            if t.Indicator then
                 t.Indicator.Visible = true
             end
         else
-            local isParentOfCurrent = (tabObj.IsSubTab and t == tabObj.ParentTab)
-            if not isParentOfCurrent then
-                TweenService:Create(t.Button, TweenInfo.new(0.2), { BackgroundTransparency = 1 }):Play()
-                TweenService:Create(t.Label, TweenInfo.new(0.2), { TextColor3 = VRSLib.Theme.TextMuted }):Play()
-                TweenService:Create(t.Icon, TweenInfo.new(0.2), { ImageColor3 = VRSLib.Theme.TextMuted }):Play()
-                if t.IsSubTab then
-                    TweenService:Create(t.Indicator, TweenInfo.new(0.2), { BackgroundColor3 = VRSLib.Theme.Outline }):Play()
-                else
-                    t.Indicator.Visible = false
-                end
+            TweenService:Create(t.Button, TweenInfo.new(0.2), { BackgroundTransparency = 1 }):Play()
+            TweenService:Create(t.Label, TweenInfo.new(0.2), { TextColor3 = VRSLib.Theme.TextMuted }):Play()
+            TweenService:Create(t.Icon, TweenInfo.new(0.2), { ImageColor3 = VRSLib.Theme.TextMuted }):Play()
+            if t.Indicator then
+                t.Indicator.Visible = false
             end
         end
     end

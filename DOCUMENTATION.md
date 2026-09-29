@@ -290,16 +290,67 @@ CardModule:AddDropdown({
 })
 ```
 
-#### 5. Status Indicator (Titik Status Menyala)
+#### 5. Key-Value Status Row (Screenshot 2 Spec)
+Status baris horizontal dengan label di sebelah kiri dan status dinamis di sebelah kanan (misal: `Quest Step`, `Doing`, `Farm`, `Slayer Progress`, `Pickups`):
 ```lua
-local StatusRow = RightBox:AddStatus({
-    Label  = "Engine State:",
-    Status = "IDLE",
-    Color  = Color3.fromRGB(255, 75, 75)
+-- Format singkat:
+local StatusQuest = RightBox:AddStatus("Quest Step", "1/6 Lower your reputation (0 / -40)")
+local StatusFarm  = RightBox:AddStatus("Farm", "Idle")
+
+-- Update status secara realtime:
+StatusFarm:Set("Farming...", Color3.fromRGB(0, 255, 128))
+StatusFarm:SetValue("Waiting for drops")
+```
+
+---
+
+## 🏠 Home Dashboard Widgets (Overview Tab)
+
+Untuk membuat halaman Beranda / Dashboard persis seperti di Screenshot 1:
+
+```lua
+local TabHome = Window:AddTab({
+    Name        = "Home",
+    Icon        = "home",
+    HeaderTitle = "Welcome to Slayer 2!",
+    Subtitle    = ""
 })
 
--- Ubah status secara live:
-StatusRow.Set("RUNNING (Floor 12)", Color3.fromRGB(0, 255, 128))
+TabHome:SetupDashboard()
+
+-- 1. Kartu Pengguna (Headshot Avatar, DisplayName, @handle, Version Pill, Streamer Mode)
+TabHome:AddUserCard({
+    Greeting    = "Welcome back,",
+    DisplayName = game.Players.LocalPlayer.DisplayName,
+    Username    = game.Players.LocalPlayer.Name,
+    Version     = "v0.141"
+})
+
+-- 2. 6-Box Stat Grid (Live FPS, Ping, Session, Players)
+TabHome:AddStatGrid()
+
+-- 3. Game Information Card & Server Action Buttons
+TabHome:AddGameCard({
+    GameName = "Ouwland",
+    Creator  = "Ouw Productions"
+})
+
+-- 4. Warning / Unsupported Game Banner
+TabHome:AddBanner({
+    Title       = "Madium",
+    Description = "Not on the supported list. Some features may not work.",
+    Icon        = "shield",
+    Badge       = "RCtrl to hide"
+})
+
+-- 5. Quick Link Rows
+TabHome:AddLinkRow({
+    Title      = "Join the community",
+    Subtitle   = "https://discord.gg/synapsex",
+    Icon       = "message-square",
+    ButtonText = "Copy Invite",
+    Url        = "https://discord.gg/synapsex"
+})
 ```
 
 #### 6. Text Label
