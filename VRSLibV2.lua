@@ -469,48 +469,19 @@ function VRSLibV2:CreateWindow(config)
     ShadowCorner.CornerRadius = UDim.new(0, 22)
     ShadowCorner.Parent = ShadowFrame
 
-    -- Main Shell Frame (Liquid Glass with Acrylic Translucency)
+    -- Main Shell Canvas (Holds Detached Floating Sidebar + Main Window)
     local Main = Instance.new("Frame")
     Main.Name = "MainFrame"
     Main.Size = self.Size
     Main.AnchorPoint = Vector2.new(0.5, 0.5)
     Main.Position = UDim2.new(0.5, 0, 0.5, 0)
-    Main.BackgroundColor3 = VRSLibV2.Theme.Background
-    Main.BackgroundTransparency = VRSLibV2.Theme.BackgroundTrans
+    Main.BackgroundTransparency = 1
     Main.BorderSizePixel = 0
     Main.Active = true
-    Main.ClipsDescendants = true
+    Main.ClipsDescendants = false
     Main.ZIndex = 2
     Main.Parent = ScreenGui
     self.MainFrame = Main
-
-    local MainCorner = Instance.new("UICorner")
-    MainCorner.CornerRadius = UDim.new(0, 16)
-    MainCorner.Parent = Main
-
-    local MainStroke = Instance.new("UIStroke")
-    MainStroke.Color = Color3.fromRGB(55, 60, 80)
-    MainStroke.Transparency = 0.55
-    MainStroke.Thickness = 1.2
-    MainStroke.Parent = Main
-
-    -- Specular shine across top edge
-    local MainSpecular = Instance.new("Frame")
-    MainSpecular.Name = "MainSpecular"
-    MainSpecular.Size = UDim2.new(1, 0, 0, 80)
-    MainSpecular.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    MainSpecular.BackgroundTransparency = 0.96
-    MainSpecular.BorderSizePixel = 0
-    MainSpecular.ZIndex = 2
-    MainSpecular.Parent = Main
-
-    local MSSpecGrad = Instance.new("UIGradient")
-    MSSpecGrad.Rotation = 90
-    MSSpecGrad.Transparency = NumberSequence.new({
-        NumberSequenceKeypoint.new(0.0, 0.92),
-        NumberSequenceKeypoint.new(1.0, 1.00),
-    })
-    MSSpecGrad.Parent = MainSpecular
 
     -- Responsive Smart Scaling Engine
     local WindowScale = Instance.new("UIScale")
@@ -536,26 +507,31 @@ function VRSLibV2:CreateWindow(config)
     UpdateScale()
 
     -- ==============================================================================
-    -- 1:1 REPRODUCED FLOATING SIDEBAR (70px width)
+    -- 1:1 DETACHED FLOATING SIDEBAR CAPSULE (70px width, Rounded All 4 Corners)
     -- ==============================================================================
     local Sidebar = Instance.new("Frame")
     Sidebar.Name = "Sidebar"
     Sidebar.Size = UDim2.new(0, 70, 1, 0)
     Sidebar.Position = UDim2.new(0, 0, 0, 0)
-    Sidebar.BackgroundColor3 = VRSLibV2.Theme.Sidebar
-    Sidebar.BackgroundTransparency = VRSLibV2.Theme.SidebarTrans
+    Sidebar.BackgroundColor3 = Color3.fromRGB(15, 16, 22)
+    Sidebar.BackgroundTransparency = 0.16
     Sidebar.BorderSizePixel = 0
+    Sidebar.ClipsDescendants = false
     Sidebar.ZIndex = 3
     Sidebar.Parent = Main
     self.Sidebar = Sidebar
 
-    local SidebarBorder = Instance.new("Frame")
-    SidebarBorder.Size = UDim2.new(0, 1, 1, 0)
-    SidebarBorder.Position = UDim2.new(1, -1, 0, 0)
-    SidebarBorder.BackgroundColor3 = VRSLibV2.Theme.CardStroke
-    SidebarBorder.BackgroundTransparency = VRSLibV2.Theme.CardStrokeTrans
-    SidebarBorder.BorderSizePixel = 0
-    SidebarBorder.Parent = Sidebar
+    local SBCorner = Instance.new("UICorner")
+    SBCorner.CornerRadius = UDim.new(0, 16)
+    SBCorner.Parent = Sidebar
+
+    local SBStroke = Instance.new("UIStroke")
+    SBStroke.Color = Color3.fromRGB(48, 52, 68)
+    SBStroke.Transparency = 0.65
+    SBStroke.Thickness = 1.2
+    SBStroke.Parent = Sidebar
+
+    ApplyGlassSpecular(Sidebar)
 
     -- Top Logo Emblem (Swirl / Ouroboros Emblem)
     local LogoContainer = Instance.new("Frame")
@@ -716,41 +692,80 @@ function VRSLibV2:CreateWindow(config)
     ProtectLocalization(UGameLbl)
 
     -- ==============================================================================
-    -- TOP HEADER BAR (Matching Screenshot 1 & 2)
+    -- 2. DETACHED FLOATING MAIN WINDOW CONTAINER (With 12px Gap & Rounded Corners)
+    -- ==============================================================================
+    local MainContainer = Instance.new("Frame")
+    MainContainer.Name = "MainContainer"
+    MainContainer.Size = UDim2.new(1, -82, 1, 0)
+    MainContainer.Position = UDim2.new(0, 82, 0, 0)
+    MainContainer.BackgroundColor3 = Color3.fromRGB(15, 16, 21)
+    MainContainer.BackgroundTransparency = 0.18
+    MainContainer.BorderSizePixel = 0
+    MainContainer.ClipsDescendants = true
+    MainContainer.ZIndex = 3
+    MainContainer.Parent = Main
+    self.MainContainer = MainContainer
+
+    local MCCorner = Instance.new("UICorner")
+    MCCorner.CornerRadius = UDim.new(0, 16)
+    MCCorner.Parent = MainContainer
+
+    local MCStroke = Instance.new("UIStroke")
+    MCStroke.Color = Color3.fromRGB(48, 52, 68)
+    MCStroke.Transparency = 0.65
+    MCStroke.Thickness = 1.2
+    MCStroke.Parent = MainContainer
+
+    ApplyGlassSpecular(MainContainer)
+
+    -- ==============================================================================
+    -- 3. TWO-TIER TOPBAR (1:1 with Screenshot 2)
+    -- Row 1 (42px): Title Left, Search + Minimize Right
+    -- Row 2 (36px): Sub-Nav Pills Left ([ ⊞ Overview ]  [ ▷ Main Menu ])
     -- ==============================================================================
     local Topbar = Instance.new("Frame")
     Topbar.Name = "Topbar"
-    Topbar.Size = UDim2.new(1, -70, 0, 52)
-    Topbar.Position = UDim2.new(0, 70, 0, 0)
-    Topbar.BackgroundColor3 = VRSLibV2.Theme.Header or Color3.fromRGB(15, 16, 21)
-    Topbar.BackgroundTransparency = VRSLibV2.Theme.HeaderTrans or 0.20
+    Topbar.Size = UDim2.new(1, 0, 0, 78)
+    Topbar.Position = UDim2.new(0, 0, 0, 0)
+    Topbar.BackgroundTransparency = 1
     Topbar.BorderSizePixel = 0
-    Topbar.ZIndex = 3
-    Topbar.Parent = Main
+    Topbar.ZIndex = 4
+    Topbar.Parent = MainContainer
     self.Topbar = Topbar
 
     local TopbarBorder = Instance.new("Frame")
     TopbarBorder.Size = UDim2.new(1, 0, 0, 1)
     TopbarBorder.Position = UDim2.new(0, 0, 1, -1)
-    TopbarBorder.BackgroundColor3 = VRSLibV2.Theme.CardStroke
-    TopbarBorder.BackgroundTransparency = VRSLibV2.Theme.CardStrokeTrans
+    TopbarBorder.BackgroundColor3 = Color3.fromRGB(48, 52, 68)
+    TopbarBorder.BackgroundTransparency = 0.75
     TopbarBorder.BorderSizePixel = 0
+    TopbarBorder.ZIndex = 4
     TopbarBorder.Parent = Topbar
 
     MakeDraggable(Topbar, Main)
+    MakeDraggable(Sidebar, Main)
 
-    -- Left: Tab Icon + Title + Horizontal Subnav Pills
+    -- --- ROW 1: HEADER TOP ---
+    local HeaderTop = Instance.new("Frame")
+    HeaderTop.Name = "HeaderTop"
+    HeaderTop.Size = UDim2.new(1, 0, 0, 42)
+    HeaderTop.Position = UDim2.new(0, 0, 0, 0)
+    HeaderTop.BackgroundTransparency = 1
+    HeaderTop.ZIndex = 4
+    HeaderTop.Parent = Topbar
+
     local HeaderLeft = Instance.new("Frame")
     HeaderLeft.Name = "HeaderLeft"
     HeaderLeft.Size = UDim2.new(1, -260, 1, 0)
-    HeaderLeft.Position = UDim2.new(0, 16, 0, 0)
+    HeaderLeft.Position = UDim2.new(0, 18, 0, 0)
     HeaderLeft.BackgroundTransparency = 1
-    HeaderLeft.Parent = Topbar
+    HeaderLeft.ZIndex = 4
+    HeaderLeft.Parent = HeaderTop
 
     local HLList = Instance.new("UIListLayout")
     HLList.FillDirection = Enum.FillDirection.Horizontal
     HLList.VerticalAlignment = Enum.VerticalAlignment.Center
-    HLList.Padding = UDim.new(0, 12)
+    HLList.Padding = UDim.new(0, 10)
     HLList.Parent = HeaderLeft
 
     local HeaderIcon = Instance.new("ImageLabel")
@@ -758,7 +773,8 @@ function VRSLibV2:CreateWindow(config)
     HeaderIcon.Size = UDim2.fromOffset(20, 20)
     HeaderIcon.BackgroundTransparency = 1
     HeaderIcon.Image = VRSLibV2.Icons.Get("home")
-    HeaderIcon.ImageColor3 = VRSLibV2.Theme.TextPrimary
+    HeaderIcon.ImageColor3 = Color3.fromRGB(255, 255, 255)
+    HeaderIcon.ZIndex = 5
     HeaderIcon.Parent = HeaderLeft
     self.HeaderIcon = HeaderIcon
 
@@ -769,42 +785,28 @@ function VRSLibV2:CreateWindow(config)
     HeaderTitle.BackgroundTransparency = 1
     HeaderTitle.Text = self.Title
     HeaderTitle.Font = Enum.Font.GothamBold
-    HeaderTitle.TextSize = 14.5
-    HeaderTitle.TextColor3 = VRSLibV2.Theme.TextPrimary
+    HeaderTitle.TextSize = 15.5
+    HeaderTitle.TextColor3 = Color3.fromRGB(248, 250, 255)
     HeaderTitle.TextXAlignment = Enum.TextXAlignment.Left
+    HeaderTitle.ZIndex = 5
     HeaderTitle.Parent = HeaderLeft
     ProtectLocalization(HeaderTitle)
     self.HeaderTitle = HeaderTitle
 
-    -- Sub-Nav Horizontal Pills (e.g. [ ⊞ Overview ] [ ▷ Main Menu ])
-    local SubNavPills = Instance.new("Frame")
-    SubNavPills.Name = "SubNavPills"
-    SubNavPills.Size = UDim2.new(0, 0, 1, 0)
-    SubNavPills.AutomaticSize = Enum.AutomaticSize.X
-    SubNavPills.BackgroundTransparency = 1
-    SubNavPills.Parent = HeaderLeft
-    self.SubNavPills = SubNavPills
-
-    local SNPList = Instance.new("UIListLayout")
-    SNPList.SortOrder = Enum.SortOrder.LayoutOrder
-    SNPList.FillDirection = Enum.FillDirection.Horizontal
-    SNPList.VerticalAlignment = Enum.VerticalAlignment.Center
-    SNPList.Padding = UDim.new(0, 8)
-    SNPList.Parent = SubNavPills
-
-    -- Right: Search Box + Window Controls
+    -- Row 1 Right: Search + Minimize
     local HeaderRight = Instance.new("Frame")
     HeaderRight.Name = "HeaderRight"
     HeaderRight.Size = UDim2.new(0, 240, 1, 0)
     HeaderRight.Position = UDim2.new(1, -240, 0, 0)
     HeaderRight.BackgroundTransparency = 1
-    HeaderRight.Parent = Topbar
+    HeaderRight.ZIndex = 4
+    HeaderRight.Parent = HeaderTop
 
     local HRList = Instance.new("UIListLayout")
     HRList.FillDirection = Enum.FillDirection.Horizontal
     HRList.HorizontalAlignment = Enum.HorizontalAlignment.Right
     HRList.VerticalAlignment = Enum.VerticalAlignment.Center
-    HRList.Padding = UDim.new(0, 14)
+    HRList.Padding = UDim.new(0, 12)
     HRList.Parent = HeaderRight
 
     local HRPadding = Instance.new("UIPadding")
@@ -815,9 +817,10 @@ function VRSLibV2:CreateWindow(config)
     local SearchBox = Instance.new("Frame")
     SearchBox.Name = "SearchBox"
     SearchBox.Size = UDim2.new(0, 150, 0, 28)
-    SearchBox.BackgroundColor3 = VRSLibV2.Theme.InputBackground
-    SearchBox.BackgroundTransparency = VRSLibV2.Theme.InputTrans
+    SearchBox.BackgroundColor3 = Color3.fromRGB(18, 20, 27)
+    SearchBox.BackgroundTransparency = 0.35
     SearchBox.BorderSizePixel = 0
+    SearchBox.ZIndex = 5
     SearchBox.Parent = HeaderRight
 
     local SBCorner = Instance.new("UICorner")
@@ -825,7 +828,7 @@ function VRSLibV2:CreateWindow(config)
     SBCorner.Parent = SearchBox
 
     local SBStroke = Instance.new("UIStroke")
-    SBStroke.Color = VRSLibV2.Theme.InputStroke
+    SBStroke.Color = Color3.fromRGB(44, 48, 64)
     SBStroke.Thickness = 1
     SBStroke.Parent = SearchBox
 
@@ -834,7 +837,8 @@ function VRSLibV2:CreateWindow(config)
     SearchIcon.Position = UDim2.new(0, 10, 0.5, -6.5)
     SearchIcon.BackgroundTransparency = 1
     SearchIcon.Image = VRSLibV2.Icons.Get("search")
-    SearchIcon.ImageColor3 = VRSLibV2.Theme.TextMuted
+    SearchIcon.ImageColor3 = Color3.fromRGB(130, 135, 155)
+    SearchIcon.ZIndex = 5
     SearchIcon.Parent = SearchBox
 
     local SearchInput = Instance.new("TextBox")
@@ -843,12 +847,13 @@ function VRSLibV2:CreateWindow(config)
     SearchInput.BackgroundTransparency = 1
     SearchInput.Font = Enum.Font.GothamMedium
     SearchInput.PlaceholderText = "Search"
-    SearchInput.PlaceholderColor3 = VRSLibV2.Theme.TextMuted
+    SearchInput.PlaceholderColor3 = Color3.fromRGB(120, 125, 145)
     SearchInput.Text = ""
-    SearchInput.TextColor3 = VRSLibV2.Theme.TextPrimary
+    SearchInput.TextColor3 = Color3.fromRGB(248, 250, 255)
     SearchInput.TextSize = 12
     SearchInput.TextXAlignment = Enum.TextXAlignment.Left
     SearchInput.ClearTextOnFocus = false
+    SearchInput.ZIndex = 5
     SearchInput.Parent = SearchBox
     ProtectLocalization(SearchInput)
 
@@ -870,6 +875,7 @@ function VRSLibV2:CreateWindow(config)
     MinimizeBtn.Size = UDim2.fromOffset(26, 26)
     MinimizeBtn.BackgroundTransparency = 1
     MinimizeBtn.Text = ""
+    MinimizeBtn.ZIndex = 5
     MinimizeBtn.Parent = HeaderRight
 
     local MinIcon = Instance.new("ImageLabel")
@@ -877,29 +883,55 @@ function VRSLibV2:CreateWindow(config)
     MinIcon.Position = UDim2.new(0.5, -6.5, 0.5, -6.5)
     MinIcon.BackgroundTransparency = 1
     MinIcon.Image = VRSLibV2.Icons.Get("minus")
-    MinIcon.ImageColor3 = VRSLibV2.Theme.TextMuted
+    MinIcon.ImageColor3 = Color3.fromRGB(140, 145, 165)
+    MinIcon.ZIndex = 5
     MinIcon.Parent = MinimizeBtn
 
     MinimizeBtn.MouseEnter:Connect(function()
-        TweenService:Create(MinIcon, TweenInfo.new(0.15), { ImageColor3 = VRSLibV2.Theme.TextPrimary }):Play()
+        TweenService:Create(MinIcon, TweenInfo.new(0.15), { ImageColor3 = Color3.fromRGB(255, 255, 255) }):Play()
     end)
     MinimizeBtn.MouseLeave:Connect(function()
-        TweenService:Create(MinIcon, TweenInfo.new(0.15), { ImageColor3 = VRSLibV2.Theme.TextMuted }):Play()
+        TweenService:Create(MinIcon, TweenInfo.new(0.15), { ImageColor3 = Color3.fromRGB(140, 145, 165) }):Play()
     end)
     MinimizeBtn.MouseButton1Click:Connect(function()
         self:Toggle()
     end)
 
+    -- --- ROW 2: SUB-NAV PILLS (Positioned under Title matching Screenshot 2!) ---
+    local SubNavRow = Instance.new("Frame")
+    SubNavRow.Name = "SubNavRow"
+    SubNavRow.Size = UDim2.new(1, 0, 0, 36)
+    SubNavRow.Position = UDim2.new(0, 0, 0, 42)
+    SubNavRow.BackgroundTransparency = 1
+    SubNavRow.ZIndex = 4
+    SubNavRow.Parent = Topbar
+
+    local SubNavPills = Instance.new("Frame")
+    SubNavPills.Name = "SubNavPills"
+    SubNavPills.Size = UDim2.new(1, -36, 1, 0)
+    SubNavPills.Position = UDim2.new(0, 18, 0, 0)
+    SubNavPills.BackgroundTransparency = 1
+    SubNavPills.ZIndex = 4
+    SubNavPills.Parent = SubNavRow
+    self.SubNavPills = SubNavPills
+
+    local SNPList = Instance.new("UIListLayout")
+    SNPList.SortOrder = Enum.SortOrder.LayoutOrder
+    SNPList.FillDirection = Enum.FillDirection.Horizontal
+    SNPList.VerticalAlignment = Enum.VerticalAlignment.Center
+    SNPList.Padding = UDim.new(0, 8)
+    SNPList.Parent = SubNavPills
+
     -- ==============================================================================
-    -- MAIN CONTENT CONTAINER
+    -- 4. MAIN CONTENT CONTAINER (Starts cleanly at Y=78)
     -- ==============================================================================
     local Content = Instance.new("Frame")
     Content.Name = "Content"
-    Content.Size = UDim2.new(1, -70, 1, -52)
-    Content.Position = UDim2.new(0, 70, 0, 52)
+    Content.Size = UDim2.new(1, 0, 1, -78)
+    Content.Position = UDim2.new(0, 0, 0, 78)
     Content.BackgroundTransparency = 1
-    Content.ZIndex = 3
-    Content.Parent = Main
+    Content.ZIndex = 4
+    Content.Parent = MainContainer
     self.Content = Content
 
     -- Keybind Listener
@@ -959,14 +991,15 @@ function Window:AddTab(config)
     TBStroke.Thickness = 1
     TBStroke.Parent = TabBtn
 
-    -- 1:1 RECREATION: White/Neon Pink Vertical Pill Indicator on the FAR LEFT EDGE!
+    -- 1:1 RECREATION: White Vertical Pill Indicator on the INNER LEFT EDGE OF THE BUTTON!
     local Indicator = Instance.new("Frame")
     Indicator.Name = "ActiveIndicator"
     Indicator.Size = UDim2.new(0, 3.5, 0, 22)
-    Indicator.Position = UDim2.new(0, -6, 0.5, -11)
+    Indicator.Position = UDim2.new(0, 0, 0.5, -11)
     Indicator.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Indicator.BorderSizePixel = 0
     Indicator.Visible = false
+    Indicator.ZIndex = 6
     Indicator.Parent = TabBtn
 
     local ICorner = Instance.new("UICorner")
@@ -1098,14 +1131,15 @@ function Window:RenderSubNavPills(tabObj)
         for idx, sub in ipairs(tabObj.SubTabs) do
             local pill = Instance.new("TextButton")
             pill.Name = "Pill_" .. sub.Name
-            pill.Size = UDim2.new(0, 0, 0, 26)
+            pill.Size = UDim2.new(0, 0, 0, 28)
             pill.AutomaticSize = Enum.AutomaticSize.X
-            pill.BackgroundColor3 = (sub.Active and Color3.fromRGB(30, 33, 46) or Color3.fromRGB(20, 22, 30))
-            pill.BackgroundTransparency = (sub.Active and 0.25 or 0.7)
+            pill.BackgroundColor3 = Color3.fromRGB(28, 31, 44)
+            pill.BackgroundTransparency = (sub.Active and 0.25 or 1)
             pill.BorderSizePixel = 0
             pill.Text = ""
             pill.AutoButtonColor = false
             pill.LayoutOrder = sub.LayoutOrder or idx
+            pill.ZIndex = 5
             pill.Parent = self.SubNavPills
 
             local pCorner = Instance.new("UICorner")
@@ -1113,8 +1147,8 @@ function Window:RenderSubNavPills(tabObj)
             pCorner.Parent = pill
 
             local pStroke = Instance.new("UIStroke")
-            pStroke.Color = (sub.Active and Color3.fromRGB(70, 75, 100) or Color3.fromRGB(44, 48, 64))
-            pStroke.Transparency = (sub.Active and 0.4 or 0.7)
+            pStroke.Color = Color3.fromRGB(55, 60, 80)
+            pStroke.Transparency = (sub.Active and 0.45 or 1)
             pStroke.Thickness = 1
             pStroke.Parent = pill
 
@@ -1131,10 +1165,11 @@ function Window:RenderSubNavPills(tabObj)
 
             if sub.Icon then
                 local pIcon = Instance.new("ImageLabel")
-                pIcon.Size = UDim2.fromOffset(13, 13)
+                pIcon.Size = UDim2.fromOffset(14, 14)
                 pIcon.BackgroundTransparency = 1
                 pIcon.Image = VRSLibV2.Icons.Get(sub.Icon)
-                pIcon.ImageColor3 = (sub.Active and Color3.fromRGB(255, 255, 255) or VRSLibV2.Theme.TextMuted)
+                pIcon.ImageColor3 = (sub.Active and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(150, 155, 175))
+                pIcon.ZIndex = 5
                 pIcon.Parent = pill
             end
 
@@ -1144,8 +1179,9 @@ function Window:RenderSubNavPills(tabObj)
             pText.BackgroundTransparency = 1
             pText.Text = sub.Name
             pText.Font = Enum.Font.GothamBold
-            pText.TextSize = 11
-            pText.TextColor3 = (sub.Active and Color3.fromRGB(255, 255, 255) or VRSLibV2.Theme.TextSecondary)
+            pText.TextSize = 11.5
+            pText.TextColor3 = (sub.Active and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(150, 155, 175))
+            pText.ZIndex = 5
             pText.Parent = pill
             ProtectLocalization(pText)
 
@@ -2791,10 +2827,12 @@ function Window:BindTabMethods(TabObj)
                 isOpen = not isOpen
                 if isOpen then
                     local absPos = Trigger.AbsolutePosition
-                    local mainPos = self.Window.MainFrame.AbsolutePosition
+                    local container = self.Window.MainContainer or self.Window.MainFrame
+                    local mainPos = container.AbsolutePosition
                     local relX = absPos.X - mainPos.X
                     local relY = absPos.Y - mainPos.Y + Trigger.AbsoluteSize.Y + 4
 
+                    DropMenu.Parent = container
                     DropMenu.Position = UDim2.fromOffset(relX, relY)
                     local menuHeight = math.min(#options * 28 + 6, 140)
                     DropMenu.Size = UDim2.new(0, Trigger.AbsoluteSize.X, 0, menuHeight)
