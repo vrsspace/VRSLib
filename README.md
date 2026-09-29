@@ -53,7 +53,7 @@ Proprietary, modular Roblox Luau UI Library engineered for **VRS Artelier**, fea
 
 ## 🚀 Cara Menjalankan
 
-### Melalui Executor (Raw GitHub) - VRSLib V1
+### Melalui Executor (Raw GitHub)
 ```lua
 local repo = "https://raw.githubusercontent.com/vrsspace/VRSLib/main/"
 local VRSLib = loadstring(game:HttpGet(repo .. "VRSLib.lua?v=" .. tick()))()
@@ -68,16 +68,8 @@ local Window = VRSLib:CreateWindow({
 })
 ```
 
----
-
-## 🌸 VRSLib V2 (Next-Gen Obsidian & Neon Pink)
-
-Engine V2 terbaru dengan tampilan modern hub, floating sidebar, horizontal sub-nav pills, full dashboard suite (User card, 6-box stats, game info, server actions, warning banner, links), groupbox, dan streamer mode!
-
-📖 **[Baca Dokumentasi V2 Lengkap (DOCUMENTATION_V2.md)](./DOCUMENTATION_V2.md)**
-
-### Menjalankan VRSLib V2 Showcase
-Eksekusi 1 baris ini di executor Anda:
+### Menjalankan Showcase Lengkap (47 Modules)
+Tinggal eksekusi 1 baris ini di executor Anda:
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/vrsspace/VRSLib/main/ExampleV2.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/vrsspace/VRSLib/v1.2.5/Example.lua"))()
 ```

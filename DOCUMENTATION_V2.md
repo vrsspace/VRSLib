@@ -1,245 +1,236 @@
-# 🌸 VRSLib V2 — Developer Documentation & API Reference
+# ⬛ VRS Mono Engine (V2 Reborn) — Documentation
 
-Dokumentasi resmi untuk **VRSLib V2 (`VRSLibV2.lua`)** — Engine UI Roblox generasi terbaru dengan desain **Matte Obsidian (#0F1015) & Signature Neon Pink (#FF408C)** yang terinspirasi 1:1 dari UI modern hub (Ouroboros / Slayer 2 design language).
+Modern Roblox Luau UI Library engineered with 1:1 precision according to the minimalist dark design specifications:
+* **Solid Charcoal Abu-Abu Body** (`#131419`, pure solid matte finish, no unwanted transparent gradients).
+* **Floating Frosted Glass Sidebar** (`#0E0F14`, `0.22` translucency with specular glass sheen).
+* **Top-Left Brand Logo** (VRS Wings emblem `rbxassetid://132717088484517` inside a rounded container).
+* **Active Tab Capsule Indicator** (Sleek pure white vertical pill on the left edge).
+* **Bottom Profile Footer** (Circular headshot avatar with emerald green online status indicator dot).
+* **Strict Monochrome Palette** (Charcoal, dark slate, and pure white accents — zero neon pink).
+* **Unified Drag Container** (Zero detached shadow frames, no double-window visual bugs).
+* **Embedded Lucide Icon Engine** (100+ high-frequency icons embedded directly).
 
 ---
 
-## 🎨 Desain & Tampilan Utama
+## 📂 Struktur File
 
-1. **Floating Left Sidebar (76px)**:
-   - Logo Wings / emblem di bagian atas dengan efek hover glow.
-   - Tombol tab vertikal (58x50px) dengan **Active Indicator Bar** (vertical neon pink pill) di sisi kiri saat tab aktif.
-   - User Profile Card di bagian bawah sidebar dengan headshot thumbnail pemain, online green status dot, dan nama pemain.
-2. **Modern Top Header**:
-   - Icon tab aktif + judul utama dinamis ("Welcome to <GameName>!").
-   - **Horizontal Sub-Nav Pills**: Menu sub-tab horizontal (seperti `[ ⊞ Overview ]`, `[ ▷ Main Menu ]`, `[ ⚔ Quests & Mobs ]`, dll.).
-   - Search Bar kapsul responsif dengan auto-filter.
-   - Kontrol Window minimalis: Minimize (`—`) dan Close / Unload (`✕`).
-3. **Full Dashboard Suite (Screenshot 1)**:
-   - **User Welcome Card**: Avatar bulat besar, display name, handle `@username`, version badge (`⚔ v0.141`), serta switch streamer mode (`Name` & `Profile`).
-   - **6-Box Quick Stat Grid**: Players, Friends, Execs, Session timer (live), FPS counter (live 60/240), dan Ping (live ms).
-   - **Game Information Card**: Thumbnail game, nama game, creator, Job ID, Place ID, Universe ID, serta tombol server action (`Rejoin`, `Server Hop`, `Copy Job ID`, `Copy Universe`, `Join Lowest Server`).
-   - **Warning / Notice Banner**: Shield icon dengan warna status (oranye/pink), deskripsi, dan hotkey pill (`RCtrl to hide`).
-   - **Two-Column Quick Links**: Kartu Discord komunitas dan link game yang didukung dengan tombol copy.
-   - **Feature List Card**: Ringkasan jumlah fitur dan tab dengan tombol action.
-4. **Groupbox & Dual-Column Section Suite (Screenshot 2 / Farm & Combat)**:
-   - 2-Kolom fleksibel dengan collapsible groupboxes.
-   - Komponen: Animated Neon Pink Pill Toggle, Numeric Sliders, Action Buttons, Inline Searchable Dropdowns (Single & Multi-Select), Text Inputs, Keybinds, dll.
-5. **Mobile & Viewport Auto-Scaling**:
-   - `UIScale` otomatis mendeteksi ukuran layar sehingga window tidak pernah terpotong di layar HP/tablet.
-   - Floating logo button yang draggable saat window di-minimize.
+```
+[ UI LIB ]/
+├── VRSLibV2.lua           # Master UI Library Engine (Mono V2 Reborn)
+├── ExampleV2.lua          # General Component Test Script
+├── DOCUMENTATION_V2.md    # Panduan & Dokumentasi Lengkap
+└── src/
+    └── Icons.lua          # Full Lucide Icon Engine
+```
 
 ---
 
 ## 🚀 Cara Menjalankan
 
-### 1. Menjalankan Showcase Lengkap (`ExampleV2.lua`)
-Di executor Anda:
-```lua
--- Jalankan file lokal
-loadstring(readfile("ExampleV2.lua"))()
+### Melalui Executor (Synapse / Wave / Solara / dll.)
 
--- Atau via link raw GitHub setelah push
--- loadstring(game:HttpGet("https://raw.githubusercontent.com/.../ExampleV2.lua"))()
-```
+Pastikan file `VRSLibV2.lua` berada di folder workspace executor Anda atau di dalam path `[ UI LIB ]/VRSLibV2.lua`.
 
-### 2. Import & Inisialisasi Manual
 ```lua
 local VRSLibV2 = loadstring(readfile("VRSLibV2.lua"))()
 
 local Window = VRSLibV2:CreateWindow({
-    Title    = "auto", -- Otomatis menjadi "Welcome to <GameName>!"
-    SubTitle = "v0.141",
+    Title    = "auto", -- Otomatis: "Welcome to <GameName>!"
+    SubTitle = "v0.167",
     Size     = UDim2.fromOffset(1020, 620),
-    Accent   = Color3.fromRGB(255, 64, 140), -- VRS Signature Neon Pink
     Keybind  = Enum.KeyCode.RightControl
 })
 ```
 
 ---
 
-## 📑 API Reference
+## 🧭 Navigasi Sidebar & Sub-Tabs
 
-### `Window:AddTab(config)`
-Menambahkan tab navigasi ke sidebar kiri.
+### 1. Menambahkan Tab Sidebar
+Sidebar otomatis menampilkan logo Wings di kiri atas, daftar tab dengan indikator kapsul putih di sisi kiri tab yang sedang aktif, serta widget profil dengan titik hijau di bagian bawah.
+
 ```lua
-local TabHome = Window:AddTab({
-    Name = "Home",
-    Icon = "home", -- Nama icon Lucide
-    LayoutOrder = 1
+local TabHome     = Window:AddTab({ Name = "Home",     Icon = "home",     HeaderTitle = "auto" })
+local TabControls = Window:AddTab({ Name = "Controls", Icon = "sliders",  HeaderTitle = "Component Testing" })
+local TabSettings = Window:AddTab({ Name = "Settings", Icon = "settings", HeaderTitle = "System Configuration" })
+```
+
+### 2. Menambahkan Sub-Tab (Horizontal Pill Bar di Header)
+Sub-tab akan dirender horizontal di bawah judul jendela (`[田 Overview] [▷ Main Menu]`):
+
+```lua
+local SubOverview = TabHome:AddSubTab({ Name = "Overview",  Icon = "overview" })
+local SubMenu     = TabHome:AddSubTab({ Name = "Main Menu", Icon = "menu" })
+```
+
+---
+
+## 📊 Dashboard & Status Components
+
+### 1. Profile / Hero Card
+Menampilkan avatar pemain saat ini, nama display, handle username, dan badge versi di kanan atas:
+```lua
+SubOverview:AddProfileCard({
+    Badge = "v0.167"
 })
 ```
 
-### `Tab:AddSubTab(config)`
-Menambahkan sub-tab horizontal di topbar (seperti `Overview` atau `Main Menu`).
+### 2. Live Stat Row
+Menampilkan deretan kartu stat horizontal interaktif (Players, Friends, Execs, Session, FPS, Ping) yang nilainya dapat di-update secara live:
 ```lua
-local SubOverview = TabHome:AddSubTab({
-    Name = "Overview",
-    Icon = "grid"
+local Stats = SubOverview:AddStatRow({
+    { Title = "Players", Value = "1/1",     Icon = "players" },
+    { Title = "Friends", Value = "0",       Icon = "friends" },
+    { Title = "Execs",   Value = "5",       Icon = "execs" },
+    { Title = "Session", Value = "0m 00s",  Icon = "session" },
+    { Title = "FPS",     Value = "240",     Icon = "fps" },
+    { Title = "Ping",    Value = "28ms",    Icon = "ping" }
 })
+
+-- Update nilai secara live:
+Stats["FPS"].UpdateValue("245")
+Stats["Ping"].UpdateValue("18ms")
 ```
 
-### Dashboard Elements (Dipanggil pada Tab atau SubTab)
-
-#### 1. `AddUserCard(config)`
-```lua
-SubOverview:AddUserCard({
-    Greeting    = "Welcome back,",
-    DisplayName = "NcangRowenss",
-    Username    = "ZyrexDiandra",
-    Version     = "v0.141",
-    LayoutOrder = 1
-})
-```
-
-#### 2. `AddStatGrid(config)`
-Membuat 6 kotak stat live:
-```lua
-SubOverview:AddStatGrid({
-    LayoutOrder = 2
-})
-```
-
-#### 3. `AddGameCard(config)`
-```lua
-SubOverview:AddGameCard({
-    GameName    = "Slayers 2",
-    Creator     = "Ouw Productions",
-    LayoutOrder = 3
-})
-```
-
-#### 4. `AddBanner(config)`
+### 3. Notice / Warning Banner
+Kartu notifikasi dengan icon perisai kuning/emas, deskripsi, dan tombol badge di sebelah kanan:
 ```lua
 SubOverview:AddBanner({
-    Title       = "Madium",
-    Description = "Not on the supported list. Some features may not work.",
-    Icon        = "shield",
-    Color       = Color3.fromRGB(255, 175, 60),
-    Badge       = "RCtrl to hide",
-    LayoutOrder = 4
+    Title   = "Mono Engine",
+    Message = "Pure monochrome aesthetic active. Frosted glass floating sidebar enabled.",
+    Icon    = "shield",
+    Badge   = "RCtrl to hide"
 })
 ```
 
-#### 5. `AddLinksRow(config)`
+### 4. InfoRow (Key-Value Row dengan Tombol Aksi)
+Sangat cocok untuk link Discord, tautan website, atau informasi konfigurasi:
 ```lua
-SubOverview:AddLinksRow({
-    Left = {
-        Title      = "Join the community",
-        Subtitle   = "https://discord.gg/synapsex",
-        ButtonText = "Copy Invite",
-        Icon       = "message-square",
-        Url        = "https://discord.gg/synapsex"
-    },
-    Right = {
-        Title      = "Supported games",
-        Subtitle   = "https://ouroboros-hub-rbx.web.app/",
-        ButtonText = "Copy Website",
-        Icon       = "monitor",
-        Url        = "https://ouroboros-hub-rbx.web.app/"
-    },
-    LayoutOrder = 5
-})
-```
-
-#### 6. `AddFeatureList(config)`
-```lua
-SubOverview:AddFeatureList({
-    Title      = "Feature list",
-    Subtitle   = "7 features across 2 tabs",
-    ButtonText = "View Features",
-    Icon       = "list",
-    Callback   = function() print("Open features") end,
-    LayoutOrder = 6
+MyGroupbox:AddInfoRow({
+    Name       = "Join the community",
+    Value      = "https://discord.gg/synapsex",
+    Icon       = "globe",
+    ButtonText = "Copy Invite",
+    Callback   = function(val)
+        if setclipboard then setclipboard(val) end
+        Window:Notify({ Title = "Success", Description = "Link copied!" })
+    end
 })
 ```
 
 ---
 
-### Section & Groupbox Suite (Untuk Tab Farm, Combat, dll.)
+## 🎛️ Interactive Controls (Groupbox Components)
 
-#### 1. `AddColumns()`
-Membagi halaman menjadi 2 kolom:
+Buat kontainer groupbox terlebih dahulu:
 ```lua
-local LeftCol, RightCol = TabFarm:AddColumns()
+local Box = SubOverview:AddGroupbox({ Title = "General Settings", Icon = "sliders" })
 ```
 
-#### 2. `AddGroupbox(config)`
+### 1. Toggle / Switch (Pill iOS Monochrome)
+Knob halus, background putih saat ON dan abu-abu gelap saat OFF:
 ```lua
-local Box = LeftCol:AddGroupbox({
-    Title = "Auto Leveling",
-    Icon  = "swords"
-})
-```
-
-#### 3. `Box:AddToggle(config)`
-```lua
-local myToggle = Box:AddToggle({
-    Name     = "Auto Quest Farm",
+local Toggle = Box:AddToggle({
+    Name     = "Auto Attack",
     Default  = false,
     Callback = function(enabled)
-        print("Toggle:", enabled)
+        print("State:", enabled)
     end
 })
+
+Toggle:SetValue(true) -- Mengubah state secara programmatik
+print(Toggle:GetValue())
 ```
 
-#### 4. `Box:AddSlider(config)`
+### 2. Slider (dengan Value Pill Badge)
+Dilengkapi value pill badge di kanan atas (`50%` / `10s`), track bar halus, dan knob draggable:
 ```lua
-local mySlider = Box:AddSlider({
-    Name      = "Attack Distance",
-    Min       = 5,
-    Max       = 50,
-    Default   = 15,
-    Suffix    = " studs",
-    Precision = 0,
-    Callback  = function(val)
-        print("Distance:", val)
+local Slider = Box:AddSlider({
+    Name     = "WalkSpeed",
+    Min      = 16,
+    Max      = 250,
+    Default  = 32,
+    Step     = 1,
+    Suffix   = " spd",
+    Callback = function(val)
+        print("Speed:", val)
     end
 })
+
+Slider:SetValue(50)
+print(Slider:GetValue())
 ```
 
-#### 5. `Box:AddDropdown(config)`
-Single select atau multi-select dengan inline bar & search:
+### 3. Inline Drop Bar (Dropdown)
+Mendukung single select maupun multi select dengan menu popout mengambang yang halus:
 ```lua
 -- Single Select
-Box:AddDropdown({
-    Name     = "Target Mob",
-    Options  = { "Bandit", "Demon", "Slayer" },
-    Default  = "Bandit",
+local Dropdown = Box:AddDropdown({
+    Name     = "Target Mode",
+    Items    = { "Closest Distance", "Lowest HP", "Highest Level" },
+    Default  = "Closest Distance",
+    Multi    = false,
     Callback = function(selected)
-        print("Target:", selected)
+        print("Selected:", selected)
     end
 })
 
 -- Multi Select
-Box:AddDropdown({
-    Name     = "Filter Rarities",
-    Options  = { "Common", "Rare", "Epic", "Legendary" },
-    Default  = { ["Legendary"] = true },
+local MultiDrop = Box:AddDropdown({
+    Name     = "Active Zones",
+    Items    = { "Village", "Cave", "Forest", "Mountain" },
+    Default  = { "Village", "Cave" },
     Multi    = true,
-    Callback = function(selectedTbl)
-        print("Updated:", selectedTbl)
+    Callback = function(selectedList)
+        print("Selected zones:", table.concat(selectedList, ", "))
     end
 })
 ```
 
-#### 6. `Box:AddButton(config)`
+### 4. Input Box (TextBox)
+Input teks modern dengan placeholder dan highlight fokus:
+```lua
+local Input = Box:AddInput({
+    Name        = "Target Name",
+    Placeholder = "e.g. Demon King",
+    Default     = "",
+    Callback    = function(text, enterPressed)
+        print("Entered:", text)
+    end
+})
+```
+
+### 5. Action Button
+Tombol interaktif dengan efek hover dan animasi klik:
 ```lua
 Box:AddButton({
     Name     = "Execute Action",
-    Icon     = "zap",
     Callback = function()
-        print("Button clicked!")
+        print("Button pressed!")
     end
 })
 ```
 
-#### 7. Toast Notification: `VRSLibV2:Notify(config)`
+### 6. Keybind
+Badge tombol interaktif yang dapat di-rebind secara realtime:
 ```lua
-VRSLibV2:Notify({
-    Title       = "VRS Artelier V2",
-    Description = "Config saved successfully!",
-    Duration    = 3.5,
-    Icon        = "check"
+local Keybind = Box:AddKeybind({
+    Name     = "Quick Teleport",
+    Default  = Enum.KeyCode.F,
+    Callback = function(key)
+        print("Key pressed:", key.Name)
+    end
+})
+```
+
+---
+
+## 🔔 Sistem Notifikasi
+
+```lua
+Window:Notify({
+    Title       = "Information",
+    Description = "Action completed successfully.",
+    Duration    = 3
 })
 ```

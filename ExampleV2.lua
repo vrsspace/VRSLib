@@ -1,260 +1,384 @@
 --[[
     ==============================================================================
-    🌸 VRSLib V2 SHOWCASE — 1:1 RECREATION OF TARGET SCREENSHOT
+    ⬛ VRS MONO ENGINE (V2) — GENERAL COMPONENT TEST SHOWCASE
     ==============================================================================
-    Execute this script in your executor.
-    Features signature Liquid Frosted Glass + Matte Obsidian (#0F1015) + Neon Pink!
+    Design: 1:1 Recreation of Target Design in Strict Monochrome
+      * Solid Charcoal Abu-Abu Window (#131419, Matte Finish)
+      * Floating Frosted Glass Sidebar (#0E0F14, 0.22 Translucency)
+      * Top-Left VRS Wings Brand Logo (rbxassetid://132717088484517)
+      * White Vertical Pill Active Indicator on Tab Left Edge
+      * Profile Avatar with Emerald Online Status Dot
+      * Pure Monochrome Theme (White Accents, Slate Borders, Zero Neon)
+      * Sub-Tabs Pill Bar ([田 Overview] [▷ Main Menu])
+      * General Component Testing (Toggles, Sliders, Drop Bars, Inputs, Buttons)
     ==============================================================================
 ]]
 
--- Anti-multi execution & clean ghost windows
-if _G.VRSV2_UNLOAD then pcall(_G.VRSV2_UNLOAD) end
-if _G.VRS_UNLOAD then pcall(_G.VRS_UNLOAD) end
+-- Anti-multi execution & clean lingering instances
+if _G.VRS_MONO_UNLOAD then pcall(_G.VRS_MONO_UNLOAD) end
+
+-- 1. Load Engine (Multi-path fallback: local executor folder, subfolders, or raw)
+local VRSLibV2
 pcall(function()
-    local CoreGui = game:GetService("CoreGui")
-    local Players = game:GetService("Players")
-    local lp = Players.LocalPlayer
-    local targets = {}
-    if gethui then table.insert(targets, gethui()) end
-    if CoreGui then table.insert(targets, CoreGui) end
-    if lp and lp:FindFirstChild("PlayerGui") then table.insert(targets, lp.PlayerGui) end
-    for _, container in ipairs(targets) do
-        for _, child in ipairs(container:GetChildren()) do
-            if child:IsA("ScreenGui") then
-                local nm = child.Name:lower()
-                if nm:find("vrs") or nm:find("artelier") then
-                    child:Destroy()
+    if readfile then
+        local paths = {
+            "VRSLibV2.lua",
+            "[ UI LIB ]/VRSLibV2.lua",
+            "d:/Data Project's/Roblox Project/[ UI LIB ]/VRSLibV2.lua"
+        }
+        for _, p in ipairs(paths) do
+            local ok, content = pcall(readfile, p)
+            if ok and content and #content > 0 then
+                local fn, err = loadstring(content)
+                if fn then
+                    VRSLibV2 = fn()
+                    break
                 end
             end
         end
     end
 end)
 
-
--- 1. Load VRSLibV2 (Local file fallback for instant execution + Raw GitHub fallback)
-local VRSLibV2
-pcall(function()
-    if readfile then
-        local localCode = readfile("VRSLibV2.lua")
-        if localCode and #localCode > 0 then
-            VRSLibV2 = loadstring(localCode)()
-        end
-    end
-end)
+-- Fallback to GitHub repository if running remotely
 if not VRSLibV2 then
     pcall(function()
         local raw = game:HttpGet("https://raw.githubusercontent.com/vrsspace/VRSLib/main/VRSLibV2.lua?v=" .. tick())
-        VRSLibV2 = loadstring(raw)()
+        local fn = loadstring(raw)
+        if fn then VRSLibV2 = fn() end
     end)
 end
+
 if not VRSLibV2 then
-    error("[VRSLibV2] Unable to load VRSLibV2 engine.")
+    error("[VRSLibV2] Failed to load VRSLibV2 engine. Ensure VRSLibV2.lua is in your executor workspace.")
 end
 
 -- 2. Create Window
 local Window = VRSLibV2:CreateWindow({
-    Title    = "auto", -- Otomatis menjadi "Welcome to <GameName>!" (e.g. Welcome to Slayer 2!)
-    SubTitle = "v0.141",
+    Title    = "auto", -- Otomatis: "Welcome to <GameName>!"
+    SubTitle = "v0.167",
     Size     = UDim2.fromOffset(1020, 620),
-    Accent   = Color3.fromRGB(255, 64, 140), -- VRS Signature Neon Pink (#FF408C)
-    Keybind  = Enum.KeyCode.RightControl,
-    Logo     = "wings"
+    Keybind  = Enum.KeyCode.RightControl
 })
 
-Window.OnUnload = function()
-    _G.VRSV2_ACTIVE = false
-    print("[VRSLibV2] Unloaded successfully.")
-end
-_G.VRSV2_UNLOAD = Window.OnUnload
-_G.VRSV2_ACTIVE = true
-
 -- ==============================================================================
--- 3. SIDEBAR NAVIGATION TABS (1:1 Matching Screenshot)
+-- TAB 1: HOME (Dashboard, Overview & Main Menu)
 -- ==============================================================================
-local TabHome     = Window:AddTab({ Name = "Home",     Icon = "home",     LayoutOrder = 1 })
-local TabClan     = Window:AddTab({ Name = "Clan",     Icon = "shield",   LayoutOrder = 2 })
-local TabSettings = Window:AddTab({ Name = "Settings", Icon = "settings", LayoutOrder = 3 })
-
--- ==============================================================================
--- 4. HOME TAB (Screenshot 1: 100% Identical Recreation)
--- ==============================================================================
-
--- Horizontal Sub-Nav Pills in Topbar (Overview is first and active, Main Menu is second)
-local SubOverview = TabHome:AddSubTab({ Name = "Overview",  Icon = "grid", LayoutOrder = 1 })
-local SubMainMenu = TabHome:AddSubTab({ Name = "Main Menu", Icon = "play", LayoutOrder = 2 })
-
--- 1. User Banner Card (Avatar headshot, greetings, display name, handle, streamer mode)
-SubOverview:AddUserCard({
-    Greeting    = "Welcome back,",
-    DisplayName = game:GetService("Players").LocalPlayer.DisplayName,
-    Username    = game:GetService("Players").LocalPlayer.Name,
-    Version     = "v0.141",
-    LayoutOrder = 1
+local TabHome = Window:AddTab({
+    Name = "Home",
+    Icon = "home",
+    HeaderTitle = "auto"
 })
 
--- 2. 6-Box Stat Grid (Strict Order: Players, Friends, Execs, Session, FPS, Ping)
-SubOverview:AddStatGrid({
-    LayoutOrder = 2
+-- SubTab 1: Overview
+local SubOverview = TabHome:AddSubTab({
+    Name = "Overview",
+    Icon = "overview"
 })
 
--- 3. Game Info Card & Server Action Buttons
-SubOverview:AddGameCard({
-    GameName    = Window.GameName,
-    Creator     = "Ouw Productions",
-    LayoutOrder = 3
+-- Hero / Profile Card
+SubOverview:AddProfileCard({
+    Badge = "v0.167"
 })
 
--- 4. Unsupported Place / Status Warning Banner
+-- Live Stat Row (Players, Friends, Execs, Session, FPS, Ping)
+local Stats = SubOverview:AddStatRow({
+    { Title = "Players", Value = "1/1",     Icon = "players" },
+    { Title = "Friends", Value = "0",       Icon = "friends" },
+    { Title = "Execs",   Value = "5",       Icon = "execs" },
+    { Title = "Session", Value = "0m 00s",  Icon = "session" },
+    { Title = "FPS",     Value = "240",     Icon = "fps" },
+    { Title = "Ping",    Value = "27ms",    Icon = "ping" }
+})
+
+-- Live Session Timer & FPS / Ping Update Loop
+task.spawn(function()
+    local startTime = tick()
+    local lastFpsTime = tick()
+    local frameCount = 0
+
+    local RunService = game:GetService("RunService")
+    local StatsService = game:GetService("Stats")
+
+    RunService.RenderStepped:Connect(function()
+        frameCount = frameCount + 1
+        local now = tick()
+        if now - lastFpsTime >= 1 then
+            local fps = math.round(frameCount / (now - lastFpsTime))
+            if Stats["FPS"] then Stats["FPS"].UpdateValue(fps) end
+            frameCount = 0
+            lastFpsTime = now
+
+            -- Session duration
+            local elapsed = math.floor(now - startTime)
+            local mins = math.floor(elapsed / 60)
+            local secs = elapsed % 60
+            if Stats["Session"] then
+                Stats["Session"].UpdateValue(string.format("%dm %02ds", mins, secs))
+            end
+
+            -- Ping
+            pcall(function()
+                local pingVal = math.round(StatsService.Network.ServerStatsItem["Data Ping"]:GetValue())
+                if Stats["Ping"] then Stats["Ping"].UpdateValue(pingVal .. "ms") end
+            end)
+        end
+    end)
+end)
+
+-- Notice Banner
 SubOverview:AddBanner({
-    Title       = "Madium",
-    Description = "Not on the supported list. Some features may not work.",
-    Icon        = "shield-alert",
-    Color       = Color3.fromRGB(255, 175, 60),
-    Badge       = "RCtrl to hide",
-    LayoutOrder = 4
+    Title   = "Mono Engine",
+    Message = "Pure monochrome aesthetic active. Frosted glass floating sidebar enabled.",
+    Icon    = "shield",
+    Badge   = "RCtrl to hide"
 })
 
--- 5. Two-Column Quick Links (Discord Community & Supported Games)
-SubOverview:AddLinksRow({
-    Left = {
-        Title       = "Join the community",
-        Subtitle    = "https://discord.gg/synapsex",
-        ButtonText  = "Copy Invite",
-        Icon        = "message-square",
-        Url         = "https://discord.gg/synapsex"
-    },
-    Right = {
-        Title       = "Supported games",
-        Subtitle    = "https://ouroboros-hub-rbx.web.app/",
-        ButtonText  = "Copy Website",
-        Icon        = "monitor",
-        Url         = "https://ouroboros-hub-rbx.web.app/"
-    },
-    LayoutOrder = 5
-})
+-- Quick Links & Information Rows
+local QuickGroup = SubOverview:AddGroupbox({ Title = "Community & Support", Icon = "globe" })
 
--- 6. Feature List Summary Card
-SubOverview:AddFeatureList({
-    Title       = "Feature list",
-    Subtitle    = "7 features across 2 tabs",
-    ButtonText  = "View Features",
-    Icon        = "list-checks",
-    Callback    = function()
-        Window:Notify({
-            Title = "Features",
-            Description = "Showing 7 active features for " .. Window.GameName,
-            Duration = 3,
-            Icon = "list"
-        })
-    end,
-    LayoutOrder = 6
-})
-
--- SubMainMenu content (Quick Actions)
-local mmLeft, mmRight = SubMainMenu:AddColumns()
-local mmGeneral = mmLeft:AddGroupbox({ Title = "Quick Actions", Icon = "zap" })
-mmGeneral:AddButton({
-    Name = "Re-Execute Hub",
-    Icon = "refresh-cw",
-    Callback = function()
-        Window:Notify({ Title = "System", Description = "Reloading VRS Artelier V2...", Duration = 2.5 })
+QuickGroup:AddInfoRow({
+    Name       = "Join the community",
+    Value      = "https://discord.gg/synapsex",
+    Icon       = "users",
+    ButtonText = "Copy Invite",
+    Callback   = function(val)
+        if setclipboard then setclipboard(val) end
+        Window:Notify({ Title = "Clipboard", Description = "Discord invite link copied to clipboard!" })
     end
 })
-mmGeneral:AddButton({
-    Name = "Unload Hub",
-    Icon = "close",
-    Callback = function()
-        Window:Unload()
+
+QuickGroup:AddInfoRow({
+    Name       = "Supported games",
+    Value      = "https://ouroboros-hub-rbx.web.app/",
+    Icon       = "box",
+    ButtonText = "Copy Website",
+    Callback   = function(val)
+        if setclipboard then setclipboard(val) end
+        Window:Notify({ Title = "Clipboard", Description = "Website URL copied to clipboard!" })
     end
 })
+
+QuickGroup:AddInfoRow({
+    Name       = "Feature list",
+    Value      = "Modular components tested across all categories",
+    Icon       = "list",
+    ButtonText = "View Info",
+    Callback   = function()
+        Window:Notify({ Title = "Information", Description = "Mono V2 Engine loaded with 100% component coverage." })
+    end
+})
+
+-- SubTab 2: Main Menu (Component Testing in Home)
+local SubMenu = TabHome:AddSubTab({
+    Name = "Main Menu",
+    Icon = "menu"
+})
+
+local GeneralBox = SubMenu:AddGroupbox({ Title = "Quick Actions", Icon = "zap" })
+
+GeneralBox:AddToggle({
+    Name     = "Enable Quick Farm",
+    Default  = false,
+    Callback = function(val)
+        print("[Toggle] Quick Farm:", val)
+    end
+})
+
+GeneralBox:AddSlider({
+    Name     = "Speed Multiplier",
+    Min      = 1,
+    Max      = 10,
+    Default  = 2,
+    Step     = 1,
+    Suffix   = "x",
+    Callback = function(val)
+        print("[Slider] Speed:", val)
+    end
+})
+
+GeneralBox:AddButton({
+    Name     = "Trigger Instant Rejoin",
+    Callback = function()
+        Window:Notify({ Title = "Server", Description = "Rejoining server..." })
+    end
+})
+
 
 -- ==============================================================================
--- 5. CLAN TAB (Dual-Column Sections with Toggles, Sliders, Dropdowns)
+-- TAB 2: COMPONENT TESTING (Toggles, Sliders, Dropdowns, Inputs, Buttons)
 -- ==============================================================================
-local clanLeft, clanRight = TabClan:AddColumns()
+local TabControls = Window:AddTab({
+    Name = "Controls",
+    Icon = "sliders",
+    HeaderTitle = "Component Testing & Controls"
+})
 
-local boxReroll = clanLeft:AddGroupbox({ Title = "Clan Spin & Reroll", Icon = "swords" })
-boxReroll:AddToggle({
-    Name = "Auto Spin Rare Clan",
-    Default = false,
-    Callback = function(val)
-        print("Auto Spin:", val)
-    end
+local SubToggles = TabControls:AddSubTab({
+    Name = "Switches & Sliders",
+    Icon = "sliders"
 })
-boxReroll:AddDropdown({
-    Name = "Target Clans",
-    Options = { "Kamado", "Tsugikuni", "Rengoku", "Tomioka", "Hashibira", "Agatsuma" },
-    Default = { ["Kamado"] = true, ["Tsugikuni"] = true },
-    Multi = true,
-    Callback = function(selected)
-        print("Target clans updated.")
-    end
-})
-boxReroll:AddSlider({
-    Name = "Spin Delay",
-    Min = 0.1,
-    Max = 2.0,
-    Default = 0.5,
-    Precision = 1,
-    Suffix = "s",
-    Callback = function(val)
-        print("Spin Delay:", val)
+
+-- Groupbox 1: Switches
+local BoxSwitches = SubToggles:AddGroupbox({ Title = "Pill Switches (iOS Mono)", Icon = "sliders" })
+
+BoxSwitches:AddToggle({
+    Name     = "Auto Attack Mobs",
+    Default  = true,
+    Callback = function(v)
+        print("[Toggle] Auto Attack:", v)
     end
 })
 
-local boxBuffs = clanRight:AddGroupbox({ Title = "Clan Passive Buffs", Icon = "shield" })
-boxBuffs:AddToggle({
-    Name = "Auto Activate Sun Breathing",
-    Default = true,
-    Callback = function(val)
-        print("Sun Breathing:", val)
+BoxSwitches:AddToggle({
+    Name     = "Auto Collect Drops",
+    Default  = false,
+    Callback = function(v)
+        print("[Toggle] Auto Collect:", v)
     end
 })
-boxBuffs:AddButton({
-    Name = "Check Clan Pity Counter",
-    Icon = "activity",
+
+BoxSwitches:AddToggle({
+    Name     = "Fast Weapon Swing",
+    Default  = true,
+    Callback = function(v)
+        print("[Toggle] Fast Swing:", v)
+    end
+})
+
+-- Groupbox 2: Sliders
+local BoxSliders = SubToggles:AddGroupbox({ Title = "Precision Sliders", Icon = "sliders" })
+
+BoxSliders:AddSlider({
+    Name     = "WalkSpeed Multiplier",
+    Min      = 16,
+    Max      = 250,
+    Default  = 32,
+    Step     = 1,
+    Suffix   = " spd",
+    Callback = function(v)
+        pcall(function()
+            local char = game:GetService("Players").LocalPlayer.Character
+            if char and char:FindFirstChild("Humanoid") then
+                char.Humanoid.WalkSpeed = v
+            end
+        end)
+    end
+})
+
+BoxSliders:AddSlider({
+    Name     = "JumpPower Height",
+    Min      = 50,
+    Max      = 300,
+    Default  = 50,
+    Step     = 5,
+    Suffix   = " jp",
+    Callback = function(v)
+        pcall(function()
+            local char = game:GetService("Players").LocalPlayer.Character
+            if char and char:FindFirstChild("Humanoid") then
+                char.Humanoid.JumpPower = v
+            end
+        end)
+    end
+})
+
+BoxSliders:AddSlider({
+    Name     = "Attack Cooldown Delay",
+    Min      = 0.1,
+    Max      = 2.0,
+    Default  = 0.5,
+    Step     = 0.1,
+    Suffix   = "s",
+    Callback = function(v)
+        print("[Slider] Attack Delay:", v)
+    end
+})
+
+-- SubTab: Drop Bars & Inputs
+local SubInputs = TabControls:AddSubTab({
+    Name = "Drop Bars & Inputs",
+    Icon = "list"
+})
+
+-- Groupbox 3: Drop Bars (Dropdowns)
+local BoxDropbars = SubInputs:AddGroupbox({ Title = "Inline Drop Bars (Dropdowns)", Icon = "list" })
+
+BoxDropbars:AddDropdown({
+    Name     = "Target Priority Mode",
+    Items    = { "Closest Distance", "Lowest HP", "Highest Level", "Random" },
+    Default  = "Closest Distance",
+    Multi    = false,
+    Callback = function(choice)
+        print("[Dropdown Single] Selected:", choice)
+        Window:Notify({ Title = "Target Priority", Description = "Changed to " .. tostring(choice) })
+    end
+})
+
+BoxDropbars:AddDropdown({
+    Name     = "Active Farming Zones",
+    Items    = { "Starter Village", "Bamboo Forest", "Demon Cave", "Mountaintop", "Underground" },
+    Default  = { "Starter Village", "Bamboo Forest" },
+    Multi    = true,
+    Callback = function(selectedList)
+        print("[Dropdown Multi] Selected zones:", table.concat(selectedList, ", "))
+    end
+})
+
+-- Groupbox 4: TextInputs & Keybinds
+local BoxInputs = SubInputs:AddGroupbox({ Title = "Inputs & Keybinds", Icon = "terminal" })
+
+BoxInputs:AddInput({
+    Name        = "Custom Target Name",
+    Placeholder = "e.g. Demon King",
+    Default     = "",
+    Callback    = function(text, enter)
+        print("[Input] Value entered:", text)
+        Window:Notify({ Title = "Target Saved", Description = "Target set to: " .. text })
+    end
+})
+
+BoxInputs:AddKeybind({
+    Name     = "Quick Teleport Keybind",
+    Default  = Enum.KeyCode.F,
+    Callback = function(key)
+        print("[Keybind] Pressed:", key.Name)
+        Window:Notify({ Title = "Keybind Fired", Description = "Key " .. key.Name .. " pressed!" })
+    end
+})
+
+BoxInputs:AddButton({
+    Name     = "Print Status Diagnostics to Console",
     Callback = function()
-        Window:Notify({ Title = "Clan System", Description = "Current Pity: 48/50 Spins (Guaranteed Mythic next!)", Duration = 3 })
+        print("=== VRS MONO STATUS DIAGNOSTIC ===")
+        print("LocalPlayer:", game:GetService("Players").LocalPlayer.Name)
+        print("Engine Version:", VRSLibV2.Version)
+        print("Active Tab:", Window.ActiveTab and Window.ActiveTab.Name or "None")
+        print("==================================")
+        Window:Notify({ Title = "Diagnostics", Description = "Check F9 developer console for output." })
     end
 })
 
--- ==============================================================================
--- 6. SETTINGS TAB
--- ==============================================================================
-local setLeft, setRight = TabSettings:AddColumns()
 
-local boxSettings = setLeft:AddGroupbox({ Title = "Hub Configuration", Icon = "settings" })
-boxSettings:AddToggle({
-    Name = "Frosted Liquid Glass Blur",
-    Default = true,
-    Callback = function(val)
-        print("Glass blur:", val)
-    end
+-- ==============================================================================
+-- TAB 3: SETTINGS
+-- ==============================================================================
+local TabSettings = Window:AddTab({
+    Name = "Settings",
+    Icon = "settings",
+    HeaderTitle = "System & Engine Settings"
 })
-boxSettings:AddToggle({
-    Name = "Show Floating Logo When Hidden",
-    Default = true,
-    Callback = function(val)
-        print("Floating logo:", val)
-    end
-})
-boxSettings:AddButton({
-    Name = "Test Notification",
-    Icon = "bell",
+
+local SettingsBox = TabSettings:AddGroupbox({ Title = "Configuration", Icon = "settings" })
+
+SettingsBox:AddLabel("VRS Mono Engine v2.1.0 • Pure Charcoal Edition")
+SettingsBox:AddLabel("Press RightControl on your keyboard to toggle window visibility.")
+
+SettingsBox:AddButton({
+    Name     = "Unload & Clean GUI",
     Callback = function()
-        Window:Notify({
-            Title = "Notification Test",
-            Description = "VRSLib V2 Liquid Glass & Obsidian Neon Pink is active!",
-            Duration = 3,
-            Icon = "home"
-        })
+        Window.OnUnload()
+        print("[VRS Mono] Interface unloaded.")
     end
 })
 
--- Initial Notification
-VRSLibV2:Notify({
-    Title = "VRS Artelier V2",
-    Description = "Loaded successfully with Liquid Glass & Obsidian aesthetic!",
-    Duration = 3.5,
-    Icon = "home"
-})
+print("[VRS Mono] ExampleV2 loaded successfully!")
