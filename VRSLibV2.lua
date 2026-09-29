@@ -27,6 +27,8 @@ local VRSLibV2 = {
         SidebarTrans        = 0.25,
         SidebarActiveBtn    = Color3.fromRGB(36, 39, 52),       -- Active Tab Card
         SidebarActiveTrans  = 0.40,
+        Header              = Color3.fromRGB(15, 16, 21),       -- Topbar Header
+        HeaderTrans         = 0.20,                             -- Topbar Transparency
         Card                = Color3.fromRGB(22, 24, 32),       -- Frosted Glass Card
         CardTrans           = 0.40,
         CardStroke          = Color3.fromRGB(48, 52, 70),       -- Glass Edge Refraction
@@ -47,6 +49,19 @@ local VRSLibV2 = {
     },
     Windows = {},
 }
+
+-- Defensive Theme Fallback to prevent any nil property crashes
+setmetatable(VRSLibV2.Theme, {
+    __index = function(_, k)
+        local key = tostring(k)
+        if key:find("Trans") then return 0.2 end
+        if key:find("Stroke") then return Color3.fromRGB(48, 52, 70) end
+        if key:find("Text") then return Color3.fromRGB(240, 240, 240) end
+        if key == "Header" then return Color3.fromRGB(15, 16, 21) end
+        if key == "Sidebar" then return Color3.fromRGB(12, 13, 17) end
+        return Color3.fromRGB(255, 64, 140) -- Safe fallback
+    end
+})
 
 -- Safe Container Resolver
 local function GetSafeContainer()
@@ -568,22 +583,25 @@ function VRSLibV2:CreateWindow(config)
     LBStroke.Thickness = 1
     LBStroke.Parent = LogoBadge
 
+    ApplyGlassSpecular(LogoBadge)
+
     local LogoImg = Instance.new("ImageLabel")
-    LogoImg.Size = UDim2.fromOffset(26, 26)
+    LogoImg.Size = UDim2.fromOffset(24, 24)
     LogoImg.AnchorPoint = Vector2.new(0.5, 0.5)
     LogoImg.Position = UDim2.new(0.5, 0, 0.5, 0)
     LogoImg.BackgroundTransparency = 1
-    LogoImg.Image = VRSLibV2.Icons.Get("disc")
-    LogoImg.ImageColor3 = Color3.fromRGB(245, 248, 255)
+    LogoImg.Image = VRSLibV2.Icons.Get("zap")
+    LogoImg.ImageColor3 = VRSLibV2.Theme.Accent
+    LogoImg.ScaleType = Enum.ScaleType.Fit
     LogoImg.Parent = LogoBadge
 
     LogoContainer.MouseEnter:Connect(function()
         TweenService:Create(LBStroke, TweenInfo.new(0.2), { Color = VRSLibV2.Theme.Accent, Transparency = 0.2 }):Play()
-        TweenService:Create(LogoImg, TweenInfo.new(0.2), { ImageColor3 = VRSLibV2.Theme.Accent }):Play()
+        TweenService:Create(LogoImg, TweenInfo.new(0.2), { ImageColor3 = Color3.fromRGB(255, 255, 255) }):Play()
     end)
     LogoContainer.MouseLeave:Connect(function()
         TweenService:Create(LBStroke, TweenInfo.new(0.2), { Color = Color3.fromRGB(50, 55, 75), Transparency = 0.6 }):Play()
-        TweenService:Create(LogoImg, TweenInfo.new(0.2), { ImageColor3 = Color3.fromRGB(245, 248, 255) }):Play()
+        TweenService:Create(LogoImg, TweenInfo.new(0.2), { ImageColor3 = VRSLibV2.Theme.Accent }):Play()
     end)
 
     -- Tab Buttons Scroll
@@ -593,8 +611,9 @@ function VRSLibV2:CreateWindow(config)
     TabScroll.Position = UDim2.new(0, 0, 0, 70)
     TabScroll.BackgroundTransparency = 1
     TabScroll.BorderSizePixel = 0
+    TabScroll.ClipsDescendants = false
     TabScroll.ScrollBarThickness = 0
-    TabScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+    TabScroll.CanvasSize = UDim2.new(0, 0, 0, 240)
     TabScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
     TabScroll.Parent = Sidebar
     self.TabScroll = TabScroll
@@ -703,8 +722,8 @@ function VRSLibV2:CreateWindow(config)
     Topbar.Name = "Topbar"
     Topbar.Size = UDim2.new(1, -70, 0, 52)
     Topbar.Position = UDim2.new(0, 70, 0, 0)
-    Topbar.BackgroundColor3 = VRSLibV2.Theme.Header
-    Topbar.BackgroundTransparency = VRSLibV2.Theme.HeaderTrans
+    Topbar.BackgroundColor3 = VRSLibV2.Theme.Header or Color3.fromRGB(15, 16, 21)
+    Topbar.BackgroundTransparency = VRSLibV2.Theme.HeaderTrans or 0.20
     Topbar.BorderSizePixel = 0
     Topbar.ZIndex = 3
     Topbar.Parent = Main
@@ -1055,6 +1074,9 @@ function Window:SelectTab(targetTab)
             TweenService:Create(t.Icon, TweenInfo.new(0.15), { ImageColor3 = Color3.fromRGB(255, 255, 255) }):Play()
             TweenService:Create(t.Label, TweenInfo.new(0.15), { TextColor3 = Color3.fromRGB(255, 255, 255) }):Play()
             self.HeaderIcon.Image = t.IconId
+            if self.HeaderTitle then
+                self.HeaderTitle.Text = (t.Name == "Home" and self.Title or t.Name)
+            end
         else
             TweenService:Create(t.Button, TweenInfo.new(0.15), { BackgroundTransparency = 1 }):Play()
             TweenService:Create(t.Stroke, TweenInfo.new(0.15), { Transparency = 1 }):Play()
@@ -1165,17 +1187,23 @@ function Window:BindTabMethods(TabObj)
         sLayout.Parent = subContainer
 
         local subObj = {
-            Name = subName,
-            Icon = cfg.Icon,
-            Active = isFirst,
+            Window      = self.Window,
+            Tab         = self,
+            Name        = subName,
+            Icon        = cfg.Icon,
+            Active      = isFirst,
             LayoutOrder = order,
-            Container = subContainer,
-            Callback = cfg.Callback,
+            Container   = subContainer,
+            Callback    = cfg.Callback,
         }
         table.insert(self.SubTabs, subObj)
         self.Window:RenderSubNavPills(self)
 
-        local subBuilder = {}
+        local subBuilder = {
+            Window    = self.Window,
+            Container = subContainer,
+            SubTab    = subObj,
+        }
         for k, v in pairs(self) do
             if type(v) == "function" and k ~= "AddSubTab" then
                 subBuilder[k] = function(_, ...)
@@ -1637,7 +1665,7 @@ function Window:BindTabMethods(TabObj)
         local placeId = game.PlaceId
         local jobId = (game.JobId ~= "" and game.JobId or "2888eb48-3c99-4d0b-a909-000000000000")
         local universeId = (game.GameId ~= 0 and game.GameId or 5595353122)
-        local gameName = config.GameName or self.Window.GameName or "Roblox Game"
+        local gameName = config.GameName or (self.Window and self.Window.GameName) or "Roblox Game"
         local creatorName = config.Creator or "Ouw Productions"
 
         pcall(function()
@@ -2294,7 +2322,7 @@ function Window:BindTabMethods(TabObj)
         local GroupObj = {
             Box = Box,
             Container = Container,
-            Window = self.Window
+            Window = self.Window or (self.Tab and self.Tab.Window) or TabObj.Window
         }
 
         function GroupObj:AddToggle(elemCfg)
