@@ -33,7 +33,7 @@ pcall(function()
     end
 end)
 if not VRSLib then
-    local repo = "https://raw.githubusercontent.com/vrsspace/VRSLib/6684e2b/"
+    local repo = "https://raw.githubusercontent.com/vrsspace/VRSLib/main/"
     local rawCode = game:HttpGet(repo .. "VRSLib.lua?v=" .. tick())
     VRSLib = loadstring(rawCode)()
 end
