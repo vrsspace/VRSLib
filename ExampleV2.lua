@@ -1,23 +1,25 @@
 --[[
     ==============================================================================
-    ⬛ VRS MONO ENGINE (V2) — GENERAL COMPONENT TEST SHOWCASE
+    ⬛ VRS MONO ENGINE (V2) — 1:1 RECREATION OF TARGET SHOWCASE
     ==============================================================================
-    Design: 1:1 Recreation of Target Design in Strict Monochrome
-      * Solid Charcoal Abu-Abu Window (#131419, Matte Finish)
-      * Floating Frosted Glass Sidebar (#0E0F14, 0.22 Translucency)
-      * Top-Left VRS Wings Brand Logo (rbxassetid://132717088484517)
-      * White Vertical Pill Active Indicator on Tab Left Edge
-      * Profile Avatar with Emerald Online Status Dot
-      * Pure Monochrome Theme (White Accents, Slate Borders, Zero Neon)
-      * Sub-Tabs Pill Bar ([田 Overview] [▷ Main Menu])
-      * General Component Testing (Toggles, Sliders, Drop Bars, Inputs, Buttons)
+    Matches target reference (Screenshot 1 & Screenshot 2):
+      * Unified Outer Shell (Docked glass sidebar, zero detached gap)
+      * Background Wallpaper Engine (Image ID / URL with live opacity control)
+      * Ambient Falling Snow Particle System
+      * Top-Left Custom Emblem Brand Logo
+      * White Active Tab Indicator Bar on Left Edge
+      * Profile Avatar with Emerald Green Online Status Indicator
+      * Full 3-Tab Suite:
+          - Home: Overview (Profile, Live Stat Row, Banner, Community Links) & Main Menu
+          - Clan: Clan Stats & Guild Features
+          - Settings: 1:1 Recreation of Screenshot 2 (Menu, Configs, Themes, Weather, Background, Colors)
     ==============================================================================
 ]]
 
--- Anti-multi execution & clean lingering instances
+-- Anti-multi execution
 if _G.VRS_MONO_UNLOAD then pcall(_G.VRS_MONO_UNLOAD) end
 
--- 1. Load Engine (Multi-path fallback: local executor folder, subfolders, or raw)
+-- 1. Load Engine (Multi-path fallback: local workspace, GitHub raw fallback)
 local VRSLibV2
 pcall(function()
     if readfile then
@@ -29,7 +31,7 @@ pcall(function()
         for _, p in ipairs(paths) do
             local ok, content = pcall(readfile, p)
             if ok and content and #content > 0 then
-                local fn, err = loadstring(content)
+                local fn = loadstring(content)
                 if fn then
                     VRSLibV2 = fn()
                     break
@@ -39,7 +41,6 @@ pcall(function()
     end
 end)
 
--- Fallback to GitHub repository if running remotely
 if not VRSLibV2 then
     pcall(function()
         local raw = game:HttpGet("https://raw.githubusercontent.com/vrsspace/VRSLib/main/VRSLibV2.lua?v=" .. tick())
@@ -54,19 +55,23 @@ end
 
 -- 2. Create Window
 local Window = VRSLibV2:CreateWindow({
-    Title    = "auto", -- Otomatis: "Welcome to <GameName>!"
-    SubTitle = "v0.167",
-    Size     = UDim2.fromOffset(1020, 620),
-    Keybind  = Enum.KeyCode.RightControl
+    Title             = "auto",             -- Menyesuaikan judul game otomatis
+    SubTitle          = "v0.167",
+    Size              = UDim2.fromOffset(1020, 620),
+    Keybind           = Enum.KeyCode.RightControl,
+    Background        = "rbxassetid://132817836308238", -- Aesthetic dark wallpaper
+    BackgroundOpacity = 0.65,              -- 65% opacity
+    Weather           = "Snow"              -- Ambient snow particles
 })
 
 -- ==============================================================================
--- TAB 1: HOME (Dashboard, Overview & Main Menu)
+-- TAB 1: HOME (Matching Screenshot 1)
 -- ==============================================================================
 local TabHome = Window:AddTab({
-    Name = "Home",
-    Icon = "home",
-    HeaderTitle = "auto"
+    Name        = "Home",
+    Icon        = "home",
+    HeaderTitle = "auto",
+    Subtitle    = "v0.167"
 })
 
 -- SubTab 1: Overview
@@ -75,7 +80,7 @@ local SubOverview = TabHome:AddSubTab({
     Icon = "overview"
 })
 
--- Hero / Profile Card
+-- Profile Card
 SubOverview:AddProfileCard({
     Badge = "v0.167"
 })
@@ -108,7 +113,6 @@ task.spawn(function()
             frameCount = 0
             lastFpsTime = now
 
-            -- Session duration
             local elapsed = math.floor(now - startTime)
             local mins = math.floor(elapsed / 60)
             local secs = elapsed % 60
@@ -116,7 +120,6 @@ task.spawn(function()
                 Stats["Session"].UpdateValue(string.format("%dm %02ds", mins, secs))
             end
 
-            -- Ping
             pcall(function()
                 local pingVal = math.round(StatsService.Network.ServerStatsItem["Data Ping"]:GetValue())
                 if Stats["Ping"] then Stats["Ping"].UpdateValue(pingVal .. "ms") end
@@ -127,13 +130,13 @@ end)
 
 -- Notice Banner
 SubOverview:AddBanner({
-    Title   = "Mono Engine",
-    Message = "Pure monochrome aesthetic active. Frosted glass floating sidebar enabled.",
+    Title   = "Madium",
+    Message = "Not on the supported list. Some features may not work.",
     Icon    = "shield",
     Badge   = "RCtrl to hide"
 })
 
--- Quick Links & Information Rows
+-- Quick Links & Community InfoRows
 local QuickGroup = SubOverview:AddGroupbox({ Title = "Community & Support", Icon = "globe" })
 
 QuickGroup:AddInfoRow({
@@ -160,225 +163,252 @@ QuickGroup:AddInfoRow({
 
 QuickGroup:AddInfoRow({
     Name       = "Feature list",
-    Value      = "Modular components tested across all categories",
+    Value      = "7 features across 2 tabs",
     Icon       = "list",
-    ButtonText = "View Info",
+    ButtonText = "View Features",
     Callback   = function()
-        Window:Notify({ Title = "Information", Description = "Mono V2 Engine loaded with 100% component coverage." })
+        Window:Notify({ Title = "Features", Description = "All components active with 100% fidelity." })
     end
 })
 
--- SubTab 2: Main Menu (Component Testing in Home)
+-- SubTab 2: Main Menu (2 Columns for Controls)
 local SubMenu = TabHome:AddSubTab({
     Name = "Main Menu",
     Icon = "menu"
 })
 
-local GeneralBox = SubMenu:AddGroupbox({ Title = "Quick Actions", Icon = "zap" })
+local LeftCol, RightCol = SubMenu:AddColumns()
 
-GeneralBox:AddToggle({
-    Name     = "Enable Quick Farm",
-    Default  = false,
-    Callback = function(val)
-        print("[Toggle] Quick Farm:", val)
-    end
-})
+local FarmBox = LeftCol:AddGroupbox({ Title = "Automation", Icon = "swords" })
+FarmBox:AddToggle({ Name = "Auto Farm Mobs", Default = false, Callback = function(v) print("Auto Farm:", v) end })
+FarmBox:AddToggle({ Name = "Auto Collect Drops", Default = true, Callback = function(v) print("Auto Collect:", v) end })
+FarmBox:AddSlider({ Name = "Attack Delay", Min = 0.1, Max = 2.0, Default = 0.5, Step = 0.1, Suffix = "s", Callback = function(v) print("Delay:", v) end })
 
-GeneralBox:AddSlider({
-    Name     = "Speed Multiplier",
-    Min      = 1,
-    Max      = 10,
-    Default  = 2,
-    Step     = 1,
-    Suffix   = "x",
-    Callback = function(val)
-        print("[Slider] Speed:", val)
-    end
-})
-
-GeneralBox:AddButton({
-    Name     = "Trigger Instant Rejoin",
-    Callback = function()
-        Window:Notify({ Title = "Server", Description = "Rejoining server..." })
-    end
-})
+local MiscBox = RightCol:AddGroupbox({ Title = "Player Modifications", Icon = "sliders" })
+MiscBox:AddSlider({ Name = "WalkSpeed Multiplier", Min = 16, Max = 250, Default = 32, Step = 1, Suffix = " spd", Callback = function(v)
+    pcall(function() game:GetService("Players").LocalPlayer.Character.Humanoid.WalkSpeed = v end)
+end })
+MiscBox:AddDropdown({ Name = "Target Selection", Items = { "Closest", "Lowest HP", "Highest Level" }, Default = "Closest", Callback = function(c) print("Target:", c) end })
+MiscBox:AddButton({ Name = "Instant Server Rejoin", Callback = function() Window:Notify({ Title = "Server", Description = "Rejoining..." }) end })
 
 
 -- ==============================================================================
--- TAB 2: COMPONENT TESTING (Toggles, Sliders, Dropdowns, Inputs, Buttons)
+-- TAB 2: CLAN (Guild & Faction Management)
 -- ==============================================================================
-local TabControls = Window:AddTab({
-    Name = "Controls",
-    Icon = "sliders",
-    HeaderTitle = "Component Testing & Controls"
+local TabClan = Window:AddTab({
+    Name        = "Clan",
+    Icon        = "shield",
+    HeaderTitle = "Clan",
+    Subtitle    = "v0.167"
 })
 
-local SubToggles = TabControls:AddSubTab({
-    Name = "Switches & Sliders",
-    Icon = "sliders"
-})
+local ClanLeft, ClanRight = TabClan:AddColumns()
 
--- Groupbox 1: Switches
-local BoxSwitches = SubToggles:AddGroupbox({ Title = "Pill Switches (iOS Mono)", Icon = "sliders" })
+local ClanInfo = ClanLeft:AddGroupbox({ Title = "Guild Information", Icon = "shield" })
+ClanInfo:AddInfoRow({ Name = "Current Clan", Value = "Kamado (Mythic)", ButtonText = "Inspect" })
+ClanInfo:AddInfoRow({ Name = "Clan Rank", Value = "Grand Master #12", ButtonText = "Ranks" })
+ClanInfo:AddButton({ Name = "Spin Clan Slot (100 Spins)", Callback = function() Window:Notify({ Title = "Clan", Description = "Spinning slot..." }) end })
 
-BoxSwitches:AddToggle({
-    Name     = "Auto Attack Mobs",
-    Default  = true,
-    Callback = function(v)
-        print("[Toggle] Auto Attack:", v)
-    end
-})
-
-BoxSwitches:AddToggle({
-    Name     = "Auto Collect Drops",
-    Default  = false,
-    Callback = function(v)
-        print("[Toggle] Auto Collect:", v)
-    end
-})
-
-BoxSwitches:AddToggle({
-    Name     = "Fast Weapon Swing",
-    Default  = true,
-    Callback = function(v)
-        print("[Toggle] Fast Swing:", v)
-    end
-})
-
--- Groupbox 2: Sliders
-local BoxSliders = SubToggles:AddGroupbox({ Title = "Precision Sliders", Icon = "sliders" })
-
-BoxSliders:AddSlider({
-    Name     = "WalkSpeed Multiplier",
-    Min      = 16,
-    Max      = 250,
-    Default  = 32,
-    Step     = 1,
-    Suffix   = " spd",
-    Callback = function(v)
-        pcall(function()
-            local char = game:GetService("Players").LocalPlayer.Character
-            if char and char:FindFirstChild("Humanoid") then
-                char.Humanoid.WalkSpeed = v
-            end
-        end)
-    end
-})
-
-BoxSliders:AddSlider({
-    Name     = "JumpPower Height",
-    Min      = 50,
-    Max      = 300,
-    Default  = 50,
-    Step     = 5,
-    Suffix   = " jp",
-    Callback = function(v)
-        pcall(function()
-            local char = game:GetService("Players").LocalPlayer.Character
-            if char and char:FindFirstChild("Humanoid") then
-                char.Humanoid.JumpPower = v
-            end
-        end)
-    end
-})
-
-BoxSliders:AddSlider({
-    Name     = "Attack Cooldown Delay",
-    Min      = 0.1,
-    Max      = 2.0,
-    Default  = 0.5,
-    Step     = 0.1,
-    Suffix   = "s",
-    Callback = function(v)
-        print("[Slider] Attack Delay:", v)
-    end
-})
-
--- SubTab: Drop Bars & Inputs
-local SubInputs = TabControls:AddSubTab({
-    Name = "Drop Bars & Inputs",
-    Icon = "list"
-})
-
--- Groupbox 3: Drop Bars (Dropdowns)
-local BoxDropbars = SubInputs:AddGroupbox({ Title = "Inline Drop Bars (Dropdowns)", Icon = "list" })
-
-BoxDropbars:AddDropdown({
-    Name     = "Target Priority Mode",
-    Items    = { "Closest Distance", "Lowest HP", "Highest Level", "Random" },
-    Default  = "Closest Distance",
-    Multi    = false,
-    Callback = function(choice)
-        print("[Dropdown Single] Selected:", choice)
-        Window:Notify({ Title = "Target Priority", Description = "Changed to " .. tostring(choice) })
-    end
-})
-
-BoxDropbars:AddDropdown({
-    Name     = "Active Farming Zones",
-    Items    = { "Starter Village", "Bamboo Forest", "Demon Cave", "Mountaintop", "Underground" },
-    Default  = { "Starter Village", "Bamboo Forest" },
-    Multi    = true,
-    Callback = function(selectedList)
-        print("[Dropdown Multi] Selected zones:", table.concat(selectedList, ", "))
-    end
-})
-
--- Groupbox 4: TextInputs & Keybinds
-local BoxInputs = SubInputs:AddGroupbox({ Title = "Inputs & Keybinds", Icon = "terminal" })
-
-BoxInputs:AddInput({
-    Name        = "Custom Target Name",
-    Placeholder = "e.g. Demon King",
-    Default     = "",
-    Callback    = function(text, enter)
-        print("[Input] Value entered:", text)
-        Window:Notify({ Title = "Target Saved", Description = "Target set to: " .. text })
-    end
-})
-
-BoxInputs:AddKeybind({
-    Name     = "Quick Teleport Keybind",
-    Default  = Enum.KeyCode.F,
-    Callback = function(key)
-        print("[Keybind] Pressed:", key.Name)
-        Window:Notify({ Title = "Keybind Fired", Description = "Key " .. key.Name .. " pressed!" })
-    end
-})
-
-BoxInputs:AddButton({
-    Name     = "Print Status Diagnostics to Console",
-    Callback = function()
-        print("=== VRS MONO STATUS DIAGNOSTIC ===")
-        print("LocalPlayer:", game:GetService("Players").LocalPlayer.Name)
-        print("Engine Version:", VRSLibV2.Version)
-        print("Active Tab:", Window.ActiveTab and Window.ActiveTab.Name or "None")
-        print("==================================")
-        Window:Notify({ Title = "Diagnostics", Description = "Check F9 developer console for output." })
-    end
-})
+local ClanBuffs = ClanRight:AddGroupbox({ Title = "Active Clan Buffs", Icon = "zap" })
+ClanBuffs:AddLabel("• +25% Health Regeneration")
+ClanBuffs:AddLabel("• +15% Breathing Technique Damage")
+ClanBuffs:AddLabel("• Special Ability: Sun Breathing Mastery")
 
 
 -- ==============================================================================
--- TAB 3: SETTINGS
+-- TAB 3: SETTINGS (1:1 Recreation of Screenshot 2)
 -- ==============================================================================
 local TabSettings = Window:AddTab({
-    Name = "Settings",
-    Icon = "settings",
-    HeaderTitle = "System & Engine Settings"
+    Name        = "Settings",
+    Icon        = "settings",
+    HeaderTitle = "Settings",
+    Subtitle    = "v0.167"
 })
 
-local SettingsBox = TabSettings:AddGroupbox({ Title = "Configuration", Icon = "settings" })
+local SetLeft, SetRight = TabSettings:AddColumns()
 
-SettingsBox:AddLabel("VRS Mono Engine v2.1.0 • Pure Charcoal Edition")
-SettingsBox:AddLabel("Press RightControl on your keyboard to toggle window visibility.")
+-- 1. Left Column: Menu Groupbox
+local MenuBox = SetLeft:AddGroupbox({ Title = "Menu", Icon = "desktop" })
 
-SettingsBox:AddButton({
-    Name     = "Unload & Clean GUI",
-    Callback = function()
-        Window.OnUnload()
-        print("[VRS Mono] Interface unloaded.")
+MenuBox:AddKeybind({
+    Name     = "Toggle UI",
+    Default  = Enum.KeyCode.RightControl,
+    Callback = function(key)
+        Window:Notify({ Title = "Keybind Saved", Description = "UI toggle keybind set to " .. key.Name })
     end
 })
+
+MenuBox:AddDropdown({
+    Name     = "Toggle button",
+    Items    = { "Mobile only", "Always", "Never" },
+    Default  = "Mobile only",
+    Callback = function(v) print("Toggle button mode:", v) end
+})
+
+local antiAfkConn
+MenuBox:AddToggle({
+    Name     = "Anti AFK",
+    Default  = true,
+    Callback = function(enabled)
+        if enabled then
+            antiAfkConn = game:GetService("Players").LocalPlayer.Idled:Connect(function()
+                game:GetService("VirtualUser"):CaptureController()
+                game:GetService("VirtualUser"):ClickButton2(Vector2.new())
+            end)
+            Window:Notify({ Title = "Anti AFK", Description = "Anti AFK protection activated." })
+        else
+            if antiAfkConn then antiAfkConn:Disconnect() end
+            Window:Notify({ Title = "Anti AFK", Description = "Anti AFK disabled." })
+        end
+    end
+})
+
+MenuBox:AddButton({
+    Name     = "⏻ Unload",
+    Callback = function()
+        Window.OnUnload()
+        print("[VRS Mono] Interface unloaded successfully.")
+    end
+})
+
+-- 2. Left Column: Configs Groupbox
+local ConfigBox = SetLeft:AddGroupbox({ Title = "Configs", Icon = "folder" })
+
+local currentConfigName = ""
+ConfigBox:AddInput({
+    Name        = "Config Name",
+    Placeholder = "config name",
+    Default     = "",
+    Callback    = function(txt) currentConfigName = txt end
+})
+
+ConfigBox:AddDropdown({
+    Name    = "Select Config",
+    Items   = { "--", "Default", "Farming", "PvP" },
+    Default = "--"
+})
+
+ConfigBox:AddButton({ Name = "Create Config", Callback = function() Window:Notify({ Title = "Configs", Description = "Created config: " .. currentConfigName }) end })
+ConfigBox:AddButton({ Name = "Save Config",   Callback = function() Window:Notify({ Title = "Configs", Description = "Config saved." }) end })
+ConfigBox:AddButton({ Name = "Load Config",   Callback = function() Window:Notify({ Title = "Configs", Description = "Config loaded." }) end })
+ConfigBox:AddButton({ Name = "Delete Config", Callback = function() Window:Notify({ Title = "Configs", Description = "Config deleted." }) end })
+
+ConfigBox:AddLabel("loaded: none  |  autoload: none")
+
+ConfigBox:AddDropdown({
+    Name    = "Autoload mode",
+    Items   = { "All accounts", "This account only", "Disabled" },
+    Default = "All accounts"
+})
+
+ConfigBox:AddButton({ Name = "Refresh list", Callback = function() Window:Notify({ Title = "Configs", Description = "Config list refreshed." }) end })
+
+ConfigBox:AddLabel("——— share ———")
+ConfigBox:AddButton({ Name = "Copy code", Callback = function()
+    if setclipboard then setclipboard("VRS_CFG_018274") end
+    Window:Notify({ Title = "Config Code", Description = "Code copied to clipboard!" })
+end })
+
+ConfigBox:AddInput({
+    Name        = "Import Code",
+    Placeholder = "paste a config code...",
+    Default     = "",
+    Callback    = function(code)
+        Window:Notify({ Title = "Configs", Description = "Imported config code!" })
+    end
+})
+
+ConfigBox:AddButton({ Name = "Import code", Callback = function() Window:Notify({ Title = "Configs", Description = "Config imported." }) end })
+
+
+-- 3. Right Column: Themes Groupbox (Matching Screenshot 2 exactly)
+local ThemesBox = SetRight:AddGroupbox({ Title = "Themes", Icon = "palette" })
+
+ThemesBox:AddDropdown({
+    Name     = "Preset",
+    Items    = { "Mono", "Dark", "Obsidian", "Cyber" },
+    Default  = "Mono",
+    Callback = function(val)
+        Window:Notify({ Title = "Theme Preset", Description = "Preset changed to " .. val })
+    end
+})
+
+ThemesBox:AddDropdown({
+    Name     = "Weather",
+    Items    = { "Snow", "None" },
+    Default  = "Snow",
+    Callback = function(val)
+        Window:SetWeather(val)
+    end
+})
+
+ThemesBox:AddDropdown({
+    Name     = "Weather Mode",
+    Items    = { "Screen", "Window" },
+    Default  = "Screen",
+    Callback = function(val) print("Weather Mode:", val) end
+})
+
+ThemesBox:AddToggle({ Name = "Dim", Default = false, Callback = function(v) print("Dim:", v) end })
+ThemesBox:AddToggle({ Name = "Transparent", Default = false, Callback = function(v) print("Transparent:", v) end })
+ThemesBox:AddToggle({ Name = "Drag Skeleton", Default = true, Callback = function(v) print("Drag Skeleton:", v) end })
+
+ThemesBox:AddDropdown({
+    Name     = "Background",
+    Items    = { "None", "Default Artwork", "Custom URL" },
+    Default  = "Default Artwork",
+    Callback = function(v)
+        if v == "None" then
+            Window:SetBackground(nil, 0)
+        elseif v == "Default Artwork" then
+            Window:SetBackground("rbxassetid://132817836308238", 0.65)
+        end
+    end
+})
+
+local customBgUrl = ""
+ThemesBox:AddInput({
+    Name        = "Background Image",
+    Placeholder = "image id or url",
+    Default     = "",
+    Callback    = function(url) customBgUrl = url end
+})
+
+ThemesBox:AddButton({
+    Name     = "Set Background",
+    Callback = function()
+        if customBgUrl and customBgUrl ~= "" then
+            Window:SetBackground(customBgUrl, 0.65)
+            Window:Notify({ Title = "Background", Description = "Custom background applied!" })
+        end
+    end
+})
+
+ThemesBox:AddSlider({
+    Name     = "Background Opacity",
+    Min      = 0,
+    Max      = 100,
+    Default  = 65,
+    Step     = 1,
+    Suffix   = "%",
+    Callback = function(val)
+        Window:SetBackground(nil, val / 100)
+    end
+})
+
+ThemesBox:AddLabel("——— Custom Themes ———")
+ThemesBox:AddInput({ Name = "Theme Name", Placeholder = "theme name", Default = "" })
+ThemesBox:AddDropdown({ Name = "Theme", Items = { "no themes", "Default Mono" }, Default = "no themes" })
+ThemesBox:AddButton({ Name = "Save Theme", Callback = function() Window:Notify({ Title = "Themes", Description = "Theme saved." }) end })
+ThemesBox:AddButton({ Name = "Load Theme", Callback = function() Window:Notify({ Title = "Themes", Description = "Theme loaded." }) end })
+
+ThemesBox:AddLabel("Default theme: none")
+
+-- Color Swatches
+ThemesBox:AddDropdown({ Name = "Accent", Items = { "White (#FFFFFF)", "Off-White (#F0F0F0)" }, Default = "White (#FFFFFF)" })
+ThemesBox:AddDropdown({ Name = "Background", Items = { "Charcoal (#101115)", "Obsidian (#0A0B0E)" }, Default = "Charcoal (#101115)" })
+ThemesBox:AddDropdown({ Name = "Surface", Items = { "Elevated Card (#191A21)" }, Default = "Elevated Card (#191A21)" })
+ThemesBox:AddDropdown({ Name = "Text", Items = { "Pure White (#FFFFFF)" }, Default = "Pure White (#FFFFFF)" })
+ThemesBox:AddDropdown({ Name = "Muted text", Items = { "Slate (#696E7E)" }, Default = "Slate (#696E7E)" })
 
 print("[VRS Mono] ExampleV2 loaded successfully!")
