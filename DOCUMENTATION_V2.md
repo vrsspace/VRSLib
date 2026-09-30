@@ -32,13 +32,18 @@ Modern Roblox Luau UI Library engineered with 1:1 precision according to the min
 Pastikan file `VRSLibV2.lua` berada di folder workspace executor Anda atau di dalam path `[ UI LIB ]/VRSLibV2.lua`.
 
 ```lua
-local VRSLibV2 = loadstring(readfile("VRSLibV2.lua"))()
+local VRSLibV2 = loadstring(game:HttpGet("https://raw.githubusercontent.com/vrsspace/VRSLib/main/VRSLibV2.lua?v=" .. tick()))()
 
 local Window = VRSLibV2:CreateWindow({
-    Title    = "auto", -- Otomatis: "Welcome to <GameName>!"
-    SubTitle = "v0.167",
-    Size     = UDim2.fromOffset(1020, 620),
-    Keybind  = Enum.KeyCode.RightControl
+    Title             = "auto",             -- Otomatis: "Welcome to <GameName>!"
+    SubTitle          = "v0.171",
+    Size              = UDim2.fromOffset(1020, 620),
+    Keybind           = Enum.KeyCode.RightControl,
+    Background        = "default",          -- Frosted obsidian texture
+    BackgroundOpacity = 0.20,              -- Lux dark opacity
+    Weather           = "Snow",             -- Fullscreen snow particles across entire screen
+    Blur              = true,               -- Depth-of-field 3D world background blur
+    ToggleButton      = true                -- Floating mobile/desktop toggle widget
 })
 ```
 
@@ -92,7 +97,18 @@ Stats["FPS"].UpdateValue("245")
 Stats["Ping"].UpdateValue("18ms")
 ```
 
-### 3. Notice / Warning Banner
+### 3. Game Info Card
+Menampilkan kartu status game aktif (Thumbnail game, Nama game, Creator, Job ID, Place ID, Universe ID) serta tombol aksi: `Rejoin`, `Server Hop`, `Copy Job ID`, `Copy Universe`, dan `Join Lowest Server`:
+```lua
+SubOverview:AddGameCard({
+    Title      = "Slayers 2",
+    Creator    = "by Gun Productions",
+    PlaceId    = 1530373724,
+    UniverseId = 5370353122
+})
+```
+
+### 4. Notice / Warning Banner
 Kartu notifikasi dengan icon perisai kuning/emas, deskripsi, dan tombol badge di sebelah kanan:
 ```lua
 SubOverview:AddBanner({

@@ -340,8 +340,8 @@ function VRSLibV2:CreateWindow(config)
     MainFrame.Name = "MainFrame"
     MainFrame.Size = windowSize
     MainFrame.Position = UDim2.new(0.5, -windowSize.X.Offset / 2, 0.5, -windowSize.Y.Offset / 2)
-    MainFrame.BackgroundColor3 = VRSLibV2.Theme.Background
-    MainFrame.BackgroundTransparency = 0 -- Solid matte base
+    MainFrame.BackgroundColor3 = Color3.fromRGB(15, 16, 21)
+    MainFrame.BackgroundTransparency = 0.12 -- Frosted translucent obsidian glass
     MainFrame.BorderSizePixel = 0
     MainFrame.ClipsDescendants = true
     MainFrame.ZIndex = 2
@@ -423,28 +423,41 @@ function VRSLibV2:CreateWindow(config)
         BgImageLabel.Visible = false
     end
 
-    -- WEATHER LAYER (Snow Particles Floating across Window)
+    -- 0. FULLSCREEN LIGHTING BLUR (Depth of field background blur on 3D game world)
+    local Lighting = game:GetService("Lighting")
+    local ScreenBlur
+    pcall(function()
+        ScreenBlur = Instance.new("BlurEffect")
+        ScreenBlur.Name = "VRS_ScreenBlur_" .. HttpService:GenerateGUID(false):sub(1, 6)
+        ScreenBlur.Size = 22
+        ScreenBlur.Enabled = (config.Blur ~= false)
+        ScreenBlur.Parent = Lighting
+    end)
+
+    -- WEATHER LAYER (Snow Particles Floating across the ENTIRE SCREEN / OUTSIDE Window)
     local WeatherContainer = Instance.new("Frame")
     WeatherContainer.Name = "WeatherContainer"
     WeatherContainer.Size = UDim2.new(1, 0, 1, 0)
+    WeatherContainer.Position = UDim2.new(0, 0, 0, 0)
     WeatherContainer.BackgroundTransparency = 1
-    WeatherContainer.ZIndex = 2
-    WeatherContainer.ClipsDescendants = true
-    WeatherContainer.Parent = MainFrame
+    WeatherContainer.BorderSizePixel = 0
+    WeatherContainer.ZIndex = 1
+    WeatherContainer.ClipsDescendants = false
+    WeatherContainer.Parent = RootGui
 
     local weatherActive = (weatherMode == "Snow")
     local snowFlakes = {}
 
     local function InitSnow()
-        for i = 1, 28 do
+        for i = 1, 60 do
             local flake = Instance.new("Frame")
-            local sz = math.random(2, 4)
+            local sz = math.random(2, 5)
             flake.Size = UDim2.fromOffset(sz, sz)
             flake.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            flake.BackgroundTransparency = math.random(35, 75) / 100
+            flake.BackgroundTransparency = math.random(25, 75) / 100
             flake.BorderSizePixel = 0
             flake.Position = UDim2.new(math.random(), 0, math.random(), 0)
-            flake.ZIndex = 2
+            flake.ZIndex = 1
             flake.Parent = WeatherContainer
 
             local flkCorner = Instance.new("UICorner")
@@ -453,8 +466,8 @@ function VRSLibV2:CreateWindow(config)
 
             table.insert(snowFlakes, {
                 obj = flake,
-                speed = math.random(30, 60),
-                drift = math.random(-15, 15),
+                speed = math.random(25, 55),
+                drift = math.random(-20, 20),
                 seed = math.random(1, 1000)
             })
         end
@@ -466,15 +479,16 @@ function VRSLibV2:CreateWindow(config)
     snowConn = RunService.RenderStepped:Connect(function(dt)
         if not weatherActive or not WeatherContainer.Parent then return end
         local t = tick()
-        local h = MainFrame.AbsoluteSize.Y
-        local w = MainFrame.AbsoluteSize.X
+        local vp = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1920, 1080)
+        local h = vp.Y
+        local w = vp.X
         for _, flk in ipairs(snowFlakes) do
             local curX = flk.obj.Position.X.Scale
             local curY = flk.obj.Position.Y.Offset
             local newY = curY + flk.speed * dt
             local newX = curX + (math.sin(t + flk.seed) * flk.drift * dt) / w
-            if newY > h + 10 then
-                newY = -10
+            if newY > h + 15 then
+                newY = -15
                 newX = math.random()
             end
             flk.obj.Position = UDim2.new(newX, 0, 0, newY)
@@ -823,6 +837,18 @@ function VRSLibV2:CreateWindow(config)
     local function SetWindowVisible(vis)
         MainFrame.Visible = vis
         if ShadowHolder then ShadowHolder.Visible = vis end
+        if WeatherContainer then WeatherContainer.Visible = (vis and weatherActive) end
+        if ScreenBlur then
+            if vis then
+                ScreenBlur.Enabled = true
+                QuickTween(ScreenBlur, { Size = 22 }, 0.25)
+            else
+                local tw = QuickTween(ScreenBlur, { Size = 0 }, 0.2)
+                tw.Completed:Connect(function()
+                    if not MainFrame.Visible then ScreenBlur.Enabled = false end
+                end)
+            end
+        end
     end
 
     local isMinimized = false
@@ -1032,6 +1058,7 @@ function VRSLibV2:CreateWindow(config)
 
     WindowObj.OnUnload = function()
         if snowConn then snowConn:Disconnect() end
+        if ScreenBlur then pcall(function() ScreenBlur:Destroy() end) end
         if ShadowHolder then ShadowHolder:Destroy() end
         RootGui:Destroy()
         _G.VRS_MONO_UNLOAD = nil
@@ -1601,6 +1628,68 @@ function VRSLibV2:_AttachComponentFactory(targetObj, container)
         bText.ZIndex = 5
         bText.Parent = Badge
 
+        local function MakeMiniSwitch(label, posX, defaultState, cb)
+            local Holder = Instance.new("Frame")
+            Holder.Size = UDim2.fromOffset(76, 20)
+            Holder.Position = UDim2.new(1, posX, 0, 52)
+            Holder.BackgroundTransparency = 1
+            Holder.ZIndex = 4
+            Holder.Parent = Card
+
+            local Lbl = Instance.new("TextLabel")
+            Lbl.Size = UDim2.new(1, -34, 1, 0)
+            Lbl.Position = UDim2.new(0, 0, 0, 0)
+            Lbl.BackgroundTransparency = 1
+            Lbl.Font = Enum.Font.Gotham
+            Lbl.TextSize = 10
+            Lbl.TextColor3 = Theme.TextMuted
+            Lbl.TextXAlignment = Enum.TextXAlignment.Right
+            Lbl.Text = label
+            Lbl.ZIndex = 4
+            Lbl.Parent = Holder
+
+            local Switch = Instance.new("TextButton")
+            Switch.Size = UDim2.fromOffset(30, 16)
+            Switch.Position = UDim2.new(1, -30, 0.5, -8)
+            Switch.BackgroundColor3 = defaultState and Theme.Accent or Color3.fromRGB(34, 36, 48)
+            Switch.Text = ""
+            Switch.AutoButtonColor = false
+            Switch.ZIndex = 4
+            Switch.Parent = Holder
+
+            local sc = Instance.new("UICorner")
+            sc.CornerRadius = UDim.new(1, 0)
+            sc.Parent = Switch
+
+            local Dot = Instance.new("Frame")
+            Dot.Size = UDim2.fromOffset(12, 12)
+            Dot.Position = defaultState and UDim2.new(1, -14, 0.5, -6) or UDim2.new(0, 2, 0.5, -6)
+            Dot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            Dot.BorderSizePixel = 0
+            Dot.ZIndex = 5
+            Dot.Parent = Switch
+
+            local dc = Instance.new("UICorner")
+            dc.CornerRadius = UDim.new(1, 0)
+            dc.Parent = Dot
+
+            local state = defaultState
+            Switch.MouseButton1Click:Connect(function()
+                state = not state
+                QuickTween(Switch, { BackgroundColor3 = state and Theme.Accent or Color3.fromRGB(34, 36, 48) }, 0.15)
+                QuickTween(Dot, { Position = state and UDim2.new(1, -14, 0.5, -6) or UDim2.new(0, 2, 0.5, -6) }, 0.15)
+                task.spawn(function() pcall(cb, state) end)
+            end)
+        end
+
+        local originalName = nameText
+        MakeMiniSwitch("Name", -174, false, function(s)
+            NameLbl.Text = s and "Anonymous" or originalName
+        end)
+        MakeMiniSwitch("Profile", -94, false, function(s)
+            AvImg.Visible = not s
+        end)
+
         return Card
     end
 
@@ -1683,6 +1772,179 @@ function VRSLibV2:_AttachComponentFactory(targetObj, container)
             }
         end
         return statControllers
+    end
+
+    -- Game Info Card (Matching Screenshot 1: Current game thumbnail, metadata & quick action buttons)
+    function targetObj:AddGameCard(cfg)
+        cfg = cfg or {}
+        local placeId    = cfg.PlaceId or game.PlaceId
+        local jobId      = cfg.JobId or game.JobId
+        local universeId = cfg.UniverseId or game.GameId
+        local title      = cfg.Title or "Current Game"
+        local creator    = cfg.Creator or "by Developer"
+
+        pcall(function()
+            local info = game:GetService("MarketplaceService"):GetProductInfo(placeId)
+            if info then
+                if not cfg.Title and info.Name then title = info.Name end
+                if not cfg.Creator and info.Creator and info.Creator.Name then
+                    creator = "by " .. info.Creator.Name
+                end
+            end
+        end)
+
+        local Card = Instance.new("Frame")
+        Card.Name = "GameCard"
+        Card.Size = UDim2.new(1, 0, 0, 96)
+        Card.BackgroundColor3 = Theme.Card
+        Card.BorderSizePixel = 0
+        Card.ZIndex = 3
+        Card.Parent = container
+
+        local cCorner = Instance.new("UICorner")
+        cCorner.CornerRadius = UDim.new(0, 10)
+        cCorner.Parent = Card
+
+        local cStroke = Instance.new("UIStroke")
+        cStroke.Color = Theme.CardStroke
+        cStroke.Thickness = 1
+        cStroke.Parent = Card
+
+        -- Thumbnail
+        local ThumbHolder = Instance.new("Frame")
+        ThumbHolder.Size = UDim2.fromOffset(66, 66)
+        ThumbHolder.Position = UDim2.new(0, 16, 0.5, -33)
+        ThumbHolder.BackgroundColor3 = Color3.fromRGB(18, 19, 25)
+        ThumbHolder.BorderSizePixel = 0
+        ThumbHolder.ZIndex = 4
+        ThumbHolder.Parent = Card
+
+        local thCorner = Instance.new("UICorner")
+        thCorner.CornerRadius = UDim.new(0, 8)
+        thCorner.Parent = ThumbHolder
+
+        local ThumbImg = Instance.new("ImageLabel")
+        ThumbImg.Size = UDim2.new(1, 0, 1, 0)
+        ThumbImg.BackgroundTransparency = 1
+        ThumbImg.ZIndex = 4
+        ThumbImg.Parent = ThumbHolder
+
+        local tiCorner = Instance.new("UICorner")
+        tiCorner.CornerRadius = UDim.new(0, 8)
+        tiCorner.Parent = ThumbImg
+
+        task.spawn(function()
+            pcall(function()
+                ThumbImg.Image = string.format("rbxthumb://type=Asset&id=%s&w=150&h=150", tostring(placeId))
+            end)
+        end)
+
+        -- Info Text (Middle)
+        local TitleLbl = Instance.new("TextLabel")
+        TitleLbl.Size = UDim2.new(0, 260, 0, 18)
+        TitleLbl.Position = UDim2.new(0, 94, 0, 14)
+        TitleLbl.BackgroundTransparency = 1
+        TitleLbl.Font = Enum.Font.GothamBold
+        TitleLbl.TextSize = 13
+        TitleLbl.TextColor3 = Theme.TextPrimary
+        TitleLbl.TextXAlignment = Enum.TextXAlignment.Left
+        TitleLbl.TextTruncate = Enum.TextTruncate.AtEnd
+        TitleLbl.Text = title
+        TitleLbl.ZIndex = 4
+        TitleLbl.Parent = Card
+
+        local CreatorLbl = Instance.new("TextLabel")
+        CreatorLbl.Size = UDim2.new(0, 260, 0, 14)
+        CreatorLbl.Position = UDim2.new(0, 94, 0, 32)
+        CreatorLbl.BackgroundTransparency = 1
+        CreatorLbl.Font = Enum.Font.Gotham
+        CreatorLbl.TextSize = 10
+        CreatorLbl.TextColor3 = Theme.TextMuted
+        CreatorLbl.TextXAlignment = Enum.TextXAlignment.Left
+        CreatorLbl.Text = creator
+        CreatorLbl.ZIndex = 4
+        CreatorLbl.Parent = Card
+
+        local MetaLbl = Instance.new("TextLabel")
+        MetaLbl.Size = UDim2.new(0, 260, 0, 34)
+        MetaLbl.Position = UDim2.new(0, 94, 0, 48)
+        MetaLbl.BackgroundTransparency = 1
+        MetaLbl.Font = Enum.Font.Gotham
+        MetaLbl.TextSize = 9
+        MetaLbl.TextColor3 = Theme.TextMuted
+        MetaLbl.TextXAlignment = Enum.TextXAlignment.Left
+        MetaLbl.TextYAlignment = Enum.TextYAlignment.Top
+        MetaLbl.Text = string.format("Job: %s\nPlace: %s\nUniverse: %s", tostring(jobId):sub(1, 14) .. "...", tostring(placeId), tostring(universeId))
+        MetaLbl.ZIndex = 4
+        MetaLbl.Parent = Card
+
+        -- Actions (Right Column)
+        local RightActions = Instance.new("Frame")
+        RightActions.Size = UDim2.new(0, 216, 1, -16)
+        RightActions.Position = UDim2.new(1, -228, 0, 8)
+        RightActions.BackgroundTransparency = 1
+        RightActions.ZIndex = 4
+        RightActions.Parent = Card
+
+        local function MakeMiniBtn(text, pos, size, cb)
+            local btn = Instance.new("TextButton")
+            btn.Size = size
+            btn.Position = pos
+            btn.BackgroundColor3 = Color3.fromRGB(28, 30, 40)
+            btn.Text = text
+            btn.Font = Enum.Font.GothamMedium
+            btn.TextSize = 10
+            btn.TextColor3 = Theme.TextSecondary
+            btn.AutoButtonColor = false
+            btn.ZIndex = 5
+            btn.Parent = RightActions
+
+            local bc = Instance.new("UICorner")
+            bc.CornerRadius = UDim.new(0, 6)
+            bc.Parent = btn
+
+            local bs = Instance.new("UIStroke")
+            bs.Color = Theme.CardStroke
+            bs.Thickness = 1
+            bs.Parent = btn
+
+            btn.MouseEnter:Connect(function() QuickTween(btn, { BackgroundColor3 = Theme.ActionBtnHover, TextColor3 = Theme.TextPrimary }, 0.15) end)
+            btn.MouseLeave:Connect(function() QuickTween(btn, { BackgroundColor3 = Color3.fromRGB(28, 30, 40), TextColor3 = Theme.TextSecondary }, 0.15) end)
+            btn.MouseButton1Click:Connect(function() task.spawn(function() pcall(cb) end) end)
+            return btn
+        end
+
+        local TeleportService = game:GetService("TeleportService")
+        local Players = game:GetService("Players")
+
+        -- Rejoin
+        MakeMiniBtn("Rejoin", UDim2.new(0, 0, 0, 0), UDim2.new(0.48, 0, 0, 24), function()
+            TeleportService:TeleportToPlaceInstance(placeId, jobId, Players.LocalPlayer)
+        end)
+
+        -- Server Hop
+        MakeMiniBtn("Server Hop", UDim2.new(0.52, 0, 0, 0), UDim2.new(0.48, 0, 0, 24), function()
+            TeleportService:Teleport(placeId, Players.LocalPlayer)
+        end)
+
+        -- Copy Job ID
+        MakeMiniBtn("Copy Job ID", UDim2.new(0, 0, 0, 28), UDim2.new(0.48, 0, 0, 24), function()
+            if setclipboard then setclipboard(tostring(jobId)) end
+            WindowObj:Notify({ Title = "Copied", Description = "Job ID copied to clipboard!" })
+        end)
+
+        -- Copy Universe
+        MakeMiniBtn("Copy Universe", UDim2.new(0.52, 0, 0, 28), UDim2.new(0.48, 0, 0, 24), function()
+            if setclipboard then setclipboard(tostring(universeId)) end
+            WindowObj:Notify({ Title = "Copied", Description = "Universe ID copied to clipboard!" })
+        end)
+
+        -- Join Lowest Server
+        MakeMiniBtn("Join Lowest Server", UDim2.new(0, 0, 0, 56), UDim2.new(1, 0, 0, 24), function()
+            TeleportService:Teleport(placeId, Players.LocalPlayer)
+        end)
+
+        return Card
     end
 
     -- Warning Banner

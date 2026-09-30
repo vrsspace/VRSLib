@@ -58,12 +58,13 @@ end
 -- 2. Create Window
 local Window = VRSLibV2:CreateWindow({
     Title             = "auto",             -- Menyesuaikan judul game otomatis
-    SubTitle          = "v0.167",
+    SubTitle          = "v0.171",
     Size              = UDim2.fromOffset(1020, 620),
     Keybind           = Enum.KeyCode.RightControl,
-    Background        = "default",          -- Aesthetic dark cyberpunk/mono wallpaper
-    BackgroundOpacity = 0.65,              -- 65% opacity
-    Weather           = "Snow",             -- Ambient snow particles
+    Background        = "default",          -- Aesthetic dark frosted glass
+    BackgroundOpacity = 0.20,              -- Subtle clean dark texture (not blinding)
+    Weather           = "Snow",             -- Ambient snow particles across entire screen
+    Blur              = true,               -- Fullscreen 3D world depth-of-field blur
     ToggleButton      = true                -- Floating mobile/desktop toggle widget
 })
 
@@ -74,7 +75,7 @@ local TabHome = Window:AddTab({
     Name        = "Home",
     Icon        = "home",
     HeaderTitle = "auto",
-    Subtitle    = "v0.167"
+    Subtitle    = "v0.171"
 })
 
 -- SubTab 1: Overview
@@ -83,19 +84,27 @@ local SubOverview = TabHome:AddSubTab({
     Icon = "overview"
 })
 
--- Profile Card
+-- Profile Card (With Name & Profile switches matching Screenshot 1)
 SubOverview:AddProfileCard({
-    Badge = "v0.167"
+    Badge = "v0.171"
 })
 
 -- Live Stat Row (Players, Friends, Execs, Session, FPS, Ping)
 local Stats = SubOverview:AddStatRow({
     { Title = "Players", Value = "1/1",     Icon = "players" },
     { Title = "Friends", Value = "0",       Icon = "friends" },
-    { Title = "Execs",   Value = "5",       Icon = "execs" },
+    { Title = "Execs",   Value = "6",       Icon = "execs" },
     { Title = "Session", Value = "0m 00s",  Icon = "session" },
     { Title = "FPS",     Value = "240",     Icon = "fps" },
     { Title = "Ping",    Value = "27ms",    Icon = "ping" }
+})
+
+-- Game Info Card (Matching Screenshot 1: Slayers 2 / Current Game Info & Action Controls)
+SubOverview:AddGameCard({
+    Title      = "Slayers 2",
+    Creator    = "by Gun Productions",
+    PlaceId    = 1530373724,
+    UniverseId = 5370353122
 })
 
 -- Live Session Timer & FPS / Ping Update Loop
