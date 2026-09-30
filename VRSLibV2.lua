@@ -191,7 +191,7 @@ VRSLibV2.Icons = (function()
     end)
 
     local LogoUrl = "https://raw.githubusercontent.com/vrsspace/VRSLib/main/assets/mono_logo.png"
-    local ResolvedLogo = LoadCustomImage(LogoUrl, "mono_logo.png", "rbxassetid://132717088484517")
+    local ResolvedLogo = LoadCustomImage(LogoUrl, "mono_logo.png", "rbxassetid://10734951367")
 
     local Map = {
         ["wings"]             = ResolvedLogo,
