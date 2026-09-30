@@ -19,10 +19,20 @@
 -- Anti-multi execution
 if _G.VRS_MONO_UNLOAD then pcall(_G.VRS_MONO_UNLOAD) end
 
--- 1. Load Engine (Multi-path fallback: local workspace, GitHub raw fallback)
+-- 1. Load Engine (Prioritizes latest GitHub version with cache-buster, with local fallback for offline dev)
 local VRSLibV2
-pcall(function()
-    if readfile then
+if not _G.VRS_LOCAL and game and game.HttpGet then
+    pcall(function()
+        local raw = game:HttpGet("https://raw.githubusercontent.com/vrsspace/VRSLib/main/VRSLibV2.lua?v=" .. tick())
+        if raw and #raw > 1000 then
+            local fn = loadstring(raw)
+            if fn then VRSLibV2 = fn() end
+        end
+    end)
+end
+
+if not VRSLibV2 and readfile then
+    pcall(function()
         local paths = {
             "VRSLibV2.lua",
             "[ UI LIB ]/VRSLibV2.lua",
@@ -38,19 +48,11 @@ pcall(function()
                 end
             end
         end
-    end
-end)
-
-if not VRSLibV2 then
-    pcall(function()
-        local raw = game:HttpGet("https://raw.githubusercontent.com/vrsspace/VRSLib/main/VRSLibV2.lua?v=" .. tick())
-        local fn = loadstring(raw)
-        if fn then VRSLibV2 = fn() end
     end)
 end
 
 if not VRSLibV2 then
-    error("[VRSLibV2] Failed to load VRSLibV2 engine. Ensure VRSLibV2.lua is in your executor workspace.")
+    error("[VRSLibV2] Failed to load VRSLibV2 engine. Check your internet connection or executor workspace.")
 end
 
 -- 2. Create Window
