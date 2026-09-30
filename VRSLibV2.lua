@@ -65,6 +65,43 @@ local VRSLibV2 = {
         WarningBadge    = Color3.fromRGB(234, 179, 8),   -- Warning yellow
         ActionBtn       = Color3.fromRGB(28, 30, 39),
         ActionBtnHover  = Color3.fromRGB(38, 41, 54),
+    },
+    Presets = {
+        ["Mono"] = {
+            Accent        = Color3.fromRGB(255, 255, 255),
+            AccentMuted   = Color3.fromRGB(180, 185, 200),
+            SwitchOn      = Color3.fromRGB(255, 255, 255),
+            SwitchOnKnob  = Color3.fromRGB(16, 17, 21),
+            PillIndicator = Color3.fromRGB(255, 255, 255)
+        },
+        ["Cyber"] = {
+            Accent        = Color3.fromRGB(0, 210, 255),
+            AccentMuted   = Color3.fromRGB(100, 190, 230),
+            SwitchOn      = Color3.fromRGB(0, 210, 255),
+            SwitchOnKnob  = Color3.fromRGB(16, 17, 21),
+            PillIndicator = Color3.fromRGB(0, 210, 255)
+        },
+        ["Emerald"] = {
+            Accent        = Color3.fromRGB(34, 197, 94),
+            AccentMuted   = Color3.fromRGB(110, 210, 150),
+            SwitchOn      = Color3.fromRGB(34, 197, 94),
+            SwitchOnKnob  = Color3.fromRGB(16, 17, 21),
+            PillIndicator = Color3.fromRGB(34, 197, 94)
+        },
+        ["Artelier"] = {
+            Accent        = Color3.fromRGB(255, 64, 140),
+            AccentMuted   = Color3.fromRGB(255, 140, 190),
+            SwitchOn      = Color3.fromRGB(255, 64, 140),
+            SwitchOnKnob  = Color3.fromRGB(255, 255, 255),
+            PillIndicator = Color3.fromRGB(255, 64, 140)
+        },
+        ["Gold"] = {
+            Accent        = Color3.fromRGB(245, 190, 40),
+            AccentMuted   = Color3.fromRGB(220, 185, 90),
+            SwitchOn      = Color3.fromRGB(245, 190, 40),
+            SwitchOnKnob  = Color3.fromRGB(16, 17, 21),
+            PillIndicator = Color3.fromRGB(245, 190, 40)
+        }
     }
 }
 
@@ -95,18 +132,33 @@ end
 -- 1. ASSET & LOGO LOADER (Guaranteed to Render in all Executors)
 -- ==============================================================================
 local function LoadCustomImage(url, filename, fallbackAssetId)
-    if getcustomasset and writefile and isfile then
-        pcall(function()
-            if not isfile(filename) then
-                local raw = game:HttpGet(url)
-                if raw and #raw > 0 then
-                    writefile(filename, raw)
-                end
+    if getcustomasset and isfile then
+        local candidates = {
+            filename,
+            "assets/" .. filename,
+            "[ UI LIB ]/assets/" .. filename,
+            "d:/Data Project's/Roblox Project/[ UI LIB ]/assets/" .. filename
+        }
+        for _, p in ipairs(candidates) do
+            if isfile(p) then
+                local ok, asset = pcall(getcustomasset, p)
+                if ok and asset then return asset end
             end
-        end)
-        if isfile(filename) then
-            local ok, asset = pcall(getcustomasset, filename)
-            if ok and asset then return asset end
+        end
+
+        if writefile and url and url ~= "" and url:sub(1, 4) == "http" then
+            pcall(function()
+                if not isfile(filename) then
+                    local raw = game:HttpGet(url)
+                    if raw and #raw > 0 then
+                        writefile(filename, raw)
+                    end
+                end
+            end)
+            if isfile(filename) then
+                local ok, asset = pcall(getcustomasset, filename)
+                if ok and asset then return asset end
+            end
         end
     end
     return fallbackAssetId
@@ -207,8 +259,16 @@ function VRSLibV2:CreateWindow(config)
     local windowSize     = config.Size or UDim2.fromOffset(1020, 620)
     local windowKeybind  = config.Keybind or Enum.KeyCode.RightControl
     local bgOpacity      = config.BackgroundOpacity or 0.65
-    local bgImage        = config.Background or "rbxassetid://132817836308238" -- Subtle aesthetic backdrop
     local weatherMode    = config.Weather or "Snow"
+
+    -- Wallpaper Resolution: Checks local assets/wallpaper.png, github raw, or fallback dark mesh
+    local defaultWallpaperUrl = "https://raw.githubusercontent.com/vrsspace/VRSLib/main/assets/wallpaper.png"
+    local defaultWallpaperAsset = LoadCustomImage(defaultWallpaperUrl, "wallpaper.png", "rbxassetid://6071575925")
+
+    local bgImage = config.Background
+    if bgImage == "auto" or bgImage == nil or bgImage == "default" or bgImage == "Default Artwork" or bgImage == "rbxassetid://132817836308238" then
+        bgImage = defaultWallpaperAsset
+    end
 
     -- Close old instance
     if _G.VRS_MONO_UNLOAD then pcall(_G.VRS_MONO_UNLOAD) end
@@ -219,14 +279,39 @@ function VRSLibV2:CreateWindow(config)
     RootGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     RootGui.Parent = GetSafeGui()
 
-    -- UNIFIED MAIN SHELL (Sidebar + Content together in ONE frame)
+    -- 1. Outer Drop Shadow (Gives physical depth, stops window from feeling detached)
+    local ShadowHolder = Instance.new("Frame")
+    ShadowHolder.Name = "ShadowHolder"
+    ShadowHolder.Size = windowSize
+    ShadowHolder.Position = UDim2.new(0.5, -windowSize.X.Offset / 2, 0.5, -windowSize.Y.Offset / 2)
+    ShadowHolder.BackgroundTransparency = 1
+    ShadowHolder.BorderSizePixel = 0
+    ShadowHolder.ZIndex = 1
+    ShadowHolder.Parent = RootGui
+
+    local ShadowImg = Instance.new("ImageLabel")
+    ShadowImg.Name = "Shadow"
+    ShadowImg.Size = UDim2.new(1, 46, 1, 46)
+    ShadowImg.Position = UDim2.new(0, -23, 0, -23)
+    ShadowImg.BackgroundTransparency = 1
+    ShadowImg.Image = "rbxassetid://5554236805" -- 9-slice soft shadow
+    ShadowImg.ScaleType = Enum.ScaleType.Slice
+    ShadowImg.SliceCenter = Rect.new(23, 23, 277, 277)
+    ShadowImg.ImageColor3 = Color3.fromRGB(0, 0, 0)
+    ShadowImg.ImageTransparency = 0.35
+    ShadowImg.ZIndex = 1
+    ShadowImg.Parent = ShadowHolder
+
+    -- 2. UNIFIED MAIN SHELL (Sidebar + Content together in ONE solid cohesive frame)
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
     MainFrame.Size = windowSize
     MainFrame.Position = UDim2.new(0.5, -windowSize.X.Offset / 2, 0.5, -windowSize.Y.Offset / 2)
     MainFrame.BackgroundColor3 = VRSLibV2.Theme.Background
+    MainFrame.BackgroundTransparency = 0 -- Solid matte base
     MainFrame.BorderSizePixel = 0
     MainFrame.ClipsDescendants = true
+    MainFrame.ZIndex = 2
     MainFrame.Parent = RootGui
 
     local mfCorner = Instance.new("UICorner")
@@ -248,35 +333,61 @@ function VRSLibV2:CreateWindow(config)
     })
     mfGrad.Parent = MainFrame
 
-    -- BACKGROUND IMAGE LAYER (Customizable Wallpaper with Opacity)
+    -- 3. BACKGROUND WALLPAPER LAYER (Live Opacity, Local & URL Caching)
     local BgImageLabel = Instance.new("ImageLabel")
     BgImageLabel.Name = "BackgroundImage"
     BgImageLabel.Size = UDim2.new(1, 0, 1, 0)
     BgImageLabel.BackgroundTransparency = 1
     BgImageLabel.ScaleType = Enum.ScaleType.Crop
     BgImageLabel.ImageTransparency = 1 - bgOpacity
-    BgImageLabel.ZIndex = 1
+    BgImageLabel.ZIndex = 2
     BgImageLabel.Parent = MainFrame
 
+    -- Ambient Vignette Depth (Ensures deep dark luxury aesthetic even if wallpaper is disabled)
+    local AmbientOverlay = Instance.new("ImageLabel")
+    AmbientOverlay.Name = "AmbientOverlay"
+    AmbientOverlay.Size = UDim2.new(1, 0, 1, 0)
+    AmbientOverlay.BackgroundTransparency = 1
+    AmbientOverlay.Image = "rbxassetid://2151741365"
+    AmbientOverlay.ImageColor3 = Color3.fromRGB(0, 0, 0)
+    AmbientOverlay.ImageTransparency = 0.45
+    AmbientOverlay.ZIndex = 2
+    AmbientOverlay.Parent = MainFrame
+
+    local currentBgSrc = bgImage
     local function ApplyBackground(src, opacity)
-        if not src or src == "" or src == "None" then
-            BgImageLabel.Visible = false
-            return
+        if opacity ~= nil then
+            bgOpacity = math.clamp(opacity, 0, 1)
+            BgImageLabel.ImageTransparency = 1 - bgOpacity
         end
-        BgImageLabel.Visible = true
-        if opacity then
-            BgImageLabel.ImageTransparency = 1 - opacity
-        end
-        if src:sub(1, 4) == "http" then
-            local asset = LoadCustomImage(src, "vrs_bg_" .. HttpService:GenerateGUID(false):sub(1, 6) .. ".png", src)
-            BgImageLabel.Image = asset
+
+        if src ~= nil then
+            currentBgSrc = src
+            if src == "" or src == "None" then
+                BgImageLabel.Visible = false
+                return
+            end
+            BgImageLabel.Visible = true
+            if src == "default" or src == "Default Artwork" then
+                src = defaultWallpaperAsset
+            end
+            if src:sub(1, 4) == "http" then
+                local asset = LoadCustomImage(src, "vrs_bg_" .. HttpService:GenerateGUID(false):sub(1, 6) .. ".png", src)
+                BgImageLabel.Image = asset
+            else
+                BgImageLabel.Image = src
+            end
         else
-            BgImageLabel.Image = src
+            if currentBgSrc and currentBgSrc ~= "" and currentBgSrc ~= "None" then
+                BgImageLabel.Visible = true
+            end
         end
     end
 
     if bgImage and bgImage ~= "None" then
         ApplyBackground(bgImage, bgOpacity)
+    else
+        BgImageLabel.Visible = false
     end
 
     -- WEATHER LAYER (Snow Particles Floating across Window)
@@ -581,18 +692,18 @@ function VRSLibV2:CreateWindow(config)
     subTabLayout.Padding = UDim.new(0, 8)
     subTabLayout.Parent = SubTabBar
 
-    -- Controls on the Right (Search + Minimize)
+    -- Controls on the Right (Search + Minimize + Close)
     local TopControls = Instance.new("Frame")
     TopControls.Name = "TopControls"
-    TopControls.Size = UDim2.new(0, 220, 0, 36)
-    TopControls.Position = UDim2.new(1, -232, 0, 10)
+    TopControls.Size = UDim2.new(0, 256, 0, 36)
+    TopControls.Position = UDim2.new(1, -268, 0, 10)
     TopControls.BackgroundTransparency = 1
     TopControls.ZIndex = 4
     TopControls.Parent = Topbar
 
     local SearchBox = Instance.new("Frame")
     SearchBox.Name = "SearchBox"
-    SearchBox.Size = UDim2.new(1, -44, 0, 28)
+    SearchBox.Size = UDim2.new(1, -76, 0, 28)
     SearchBox.Position = UDim2.new(0, 0, 0, 4)
     SearchBox.BackgroundColor3 = Color3.fromRGB(24, 25, 33)
     SearchBox.BorderSizePixel = 0
@@ -635,7 +746,7 @@ function VRSLibV2:CreateWindow(config)
     local MinBtn = Instance.new("TextButton")
     MinBtn.Name = "MinBtn"
     MinBtn.Size = UDim2.fromOffset(28, 28)
-    MinBtn.Position = UDim2.new(1, -34, 0, 4)
+    MinBtn.Position = UDim2.new(1, -66, 0, 4)
     MinBtn.BackgroundColor3 = Color3.fromRGB(24, 25, 33)
     MinBtn.Text = "-"
     MinBtn.Font = Enum.Font.GothamBold
@@ -654,19 +765,59 @@ function VRSLibV2:CreateWindow(config)
     minStroke.Thickness = 1
     minStroke.Parent = MinBtn
 
+    local CloseBtn = Instance.new("TextButton")
+    CloseBtn.Name = "CloseBtn"
+    CloseBtn.Size = UDim2.fromOffset(28, 28)
+    CloseBtn.Position = UDim2.new(1, -32, 0, 4)
+    CloseBtn.BackgroundColor3 = Color3.fromRGB(24, 25, 33)
+    CloseBtn.Text = "✕"
+    CloseBtn.Font = Enum.Font.GothamBold
+    CloseBtn.TextSize = 12
+    CloseBtn.TextColor3 = VRSLibV2.Theme.TextSecondary
+    CloseBtn.AutoButtonColor = false
+    CloseBtn.ZIndex = 4
+    CloseBtn.Parent = TopControls
+
+    local closeCorner = Instance.new("UICorner")
+    closeCorner.CornerRadius = UDim.new(0, 8)
+    closeCorner.Parent = CloseBtn
+
+    local closeStroke = Instance.new("UIStroke")
+    closeStroke.Color = Color3.fromRGB(38, 41, 54)
+    closeStroke.Thickness = 1
+    closeStroke.Parent = CloseBtn
+
+    local function SetWindowVisible(vis)
+        MainFrame.Visible = vis
+        if ShadowHolder then ShadowHolder.Visible = vis end
+    end
+
     local isMinimized = false
     MinBtn.MouseButton1Click:Connect(function()
         isMinimized = not isMinimized
         if isMinimized then
             QuickTween(MainFrame, { Size = UDim2.new(0, SidebarWidth, 0, 70) }, 0.25)
+            if ShadowHolder then QuickTween(ShadowHolder, { Size = UDim2.new(0, SidebarWidth, 0, 70) }, 0.25) end
             ContentArea.Visible = false
         else
             ContentArea.Visible = true
             QuickTween(MainFrame, { Size = windowSize }, 0.25)
+            if ShadowHolder then QuickTween(ShadowHolder, { Size = windowSize }, 0.25) end
         end
     end)
 
-    -- Window Dragging System
+    CloseBtn.MouseButton1Click:Connect(function()
+        SetWindowVisible(false)
+    end)
+
+    CloseBtn.MouseEnter:Connect(function()
+        QuickTween(CloseBtn, { BackgroundColor3 = Color3.fromRGB(180, 40, 50), TextColor3 = Color3.fromRGB(255, 255, 255) }, 0.15)
+    end)
+    CloseBtn.MouseLeave:Connect(function()
+        QuickTween(CloseBtn, { BackgroundColor3 = Color3.fromRGB(24, 25, 33), TextColor3 = VRSLibV2.Theme.TextSecondary }, 0.15)
+    end)
+
+    -- Window Dragging System (Synchronized MainFrame & Drop Shadow)
     local isDragging = false
     local dragStart, startPos
     local function UpdateDrag(input)
@@ -677,6 +828,9 @@ function VRSLibV2:CreateWindow(config)
             startPos.Y.Scale,
             startPos.Y.Offset + delta.Y
         )
+        if ShadowHolder then
+            ShadowHolder.Position = MainFrame.Position
+        end
     end
 
     local function HookDrag(frame)
@@ -706,9 +860,66 @@ function VRSLibV2:CreateWindow(config)
     -- Visibility Toggle Keybind
     UserInputService.InputBegan:Connect(function(input, processed)
         if not processed and input.KeyCode == windowKeybind then
-            MainFrame.Visible = not MainFrame.Visible
+            SetWindowVisible(not MainFrame.Visible)
         end
     end)
+
+    -- Mobile / Touch Screen Floating Draggable Toggle Widget
+    local isMobileDevice = (UserInputService.TouchEnabled and (not UserInputService.KeyboardEnabled or not UserInputService.MouseEnabled))
+    local showToggleWidget = (config.ToggleButton == true) or (config.ToggleButton == nil and isMobileDevice)
+
+    if showToggleWidget then
+        local ToggleWidget = Instance.new("ImageButton")
+        ToggleWidget.Name = "VRSToggleWidget"
+        ToggleWidget.Size = UDim2.fromOffset(40, 40)
+        ToggleWidget.Position = UDim2.new(0, 16, 0.5, -20)
+        ToggleWidget.BackgroundColor3 = Color3.fromRGB(20, 22, 28)
+        ToggleWidget.AutoButtonColor = false
+        ToggleWidget.ZIndex = 80
+        ToggleWidget.Parent = RootGui
+
+        local twCorner = Instance.new("UICorner")
+        twCorner.CornerRadius = UDim.new(1, 0)
+        twCorner.Parent = ToggleWidget
+
+        local twStroke = Instance.new("UIStroke")
+        twStroke.Color = Color3.fromRGB(48, 52, 68)
+        twStroke.Thickness = 1.5
+        twStroke.Parent = ToggleWidget
+
+        local twIcon = Instance.new("ImageLabel")
+        twIcon.Size = UDim2.fromOffset(24, 24)
+        twIcon.Position = UDim2.new(0.5, -12, 0.5, -12)
+        twIcon.BackgroundTransparency = 1
+        twIcon.Image = VRSLibV2.Icons.Logo
+        twIcon.ImageColor3 = VRSLibV2.Theme.Accent
+        twIcon.ZIndex = 81
+        twIcon.Parent = ToggleWidget
+
+        local twDragging, twStart, twPos
+        ToggleWidget.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                twDragging = true
+                twStart = input.Position
+                twPos = ToggleWidget.Position
+                input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then
+                        twDragging = false
+                    end
+                end)
+            end
+        end)
+        UserInputService.InputChanged:Connect(function(input)
+            if twDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                local delta = input.Position - twStart
+                ToggleWidget.Position = UDim2.new(twPos.X.Scale, twPos.X.Offset + delta.X, twPos.Y.Scale, twPos.Y.Offset + delta.Y)
+            end
+        end)
+
+        ToggleWidget.MouseButton1Click:Connect(function()
+            SetWindowVisible(not MainFrame.Visible)
+        end)
+    end
 
     -- Pages Container
     local PagesContainer = Instance.new("Frame")
@@ -724,24 +935,71 @@ function VRSLibV2:CreateWindow(config)
     local WindowObj = {
         RootGui        = RootGui,
         MainFrame      = MainFrame,
+        ShadowHolder   = ShadowHolder,
         ContentArea    = ContentArea,
         PagesContainer = PagesContainer,
         SubTabBar      = SubTabBar,
         TitleLabel     = TitleLabel,
         TitleIcon      = TitleIcon,
         SubtitleLabel  = SubtitleLabel,
+        SearchInput    = SearchInput,
         Tabs           = {},
         ActiveTab      = nil,
         Keybind        = windowKeybind,
         SetBackground  = ApplyBackground,
         SetWeather     = function(self, mode)
-            weatherActive = (mode == "Snow")
+            weatherMode = mode or "None"
+            weatherActive = (weatherMode == "Snow")
             WeatherContainer.Visible = weatherActive
+        end,
+        SetKeybind     = function(self, newKey)
+            windowKeybind = newKey
+            WindowObj.Keybind = newKey
+        end,
+        SetPreset      = function(self, presetName)
+            local preset = VRSLibV2.Presets[presetName]
+            if not preset then return end
+            for k, v in pairs(preset) do
+                VRSLibV2.Theme[k] = v
+            end
+            if WindowObj.ActiveTab and WindowObj.ActiveTab.Button then
+                QuickTween(WindowObj.ActiveTab.Button.ActivePill, { BackgroundColor3 = VRSLibV2.Theme.PillIndicator }, 0.2)
+            end
+        end,
+        ToggleVisibility = function(self)
+            SetWindowVisible(not MainFrame.Visible)
         end
     }
 
+    -- Real-time Search Filtering across active tab/subtab elements
+    SearchInput:GetPropertyChangedSignal("Text"):Connect(function()
+        local query = SearchInput.Text:lower()
+        if not WindowObj.ActiveTab then return end
+        local activePage = (WindowObj.ActiveTab.ActiveSubTab and WindowObj.ActiveTab.ActiveSubTab.Page) or WindowObj.ActiveTab.Page
+        for _, desc in ipairs(activePage:GetDescendants()) do
+            if desc:IsA("Frame") and (desc.Name:sub(1, 9) == "Groupbox_" or desc.Name:sub(1, 7) == "Toggle_" or desc.Name:sub(1, 7) == "Slider_" or desc.Name:sub(1, 9) == "Dropdown_" or desc.Name:sub(1, 6) == "Input_" or desc.Name:sub(1, 7) == "Button_" or desc.Name:sub(1, 8) == "Keybind_" or desc.Name:sub(1, 8) == "InfoRow_") then
+                if query == "" then
+                    desc.Visible = true
+                else
+                    local itemName = desc.Name:gsub("^%w+_", ""):lower()
+                    local matched = (itemName:find(query, 1, true) ~= nil)
+                    if not matched then
+                        for _, child in ipairs(desc:GetChildren()) do
+                            if child:IsA("TextLabel") and child.Text:lower():find(query, 1, true) then
+                                matched = true
+                                break
+                            end
+                        end
+                    end
+                    desc.Visible = matched
+                end
+            end
+        end
+    end)
+
     WindowObj.OnUnload = function()
         if snowConn then snowConn:Disconnect() end
+        if ShadowHolder then ShadowHolder:Destroy() end
         RootGui:Destroy()
         _G.VRS_MONO_UNLOAD = nil
     end
@@ -1976,6 +2234,16 @@ function VRSLibV2:_AttachComponentFactory(targetObj, container)
                     ibText.TextColor3 = Theme.Accent
                 end
 
+                local chkIcon = Instance.new("ImageLabel")
+                chkIcon.Size = UDim2.fromOffset(11, 11)
+                chkIcon.Position = UDim2.new(1, -17, 0.5, -5)
+                chkIcon.BackgroundTransparency = 1
+                chkIcon.Image = VRSLibV2.Icons.Get("check")
+                chkIcon.ImageColor3 = Theme.Accent
+                chkIcon.Visible = isPicked
+                chkIcon.ZIndex = 53
+                chkIcon.Parent = ItemBtn
+
                 ItemBtn.MouseButton1Click:Connect(function()
                     if multi then
                         local idx = table.find(selected, optStr)
@@ -1988,6 +2256,8 @@ function VRSLibV2:_AttachComponentFactory(targetObj, container)
                         SelectedLbl.Text = GetDisplayString()
                         isOpen = false
                         Menu.Visible = false
+                        Row.ZIndex = 4
+                        Trigger.ZIndex = 4
                         QuickTween(Chevron, { Rotation = 0 }, 0.15)
                         task.spawn(function() pcall(callback, selected) end)
                     end
@@ -2002,11 +2272,15 @@ function VRSLibV2:_AttachComponentFactory(targetObj, container)
         Trigger.MouseButton1Click:Connect(function()
             isOpen = not isOpen
             if isOpen then
+                Row.ZIndex = 40
+                Trigger.ZIndex = 41
                 PopulateItems()
                 Menu.Visible = true
                 QuickTween(Chevron, { Rotation = 180 }, 0.15)
             else
                 Menu.Visible = false
+                Row.ZIndex = 4
+                Trigger.ZIndex = 4
                 QuickTween(Chevron, { Rotation = 0 }, 0.15)
             end
         end)
@@ -2354,6 +2628,158 @@ function VRSLibV2:_AttachComponentFactory(targetObj, container)
         Lbl.Parent = container
 
         return Lbl
+    end
+
+    -- Color Picker
+    function targetObj:AddColorPicker(cpConfig)
+        cpConfig = cpConfig or {}
+        local name     = cpConfig.Name or "Color Picker"
+        local default  = cpConfig.Default or Theme.Accent
+        local callback = cpConfig.Callback or function() end
+
+        local currentColor = default
+
+        local Row = Instance.new("Frame")
+        Row.Name = "ColorPicker_" .. name
+        Row.Size = UDim2.new(1, 0, 0, 36)
+        Row.BackgroundColor3 = Color3.fromRGB(20, 21, 28)
+        Row.BorderSizePixel = 0
+        Row.ClipsDescendants = true
+        Row.ZIndex = 3
+        Row.Parent = container
+
+        local rCorner = Instance.new("UICorner")
+        rCorner.CornerRadius = UDim.new(0, 8)
+        rCorner.Parent = Row
+
+        local rStroke = Instance.new("UIStroke")
+        rStroke.Color = Color3.fromRGB(34, 36, 48)
+        rStroke.Thickness = 1
+        rStroke.Parent = Row
+
+        local Label = Instance.new("TextLabel")
+        Label.Size = UDim2.new(1, -60, 0, 36)
+        Label.Position = UDim2.new(0, 12, 0, 0)
+        Label.BackgroundTransparency = 1
+        Label.Font = Enum.Font.GothamMedium
+        Label.TextSize = 11
+        Label.TextColor3 = Theme.TextPrimary
+        Label.TextXAlignment = Enum.TextXAlignment.Left
+        Label.Text = name
+        Label.ZIndex = 4
+        Label.Parent = Row
+
+        local ColorPreview = Instance.new("TextButton")
+        ColorPreview.Name = "ColorPreview"
+        ColorPreview.Size = UDim2.fromOffset(36, 20)
+        ColorPreview.Position = UDim2.new(1, -48, 0, 8)
+        ColorPreview.BackgroundColor3 = currentColor
+        ColorPreview.Text = ""
+        ColorPreview.AutoButtonColor = false
+        ColorPreview.ZIndex = 4
+        ColorPreview.Parent = Row
+
+        local cpCorner = Instance.new("UICorner")
+        cpCorner.CornerRadius = UDim.new(0, 6)
+        cpCorner.Parent = ColorPreview
+
+        local cpStroke = Instance.new("UIStroke")
+        cpStroke.Color = Color3.fromRGB(48, 52, 68)
+        cpStroke.Thickness = 1
+        cpStroke.Parent = ColorPreview
+
+        local Palette = Instance.new("Frame")
+        Palette.Name = "Palette"
+        Palette.Size = UDim2.new(1, -24, 0, 28)
+        Palette.Position = UDim2.new(0, 12, 0, 40)
+        Palette.BackgroundTransparency = 1
+        Palette.Visible = false
+        Palette.ZIndex = 4
+        Palette.Parent = Row
+
+        local palLayout = Instance.new("UIListLayout")
+        palLayout.FillDirection = Enum.FillDirection.Horizontal
+        palLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        palLayout.Padding = UDim.new(0, 6)
+        palLayout.Parent = Palette
+
+        local presets = {
+            Color3.fromRGB(255, 255, 255), -- White
+            Color3.fromRGB(255, 64, 140),  -- Artelier Pink
+            Color3.fromRGB(0, 210, 255),   -- Cyber Blue
+            Color3.fromRGB(34, 197, 94),   -- Emerald
+            Color3.fromRGB(245, 190, 40),  -- Gold
+            Color3.fromRGB(168, 85, 247),  -- Purple
+            Color3.fromRGB(239, 68, 68),   -- Red
+            Color3.fromRGB(20, 184, 166),  -- Teal
+            Color3.fromRGB(160, 165, 185)  -- Slate
+        }
+
+        local isPalOpen = false
+        local function SetColor(col, fire)
+            currentColor = col
+            ColorPreview.BackgroundColor3 = col
+            if fire then
+                task.spawn(function() pcall(callback, currentColor) end)
+            end
+        end
+
+        for _, col in ipairs(presets) do
+            local Swatch = Instance.new("TextButton")
+            Swatch.Size = UDim2.fromOffset(22, 22)
+            Swatch.BackgroundColor3 = col
+            Swatch.Text = ""
+            Swatch.AutoButtonColor = false
+            Swatch.ZIndex = 5
+            Swatch.Parent = Palette
+
+            local swcCorner = Instance.new("UICorner")
+            swcCorner.CornerRadius = UDim.new(0, 4)
+            swcCorner.Parent = Swatch
+
+            local swcStroke = Instance.new("UIStroke")
+            swcStroke.Color = Color3.fromRGB(48, 52, 68)
+            swcStroke.Thickness = 1
+            swcStroke.Parent = Swatch
+
+            Swatch.MouseButton1Click:Connect(function()
+                SetColor(col, true)
+            end)
+        end
+
+        ColorPreview.MouseButton1Click:Connect(function()
+            isPalOpen = not isPalOpen
+            Palette.Visible = isPalOpen
+            QuickTween(Row, { Size = isPalOpen and UDim2.new(1, 0, 0, 76) or UDim2.new(1, 0, 0, 36) }, 0.15)
+        end)
+
+        return {
+            SetValue = function(self, col) SetColor(col, true) end,
+            GetValue = function() return currentColor end
+        }
+    end
+
+    -- Section Header
+    function targetObj:AddSection(title)
+        local Sec = Instance.new("Frame")
+        Sec.Name = "Section_" .. (title or "Divider")
+        Sec.Size = UDim2.new(1, 0, 0, 24)
+        Sec.BackgroundTransparency = 1
+        Sec.ZIndex = 3
+        Sec.Parent = container
+
+        local SecLbl = Instance.new("TextLabel")
+        SecLbl.Size = UDim2.new(1, 0, 1, 0)
+        SecLbl.BackgroundTransparency = 1
+        SecLbl.Font = Enum.Font.GothamBold
+        SecLbl.TextSize = 11
+        SecLbl.TextColor3 = Theme.AccentMuted
+        SecLbl.TextXAlignment = Enum.TextXAlignment.Left
+        SecLbl.Text = title or ""
+        SecLbl.ZIndex = 4
+        SecLbl.Parent = Sec
+
+        return Sec
     end
 end
 

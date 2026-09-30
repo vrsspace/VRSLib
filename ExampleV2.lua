@@ -59,9 +59,10 @@ local Window = VRSLibV2:CreateWindow({
     SubTitle          = "v0.167",
     Size              = UDim2.fromOffset(1020, 620),
     Keybind           = Enum.KeyCode.RightControl,
-    Background        = "rbxassetid://132817836308238", -- Aesthetic dark wallpaper
+    Background        = "default",          -- Aesthetic dark cyberpunk/mono wallpaper
     BackgroundOpacity = 0.65,              -- 65% opacity
-    Weather           = "Snow"              -- Ambient snow particles
+    Weather           = "Snow",             -- Ambient snow particles
+    ToggleButton      = true                -- Floating mobile/desktop toggle widget
 })
 
 -- ==============================================================================
@@ -326,9 +327,10 @@ local ThemesBox = SetRight:AddGroupbox({ Title = "Themes", Icon = "palette" })
 
 ThemesBox:AddDropdown({
     Name     = "Preset",
-    Items    = { "Mono", "Dark", "Obsidian", "Cyber" },
+    Items    = { "Mono", "Cyber", "Emerald", "Artelier", "Gold" },
     Default  = "Mono",
     Callback = function(val)
+        Window:SetPreset(val)
         Window:Notify({ Title = "Theme Preset", Description = "Preset changed to " .. val })
     end
 })
@@ -345,7 +347,7 @@ ThemesBox:AddDropdown({
 ThemesBox:AddDropdown({
     Name     = "Weather Mode",
     Items    = { "Screen", "Window" },
-    Default  = "Screen",
+    Default  = "Window",
     Callback = function(val) print("Weather Mode:", val) end
 })
 
@@ -355,13 +357,15 @@ ThemesBox:AddToggle({ Name = "Drag Skeleton", Default = true, Callback = functio
 
 ThemesBox:AddDropdown({
     Name     = "Background",
-    Items    = { "None", "Default Artwork", "Custom URL" },
+    Items    = { "Default Artwork", "Cyber Grid", "None" },
     Default  = "Default Artwork",
     Callback = function(v)
         if v == "None" then
-            Window:SetBackground(nil, 0)
+            Window:SetBackground("None", 0)
         elseif v == "Default Artwork" then
-            Window:SetBackground("rbxassetid://132817836308238", 0.65)
+            Window:SetBackground("default", 0.65)
+        elseif v == "Cyber Grid" then
+            Window:SetBackground("rbxassetid://6071575925", 0.45)
         end
     end
 })
@@ -396,19 +400,24 @@ ThemesBox:AddSlider({
     end
 })
 
-ThemesBox:AddLabel("——— Custom Themes ———")
+ThemesBox:AddLabel("——— Custom Themes & Palette ———")
+ThemesBox:AddColorPicker({
+    Name     = "Accent Color",
+    Default  = Color3.fromRGB(255, 255, 255),
+    Callback = function(col)
+        VRSLibV2.Theme.Accent = col
+        VRSLibV2.Theme.PillIndicator = col
+        if Window.ActiveTab and Window.ActiveTab.Button then
+            TweenService:Create(Window.ActiveTab.Button.ActivePill, TweenInfo.new(0.2), { BackgroundColor3 = col }):Play()
+        end
+        Window:Notify({ Title = "Palette", Description = "Accent color updated!" })
+    end
+})
+
 ThemesBox:AddInput({ Name = "Theme Name", Placeholder = "theme name", Default = "" })
-ThemesBox:AddDropdown({ Name = "Theme", Items = { "no themes", "Default Mono" }, Default = "no themes" })
 ThemesBox:AddButton({ Name = "Save Theme", Callback = function() Window:Notify({ Title = "Themes", Description = "Theme saved." }) end })
 ThemesBox:AddButton({ Name = "Load Theme", Callback = function() Window:Notify({ Title = "Themes", Description = "Theme loaded." }) end })
 
-ThemesBox:AddLabel("Default theme: none")
-
--- Color Swatches
-ThemesBox:AddDropdown({ Name = "Accent", Items = { "White (#FFFFFF)", "Off-White (#F0F0F0)" }, Default = "White (#FFFFFF)" })
-ThemesBox:AddDropdown({ Name = "Background", Items = { "Charcoal (#101115)", "Obsidian (#0A0B0E)" }, Default = "Charcoal (#101115)" })
-ThemesBox:AddDropdown({ Name = "Surface", Items = { "Elevated Card (#191A21)" }, Default = "Elevated Card (#191A21)" })
-ThemesBox:AddDropdown({ Name = "Text", Items = { "Pure White (#FFFFFF)" }, Default = "Pure White (#FFFFFF)" })
-ThemesBox:AddDropdown({ Name = "Muted text", Items = { "Slate (#696E7E)" }, Default = "Slate (#696E7E)" })
+ThemesBox:AddLabel("Default theme: Mono")
 
 print("[VRS Mono] ExampleV2 loaded successfully!")

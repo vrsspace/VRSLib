@@ -223,6 +223,58 @@ local Keybind = Box:AddKeybind({
 })
 ```
 
+### 7. Color Picker
+Komponen pemilih warna modern dengan tombol preview dan palet preset swatch:
+```lua
+local ColorPick = Box:AddColorPicker({
+    Name     = "Accent Color",
+    Default  = Color3.fromRGB(255, 255, 255),
+    Callback = function(col)
+        print("Color selected:", col)
+    end
+})
+
+ColorPick:SetValue(Color3.fromRGB(0, 210, 255))
+```
+
+### 8. Section Divider
+Pemisah grup atau sub-judul kategori di dalam groupbox:
+```lua
+Box:AddSection("Player Modifications")
+```
+
+---
+
+## 🎨 Theme Presets & Wallpaper Engine
+
+### 1. Preset Tema
+Ubah palet warna aksen secara instan:
+```lua
+Window:SetPreset("Mono")     -- Pure White
+Window:SetPreset("Cyber")    -- Neon Cyan Blue
+Window:SetPreset("Emerald")  -- Emerald Green
+Window:SetPreset("Artelier") -- Signature VRS Neon Pink
+Window:SetPreset("Gold")     -- Luxury Dark Gold
+```
+
+### 2. Wallpaper & Opacity Control
+```lua
+-- Mengubah wallpaper (bisa ID rbxassetid, URL, atau file lokal)
+Window:SetBackground("default", 0.65)
+
+-- Mengubah opacity saja tanpa mengubah gambar
+Window:SetBackground(nil, 0.40)
+
+-- Mematikan wallpaper (menampilkan solid matte obsidian)
+Window:SetBackground("None", 0)
+```
+
+### 3. Ambient Weather
+```lua
+Window:SetWeather("Snow")  -- Salju mengambang halus di seluruh jendela
+Window:SetWeather("None")  -- Mematikan partikel cuaca
+```
+
 ---
 
 ## 🔔 Sistem Notifikasi
