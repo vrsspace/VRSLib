@@ -165,69 +165,96 @@ local function LoadCustomImage(url, filename, fallbackAssetId)
 end
 
 VRSLibV2.Icons = (function()
+    local FullIcons
+    pcall(function()
+        local paths = {
+            "src/Icons.lua",
+            "[ UI LIB ]/src/Icons.lua",
+            "d:/Data Project's/Roblox Project/[ UI LIB ]/src/Icons.lua"
+        }
+        if readfile then
+            for _, p in ipairs(paths) do
+                if isfile and isfile(p) then
+                    local fn = loadstring(readfile(p))
+                    if fn then
+                        FullIcons = fn()
+                        break
+                    end
+                end
+            end
+        end
+        if not FullIcons and game and game.HttpGet then
+            local raw = game:HttpGet("https://raw.githubusercontent.com/vrsspace/VRSLib/main/src/Icons.lua?v=" .. tick())
+            local fn = loadstring(raw)
+            if fn then FullIcons = fn() end
+        end
+    end)
+
     local LogoUrl = "https://raw.githubusercontent.com/vrsspace/VRSLib/main/assets/mono_logo.png"
-    local ResolvedLogo = LoadCustomImage(LogoUrl, "vrs_mono_logo.png", "rbxassetid://10709761813")
+    local ResolvedLogo = LoadCustomImage(LogoUrl, "mono_logo.png", "rbxassetid://132717088484517")
 
     local Map = {
         ["wings"]             = ResolvedLogo,
         ["brand"]             = ResolvedLogo,
         ["logo"]              = ResolvedLogo,
         ["ouroboros"]         = ResolvedLogo,
-        ["home"]              = "rbxassetid://10709789810",
-        ["layout-grid"]       = "rbxassetid://10709789508",
-        ["grid"]              = "rbxassetid://10709789508",
-        ["overview"]          = "rbxassetid://10709789508",
-        ["list"]              = "rbxassetid://10709789643",
-        ["menu"]              = "rbxassetid://10709790537",
-        ["swords"]            = "rbxassetid://10709819149",
-        ["combat"]            = "rbxassetid://10709819149",
-        ["shield"]            = "rbxassetid://10709811911",
-        ["clan"]              = "rbxassetid://10709811911",
-        ["settings"]          = "rbxassetid://10709810948",
-        ["gear"]              = "rbxassetid://10709810948",
-        ["user"]              = "rbxassetid://10709818834",
-        ["users"]             = "rbxassetid://10709818967",
-        ["players"]           = "rbxassetid://10709818967",
-        ["friends"]           = "rbxassetid://10709818967",
-        ["search"]            = "rbxassetid://10734943674",
-        ["clock"]             = "rbxassetid://10709752630",
-        ["session"]           = "rbxassetid://10709752630",
-        ["gauge"]             = "rbxassetid://10709788686",
-        ["speed"]             = "rbxassetid://10709788686",
-        ["fps"]               = "rbxassetid://10709788686",
-        ["wifi"]              = "rbxassetid://10709819443",
-        ["ping"]              = "rbxassetid://10709819443",
-        ["zap"]               = "rbxassetid://10709819617",
-        ["execs"]             = "rbxassetid://10709819617",
-        ["minus"]             = "rbxassetid://10709790757",
-        ["x"]                 = "rbxassetid://10709819844",
-        ["close"]             = "rbxassetid://10709819844",
-        ["check"]             = "rbxassetid://10709790644",
-        ["chevron-down"]      = "rbxassetid://10709790948",
-        ["chevron-up"]        = "rbxassetid://10709791043",
-        ["chevron-right"]     = "rbxassetid://10709791130",
-        ["chevron-left"]      = "rbxassetid://10709791281",
-        ["copy"]              = "rbxassetid://10709791437",
-        ["external-link"]     = "rbxassetid://10709791558",
-        ["play"]              = "rbxassetid://10709810810",
-        ["eye"]               = "rbxassetid://10709791694",
-        ["eye-off"]           = "rbxassetid://10709791786",
-        ["sliders"]           = "rbxassetid://10709811520",
-        ["terminal"]          = "rbxassetid://10709811776",
-        ["code"]              = "rbxassetid://10709791880",
-        ["folder"]            = "rbxassetid://10709788798",
-        ["star"]              = "rbxassetid://10709811651",
-        ["alert-circle"]      = "rbxassetid://10709752996",
-        ["alert-triangle"]    = "rbxassetid://10709753149",
-        ["info"]              = "rbxassetid://10709790387",
-        ["refresh-cw"]        = "rbxassetid://10709810534",
-        ["cloud"]             = "rbxassetid://10709788574",
-        ["globe"]             = "rbxassetid://10709789392",
-        ["database"]          = "rbxassetid://10709791993",
-        ["box"]               = "rbxassetid://10709782497",
-        ["palette"]           = "rbxassetid://10709810463",
-        ["desktop"]           = "rbxassetid://10709791558",
-        ["computer"]          = "rbxassetid://10709791558",
+        ["home"]              = "rbxassetid://10723407389", -- Lucide Home
+        ["layout-grid"]       = "rbxassetid://10723424838", -- Lucide Layout Grid
+        ["grid"]              = "rbxassetid://10723404936", -- Lucide Grid
+        ["overview"]          = "rbxassetid://10723424838", -- Lucide Layout Grid
+        ["list"]              = "rbxassetid://10723433811", -- Lucide List
+        ["menu"]              = "rbxassetid://10734887784", -- Lucide Menu
+        ["swords"]            = "rbxassetid://10734975692", -- Lucide Swords
+        ["combat"]            = "rbxassetid://10734975692", -- Lucide Swords
+        ["shield"]            = "rbxassetid://10734951847", -- Lucide Shield
+        ["clan"]              = "rbxassetid://10734951847", -- Lucide Shield
+        ["settings"]          = "rbxassetid://10734950309", -- Lucide Settings
+        ["gear"]              = "rbxassetid://10734950309", -- Lucide Settings
+        ["user"]              = "rbxassetid://10747373176", -- Lucide User
+        ["users"]             = "rbxassetid://10747373426", -- Lucide Users
+        ["players"]           = "rbxassetid://10747373426", -- Lucide Users
+        ["friends"]           = "rbxassetid://10747373426", -- Lucide Users
+        ["search"]            = "rbxassetid://10734943674", -- Lucide Search
+        ["clock"]             = "rbxassetid://10709805144", -- Lucide Clock
+        ["session"]           = "rbxassetid://10709805144", -- Lucide Clock
+        ["gauge"]             = "rbxassetid://10723395708", -- Lucide Gauge
+        ["speed"]             = "rbxassetid://10723395708", -- Lucide Gauge
+        ["fps"]               = "rbxassetid://10723395708", -- Lucide Gauge
+        ["wifi"]              = "rbxassetid://10747382504", -- Lucide Wifi
+        ["ping"]              = "rbxassetid://10747382504", -- Lucide Wifi
+        ["zap"]               = "rbxassetid://10709752035", -- Lucide Activity
+        ["execs"]             = "rbxassetid://10709752035", -- Lucide Activity
+        ["activity"]          = "rbxassetid://10709752035", -- Lucide Activity
+        ["minus"]             = "rbxassetid://10734896206", -- Lucide Minus
+        ["x"]                 = "rbxassetid://10747384394", -- Lucide X
+        ["close"]             = "rbxassetid://10747384394", -- Lucide X
+        ["check"]             = "rbxassetid://10709790644", -- Lucide Check
+        ["chevron-down"]      = "rbxassetid://10709790948", -- Lucide Chevron Down
+        ["chevron-up"]        = "rbxassetid://10709791523", -- Lucide Chevron Up
+        ["chevron-right"]     = "rbxassetid://10709791437", -- Lucide Chevron Right
+        ["chevron-left"]      = "rbxassetid://10709791281", -- Lucide Chevron Left
+        ["copy"]              = "rbxassetid://10709812159", -- Lucide Copy
+        ["external-link"]     = "rbxassetid://10723346684", -- Lucide External Link
+        ["play"]              = "rbxassetid://10734923549", -- Lucide Play
+        ["eye"]               = "rbxassetid://10723346959", -- Lucide Eye
+        ["eye-off"]           = "rbxassetid://10723346871", -- Lucide Eye Off
+        ["sliders"]           = "rbxassetid://10734963400", -- Lucide Sliders
+        ["terminal"]          = "rbxassetid://10734982144", -- Lucide Terminal
+        ["code"]              = "rbxassetid://10709810463", -- Lucide Code
+        ["folder"]            = "rbxassetid://10723387563", -- Lucide Folder
+        ["star"]              = "rbxassetid://10734966248", -- Lucide Star
+        ["alert-circle"]      = "rbxassetid://10709752996", -- Lucide Alert Circle
+        ["alert-triangle"]    = "rbxassetid://10709753149", -- Lucide Alert Triangle
+        ["info"]              = "rbxassetid://10723415903", -- Lucide Info
+        ["refresh-cw"]        = "rbxassetid://10734933222", -- Lucide Refresh
+        ["cloud"]             = "rbxassetid://10709806740", -- Lucide Cloud
+        ["globe"]             = "rbxassetid://10723404337", -- Lucide Globe
+        ["database"]          = "rbxassetid://10709818996", -- Lucide Database
+        ["box"]               = "rbxassetid://10709782497", -- Lucide Box
+        ["palette"]           = "rbxassetid://10734910430", -- Lucide Palette
+        ["desktop"]           = "rbxassetid://10734896881", -- Lucide Monitor
+        ["computer"]          = "rbxassetid://10734896881", -- Lucide Monitor
+        ["lock"]              = "rbxassetid://10723434711", -- Lucide Lock
     }
 
     return {
@@ -237,6 +264,12 @@ VRSLibV2.Icons = (function()
             local s = tostring(name):lower():gsub("lucide%-", "")
             if s:sub(1, 13) == "rbxassetid://" then return s end
             if Map[s] then return Map[s] end
+            if FullIcons and FullIcons.Get then
+                local full = FullIcons.Get(name)
+                if full and full ~= "" and full ~= "rbxassetid://10709782497" then
+                    return full
+                end
+            end
             return Map["box"]
         end
     }
