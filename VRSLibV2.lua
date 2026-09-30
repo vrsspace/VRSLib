@@ -42,8 +42,8 @@ local VRSLibV2 = {
     Theme = {
         Background      = Color3.fromRGB(16, 17, 21),    -- Charcoal Abu-Abu (#101115)
         BackgroundTrans = 0,                             -- Base solid
-        Sidebar         = Color3.fromRGB(14, 15, 19),    -- Docked Sidebar (#0E0F13)
-        SidebarTrans    = 0.35,                          -- Frosted Glass over background
+        Sidebar         = Color3.fromRGB(26, 27, 35),    -- Solid Abu-Abu (#1A1B23)
+        SidebarTrans    = 0,                             -- Solid 100% (No see-through holes)
         SidebarStroke   = Color3.fromRGB(38, 41, 52),
         Header          = Color3.fromRGB(16, 17, 21),
         Card            = Color3.fromRGB(25, 26, 33),    -- Elevated Card (#191A21)
@@ -312,7 +312,7 @@ function VRSLibV2:CreateWindow(config)
     RootGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     RootGui.Parent = GetSafeGui()
 
-    -- 1. Outer Drop Shadow (Gives physical depth, stops window from feeling detached)
+    -- 1. Outer Translucent Frosted Glass Backdrop (Matches 1:1 Reference Target)
     local ShadowHolder = Instance.new("Frame")
     ShadowHolder.Name = "ShadowHolder"
     ShadowHolder.Size = windowSize
@@ -324,24 +324,45 @@ function VRSLibV2:CreateWindow(config)
 
     local ShadowImg = Instance.new("ImageLabel")
     ShadowImg.Name = "Shadow"
-    ShadowImg.Size = UDim2.new(1, 46, 1, 46)
-    ShadowImg.Position = UDim2.new(0, -23, 0, -23)
+    ShadowImg.Size = UDim2.new(1, 64, 1, 64)
+    ShadowImg.Position = UDim2.new(0, -32, 0, -32)
     ShadowImg.BackgroundTransparency = 1
     ShadowImg.Image = "rbxassetid://5554236805" -- 9-slice soft shadow
     ShadowImg.ScaleType = Enum.ScaleType.Slice
     ShadowImg.SliceCenter = Rect.new(23, 23, 277, 277)
     ShadowImg.ImageColor3 = Color3.fromRGB(0, 0, 0)
-    ShadowImg.ImageTransparency = 0.35
+    ShadowImg.ImageTransparency = 0.25
     ShadowImg.ZIndex = 1
     ShadowImg.Parent = ShadowHolder
 
-    -- 2. UNIFIED MAIN SHELL (Sidebar + Content together in ONE solid cohesive frame)
+    -- Outer Frosted Glass Aura Panel (Extends around MainFrame)
+    local BackdropFrame = Instance.new("Frame")
+    BackdropFrame.Name = "BackdropFrame"
+    BackdropFrame.Size = UDim2.new(1, 40, 1, 40)
+    BackdropFrame.Position = UDim2.new(0, -20, 0, -20)
+    BackdropFrame.BackgroundColor3 = Color3.fromRGB(12, 13, 17)
+    BackdropFrame.BackgroundTransparency = 0.50 -- Frosted translucent glass halo
+    BackdropFrame.BorderSizePixel = 0
+    BackdropFrame.ZIndex = 1
+    BackdropFrame.Parent = ShadowHolder
+
+    local bdCorner = Instance.new("UICorner")
+    bdCorner.CornerRadius = UDim.new(0, 20)
+    bdCorner.Parent = BackdropFrame
+
+    local bdStroke = Instance.new("UIStroke")
+    bdStroke.Color = Color3.fromRGB(42, 45, 60)
+    bdStroke.Thickness = 1
+    bdStroke.Transparency = 0.5
+    bdStroke.Parent = BackdropFrame
+
+    -- 2. UNIFIED MAIN SHELL (Sidebar + Content in ONE Solid Cohesive Obsidian Frame)
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
     MainFrame.Size = windowSize
     MainFrame.Position = UDim2.new(0.5, -windowSize.X.Offset / 2, 0.5, -windowSize.Y.Offset / 2)
-    MainFrame.BackgroundColor3 = Color3.fromRGB(15, 16, 21)
-    MainFrame.BackgroundTransparency = 0.12 -- Frosted translucent obsidian glass
+    MainFrame.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+    MainFrame.BackgroundTransparency = 0 -- Solid matte base
     MainFrame.BorderSizePixel = 0
     MainFrame.ClipsDescendants = true
     MainFrame.ZIndex = 2
@@ -366,7 +387,7 @@ function VRSLibV2:CreateWindow(config)
     })
     mfGrad.Parent = MainFrame
 
-    -- 3. BACKGROUND WALLPAPER LAYER (Live Opacity, Local & URL Caching)
+    -- 3. BACKGROUND WALLPAPER LAYER (Blurred Soft Ambient Noise, Zero Sharp Lines)
     local BgImageLabel = Instance.new("ImageLabel")
     BgImageLabel.Name = "BackgroundImage"
     BgImageLabel.Size = UDim2.new(1, 0, 1, 0)
@@ -376,14 +397,14 @@ function VRSLibV2:CreateWindow(config)
     BgImageLabel.ZIndex = 2
     BgImageLabel.Parent = MainFrame
 
-    -- Ambient Vignette Depth (Ensures deep dark luxury aesthetic even if wallpaper is disabled)
+    -- Ambient Vignette Depth
     local AmbientOverlay = Instance.new("ImageLabel")
     AmbientOverlay.Name = "AmbientOverlay"
     AmbientOverlay.Size = UDim2.new(1, 0, 1, 0)
     AmbientOverlay.BackgroundTransparency = 1
     AmbientOverlay.Image = "rbxassetid://2151741365"
     AmbientOverlay.ImageColor3 = Color3.fromRGB(0, 0, 0)
-    AmbientOverlay.ImageTransparency = 0.45
+    AmbientOverlay.ImageTransparency = 0.55
     AmbientOverlay.ZIndex = 2
     AmbientOverlay.Parent = MainFrame
 
@@ -422,17 +443,6 @@ function VRSLibV2:CreateWindow(config)
     else
         BgImageLabel.Visible = false
     end
-
-    -- 0. FULLSCREEN LIGHTING BLUR (Depth of field background blur on 3D game world)
-    local Lighting = game:GetService("Lighting")
-    local ScreenBlur
-    pcall(function()
-        ScreenBlur = Instance.new("BlurEffect")
-        ScreenBlur.Name = "VRS_ScreenBlur_" .. HttpService:GenerateGUID(false):sub(1, 6)
-        ScreenBlur.Size = 22
-        ScreenBlur.Enabled = (config.Blur ~= false)
-        ScreenBlur.Parent = Lighting
-    end)
 
     -- WEATHER LAYER (Snow Particles Floating across the ENTIRE SCREEN / OUTSIDE Window)
     local WeatherContainer = Instance.new("Frame")
@@ -838,17 +848,6 @@ function VRSLibV2:CreateWindow(config)
         MainFrame.Visible = vis
         if ShadowHolder then ShadowHolder.Visible = vis end
         if WeatherContainer then WeatherContainer.Visible = (vis and weatherActive) end
-        if ScreenBlur then
-            if vis then
-                ScreenBlur.Enabled = true
-                QuickTween(ScreenBlur, { Size = 22 }, 0.25)
-            else
-                local tw = QuickTween(ScreenBlur, { Size = 0 }, 0.2)
-                tw.Completed:Connect(function()
-                    if not MainFrame.Visible then ScreenBlur.Enabled = false end
-                end)
-            end
-        end
     end
 
     local isMinimized = false
@@ -1027,8 +1026,211 @@ function VRSLibV2:CreateWindow(config)
         end,
         ToggleVisibility = function(self)
             SetWindowVisible(not MainFrame.Visible)
+        end,
+        AddArtworkCompanion = function(self, artConfig)
+            artConfig = artConfig or {}
+            local artTitle  = artConfig.Title or "Ouwland"
+            local artImage  = artConfig.Image or "rbxassetid://1530373724"
+            local artFooter = artConfig.Footer or "Last played\n1 day ago"
+            local artAction = artConfig.ActionButton or "Create Party"
+            local artCb     = artConfig.Callback or function() end
+
+            local artWidth = 190
+            local artGap   = 12
+
+            local totalW = windowSize.X.Offset + artWidth + artGap
+            local startX = -totalW / 2
+
+            MainFrame.Position = UDim2.new(0.5, startX + artWidth + artGap, 0.5, -windowSize.Y.Offset / 2)
+            ShadowHolder.Position = MainFrame.Position
+
+            local ArtCard = Instance.new("Frame")
+            ArtCard.Name = "ArtworkCompanion"
+            ArtCard.Size = UDim2.new(0, artWidth, 0, windowSize.Y.Offset)
+            ArtCard.Position = UDim2.new(0.5, startX, 0.5, -windowSize.Y.Offset / 2)
+            ArtCard.BackgroundColor3 = Color3.fromRGB(16, 17, 22)
+            ArtCard.BorderSizePixel = 0
+            ArtCard.ClipsDescendants = true
+            ArtCard.ZIndex = 2
+            ArtCard.Parent = RootGui
+
+            local acCorner = Instance.new("UICorner")
+            acCorner.CornerRadius = UDim.new(0, 16)
+            acCorner.Parent = ArtCard
+
+            local acStroke = Instance.new("UIStroke")
+            acStroke.Color = Color3.fromRGB(42, 45, 58)
+            acStroke.Thickness = 1
+            acStroke.Parent = ArtCard
+
+            local ArtImg = Instance.new("ImageLabel")
+            ArtImg.Size = UDim2.new(1, 0, 1, 0)
+            ArtImg.BackgroundTransparency = 1
+            ArtImg.ScaleType = Enum.ScaleType.Crop
+            ArtImg.Image = artImage
+            ArtImg.ZIndex = 2
+            ArtImg.Parent = ArtCard
+
+            local Grad = Instance.new("Frame")
+            Grad.Size = UDim2.new(1, 0, 1, 0)
+            Grad.BackgroundTransparency = 0
+            Grad.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+            Grad.ZIndex = 3
+            Grad.Parent = ArtCard
+
+            local uig = Instance.new("UIGradient")
+            uig.Rotation = 90
+            uig.Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0)),
+                ColorSequenceKeypoint.new(0.25, Color3.fromRGB(0, 0, 0)),
+                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 0, 0)),
+                ColorSequenceKeypoint.new(0.85, Color3.fromRGB(12, 13, 17)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(12, 13, 17))
+            })
+            uig.Transparency = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 0.4),
+                NumberSequenceKeypoint.new(0.2, 0.7),
+                NumberSequenceKeypoint.new(0.65, 0.8),
+                NumberSequenceKeypoint.new(0.85, 0.2),
+                NumberSequenceKeypoint.new(1, 0)
+            })
+            uig.Parent = Grad
+
+            local Title = Instance.new("TextLabel")
+            Title.Size = UDim2.new(1, -24, 0, 24)
+            Title.Position = UDim2.new(0, 14, 0, 14)
+            Title.BackgroundTransparency = 1
+            Title.Font = Enum.Font.GothamBold
+            Title.TextSize = 15
+            Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+            Title.TextXAlignment = Enum.TextXAlignment.Left
+            Title.Text = artTitle
+            Title.ZIndex = 4
+            Title.Parent = ArtCard
+
+            if artAction and artAction ~= "" then
+                local ActBtn = Instance.new("TextButton")
+                ActBtn.Size = UDim2.new(0, 110, 0, 26)
+                ActBtn.Position = UDim2.new(0, 14, 1, -74)
+                ActBtn.BackgroundColor3 = Color3.fromRGB(24, 25, 34)
+                ActBtn.Text = "+ " .. artAction
+                ActBtn.Font = Enum.Font.GothamMedium
+                ActBtn.TextSize = 10
+                ActBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+                ActBtn.AutoButtonColor = false
+                ActBtn.ZIndex = 4
+                ActBtn.Parent = ArtCard
+
+                local btnCorner = Instance.new("UICorner")
+                btnCorner.CornerRadius = UDim.new(1, 0)
+                btnCorner.Parent = ActBtn
+
+                local btnStroke = Instance.new("UIStroke")
+                btnStroke.Color = Color3.fromRGB(48, 52, 68)
+                btnStroke.Thickness = 1
+                btnStroke.Parent = ActBtn
+
+                ActBtn.MouseButton1Click:Connect(function() task.spawn(function() pcall(artCb) end) end)
+            end
+
+            local Footer = Instance.new("TextLabel")
+            Footer.Size = UDim2.new(1, -28, 0, 32)
+            Footer.Position = UDim2.new(0, 14, 1, -44)
+            Footer.BackgroundTransparency = 1
+            Footer.Font = Enum.Font.Gotham
+            Footer.TextSize = 11
+            Footer.TextColor3 = Color3.fromRGB(200, 205, 215)
+            Footer.TextXAlignment = Enum.TextXAlignment.Left
+            Footer.TextYAlignment = Enum.TextYAlignment.Bottom
+            Footer.Text = artFooter
+            Footer.ZIndex = 4
+            Footer.Parent = ArtCard
+
+            local origSetVisible = SetWindowVisible
+            SetWindowVisible = function(vis)
+                origSetVisible(vis)
+                ArtCard.Visible = vis
+            end
+
+            local oldUpdateDrag = UpdateDrag
+            UpdateDrag = function(input)
+                oldUpdateDrag(input)
+                ArtCard.Position = UDim2.new(
+                    MainFrame.Position.X.Scale,
+                    MainFrame.Position.X.Offset - (artWidth + artGap),
+                    MainFrame.Position.Y.Scale,
+                    MainFrame.Position.Y.Offset
+                )
+            end
+
+            HookDrag(ArtCard)
+            return ArtCard
+        end,
+        AddFriendJoin = function(self)
+            local FJ = Instance.new("Frame")
+            FJ.Name = "FriendJoinWidget"
+            FJ.Size = UDim2.fromOffset(160, 58)
+            FJ.Position = UDim2.new(0.5, -80, 1, -76)
+            FJ.BackgroundTransparency = 1
+            FJ.ZIndex = 10
+            FJ.Parent = RootGui
+
+            local Lbl = Instance.new("TextLabel")
+            Lbl.Size = UDim2.new(1, 0, 0, 14)
+            Lbl.BackgroundTransparency = 1
+            Lbl.Font = Enum.Font.GothamMedium
+            Lbl.TextSize = 11
+            Lbl.TextColor3 = Color3.fromRGB(180, 185, 200)
+            Lbl.Text = "Friend Join"
+            Lbl.ZIndex = 11
+            Lbl.Parent = FJ
+
+            local Input = Instance.new("TextBox")
+            Input.Size = UDim2.new(1, 0, 0, 22)
+            Input.Position = UDim2.new(0, 0, 0, 16)
+            Input.BackgroundColor3 = Color3.fromRGB(180, 185, 195)
+            Input.PlaceholderColor3 = Color3.fromRGB(90, 95, 105)
+            Input.PlaceholderText = "Player's name"
+            Input.TextColor3 = Color3.fromRGB(20, 20, 20)
+            Input.Font = Enum.Font.Gotham
+            Input.TextSize = 11
+            Input.Text = ""
+            Input.ZIndex = 11
+            Input.Parent = FJ
+
+            local inc = Instance.new("UICorner")
+            inc.CornerRadius = UDim.new(1, 0)
+            inc.Parent = Input
+
+            local JoinBtn = Instance.new("TextButton")
+            JoinBtn.Size = UDim2.fromOffset(56, 18)
+            JoinBtn.Position = UDim2.new(0.5, -28, 0, 41)
+            JoinBtn.BackgroundColor3 = Color3.fromRGB(45, 80, 130)
+            JoinBtn.Text = "Join"
+            JoinBtn.Font = Enum.Font.GothamBold
+            JoinBtn.TextSize = 10
+            JoinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            JoinBtn.AutoButtonColor = false
+            JoinBtn.ZIndex = 11
+            JoinBtn.Parent = FJ
+
+            local jbc = Instance.new("UICorner")
+            jbc.CornerRadius = UDim.new(0, 4)
+            jbc.Parent = JoinBtn
+
+            return FJ
         end
     }
+
+    if config.Artwork then
+        task.spawn(function()
+            WindowObj:AddArtworkCompanion(config.Artwork)
+        end)
+    end
+
+    if config.FriendJoin then
+        WindowObj:AddFriendJoin()
+    end
 
     -- Real-time Search Filtering across active tab/subtab elements
     SearchInput:GetPropertyChangedSignal("Text"):Connect(function()
@@ -1058,7 +1260,6 @@ function VRSLibV2:CreateWindow(config)
 
     WindowObj.OnUnload = function()
         if snowConn then snowConn:Disconnect() end
-        if ScreenBlur then pcall(function() ScreenBlur:Destroy() end) end
         if ShadowHolder then ShadowHolder:Destroy() end
         RootGui:Destroy()
         _G.VRS_MONO_UNLOAD = nil
@@ -1835,7 +2036,12 @@ function VRSLibV2:_AttachComponentFactory(targetObj, container)
 
         task.spawn(function()
             pcall(function()
-                ThumbImg.Image = string.format("rbxthumb://type=Asset&id=%s&w=150&h=150", tostring(placeId))
+                if cfg.Image or cfg.Thumbnail then
+                    ThumbImg.Image = cfg.Image or cfg.Thumbnail
+                else
+                    local tId = (placeId == 1530373724 or universeId == 5370353122) and 1530373724 or (universeId > 0 and universeId or placeId)
+                    ThumbImg.Image = string.format("rbxthumb://type=GameIcon&id=%s&w=150&h=150", tostring(tId))
+                end
             end)
         end)
 

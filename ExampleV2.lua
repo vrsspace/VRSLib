@@ -59,13 +59,22 @@ end
 local Window = VRSLibV2:CreateWindow({
     Title             = "auto",             -- Menyesuaikan judul game otomatis
     SubTitle          = "v0.171",
-    Size              = UDim2.fromOffset(1020, 620),
+    Size              = UDim2.fromOffset(880, 560), -- Proportioned 1:1 with reference
     Keybind           = Enum.KeyCode.RightControl,
-    Background        = "default",          -- Aesthetic dark frosted glass
-    BackgroundOpacity = 0.20,              -- Subtle clean dark texture (not blinding)
+    Background        = "default",          -- Soft ambient dark frosted glass
+    BackgroundOpacity = 0.18,              -- Subtle lux opacity (No sharp contour lines)
     Weather           = "Snow",             -- Ambient snow particles across entire screen
-    Blur              = true,               -- Fullscreen 3D world depth-of-field blur
-    ToggleButton      = true                -- Floating mobile/desktop toggle widget
+    ToggleButton      = true,               -- Floating mobile/desktop toggle widget
+    Artwork           = {
+        Title        = "Ouwland",
+        Image        = "rbxassetid://1530373724",
+        Footer       = "Last played\n1 day ago",
+        ActionButton = "Create Party",
+        Callback     = function()
+            Window:Notify({ Title = "Party", Description = "Party lobby created!" })
+        end
+    },
+    FriendJoin        = true                -- Bottom screen Friend Join widget
 })
 
 -- ==============================================================================
